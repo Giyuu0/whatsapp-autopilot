@@ -12,3 +12,6 @@ data/db.json
 
 *.log
 .DS_Store
+
+# Local Claude Code / preview config — not needed in the repo
+.claude/
