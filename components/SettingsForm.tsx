@@ -1,0 +1,486 @@
+"use client";
+
+import React, { useCallback, useEffect, useState } from "react";
+import { Toggle } from "@/components/ui";
+import type { Settings, ModelStep, ModelsResult } from "@/components/useWaSocket";
+
+/* ------------------------------ small helpers ------------------------------ */
+
+const CUSTOM = "__custom__";
+
+/** A real <select> dropdown listing every model fetched from the API key,
+ *  with a "Custom…" escape hatch to type any model id by hand. */
+function ModelField({
+  value,
+  onChange,
+  options,
+  placeholder,
+  className = "",
+}: {
+  id?: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder?: string;
+  className?: string;
+}) {
+  const [custom, setCustom] = useState(false);
+
+  if (custom) {
+    return (
+      <div className="flex gap-2">
+        <input
+          autoFocus
+          className={`input ${className}`}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <button
+          type="button"
+          className="btn-ghost shrink-0 !px-2.5 !py-1.5 text-xs"
+          onClick={() => setCustom(false)}
+          title="Back to the list"
+        >
+          List
+        </button>
+      </div>
+    );
+  }
+
+  // Ensure the current value is always selectable, even if it isn't in the list.
+  const opts = value && !options.includes(value) ? [value, ...options] : options;
+  return (
+    <select
+      className={`input ${className}`}
+      value={value || ""}
+      onChange={(e) => {
+        const v = e.target.value;
+        if (v === CUSTOM) setCustom(true);
+        else onChange(v);
+      }}
+    >
+      {!value && (
+        <option value="" disabled>
+          {placeholder || "Select a model…"}
+        </option>
+      )}
+      {opts.map((o) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
+      <option value={CUSTOM}>✎ Custom…</option>
+    </select>
+  );
+}
+
+function ChainEditor({
+  steps,
+  onChange,
+  groqOptions,
+  geminiOptions,
+  idBase,
+}: {
+  steps: ModelStep[];
+  onChange: (s: ModelStep[]) => void;
+  groqOptions: string[];
+  geminiOptions: string[];
+  idBase: string;
+}) {
+  const setStep = (i: number, patch: Partial<ModelStep>) =>
+    onChange(steps.map((s, j) => (j === i ? { ...s, ...patch } : s)));
+  const remove = (i: number) => onChange(steps.filter((_, j) => j !== i));
+  const add = () => onChange([...steps, { provider: "groq", model: "" }]);
+
+  return (
+    <div>
+      <div className="space-y-2">
+        {steps.length === 0 && (
+          <p className="text-xs text-slate-500">No fallbacks — only the primary model is used.</p>
+        )}
+        {steps.map((s, i) => (
+          <div key={i} className="flex flex-wrap items-center gap-2">
+            <span className="w-4 text-xs text-slate-500">{i + 1}.</span>
+            <select
+              className="input w-24 shrink-0"
+              value={s.provider}
+              onChange={(e) => setStep(i, { provider: e.target.value as ModelStep["provider"], model: "" })}
+            >
+              <option value="groq">Groq</option>
+              <option value="gemini">Gemini</option>
+            </select>
+            <div className="min-w-[8rem] flex-1">
+              <ModelField
+                id={`${idBase}-${i}`}
+                value={s.model}
+                onChange={(v) => setStep(i, { model: v })}
+                options={s.provider === "groq" ? groqOptions : geminiOptions}
+                placeholder="model id"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              className="btn-ghost !px-2.5 !py-1.5 text-xs"
+              title="Remove"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
+      <button type="button" onClick={add} className="btn-ghost mt-2 !py-1.5 text-xs">
+        ＋ Add fallback
+      </button>
+    </div>
+  );
+}
+
+const LANGS = [
+  { value: "auto", label: "Auto-detect (match the sender)" },
+  { value: "english", label: "English" },
+  { value: "hindi", label: "Hindi" },
+  { value: "hinglish", label: "Hinglish" },
+  { value: "english-slang", label: "English + slang" },
+];
+
+const TONES = [
+  { value: "professional", label: "Professional" },
+  { value: "friendly", label: "Friendly (witty / roasty)" },
+  { value: "flirty", label: "Flirty" },
+];
+
+/* --------------------------------- form ----------------------------------- */
+
+export function SettingsForm({
+  settings,
+  onSave,
+  onLock,
+  onFetchModels,
+}: {
+  settings: Settings;
+  onSave: (patch: any) => Promise<void>;
+  onLock: () => void;
+  onFetchModels: () => Promise<ModelsResult>;
+}) {
+  const [groqKey, setGroqKey] = useState("");
+  const [geminiKey, setGeminiKey] = useState("");
+  const [groqModel, setGroqModel] = useState(settings.groqModel);
+  const [geminiModel, setGeminiModel] = useState(settings.geminiModel);
+  const [chatFallbacks, setChatFallbacks] = useState<ModelStep[]>(settings.chatFallbacks || []);
+  const [visionFallbacks, setVisionFallbacks] = useState<ModelStep[]>(settings.visionFallbacks || []);
+  const [language, setLanguage] = useState(settings.language);
+  const [tone, setTone] = useState(settings.tone);
+  const [ownerProfile, setOwnerProfile] = useState(settings.ownerProfile);
+  const [systemPrompt, setSystemPrompt] = useState(settings.systemPrompt);
+  const [replyDelayMs, setReplyDelayMs] = useState(settings.replyDelayMs);
+  const [replyToGroups, setReplyToGroups] = useState(settings.replyToGroups);
+  const [voiceReplies, setVoiceReplies] = useState(settings.voiceReplies);
+  const [whisperModel, setWhisperModel] = useState(settings.whisperModel);
+  const [ttsModel, setTtsModel] = useState(settings.ttsModel);
+  const [ttsVoice, setTtsVoice] = useState(settings.ttsVoice);
+  const [accessKey, setAccessKey] = useState("");
+
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const [models, setModels] = useState<ModelsResult | null>(null);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsMsg, setModelsMsg] = useState<string | null>(null);
+
+  // Re-seed when settings change from the server.
+  useEffect(() => {
+    setGroqModel(settings.groqModel);
+    setGeminiModel(settings.geminiModel);
+    setChatFallbacks(settings.chatFallbacks || []);
+    setVisionFallbacks(settings.visionFallbacks || []);
+    setLanguage(settings.language);
+    setTone(settings.tone);
+    setOwnerProfile(settings.ownerProfile);
+    setSystemPrompt(settings.systemPrompt);
+    setReplyDelayMs(settings.replyDelayMs);
+    setReplyToGroups(settings.replyToGroups);
+    setVoiceReplies(settings.voiceReplies);
+    setWhisperModel(settings.whisperModel);
+    setTtsModel(settings.ttsModel);
+    setTtsVoice(settings.ttsVoice);
+  }, [settings]);
+
+  const loadModels = useCallback(async () => {
+    setModelsLoading(true);
+    setModelsMsg(null);
+    try {
+      const res = await onFetchModels();
+      if (res?.ok) {
+        setModels(res);
+        let msg = `Loaded ${res.groq?.all?.length || 0} Groq · ${res.gemini?.all?.length || 0} Gemini models`;
+        if (res.errors?.groq) msg += ` · Groq: ${res.errors.groq}`;
+        if (res.errors?.gemini) msg += ` · Gemini: ${res.errors.gemini}`;
+        setModelsMsg(msg);
+      } else {
+        setModelsMsg(res?.error || "Could not fetch models. Save your API keys first.");
+      }
+    } catch (e: any) {
+      setModelsMsg(e?.message || "Failed to fetch models");
+    } finally {
+      setModelsLoading(false);
+    }
+  }, [onFetchModels]);
+
+  // Auto-load discovered models on mount if at least one key is already saved.
+  useEffect(() => {
+    if (settings.hasGroqKey || settings.hasGeminiKey) loadModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const groqChat = models?.groq?.chat || [];
+  const groqVision = models?.groq?.vision || [];
+  const groqWhisper = models?.groq?.whisper || [];
+  const groqTts = models?.groq?.tts || [];
+  const geminiChat = models?.gemini?.chat || [];
+  const geminiVision = models?.gemini?.vision || [];
+  const voices = models?.voices || [];
+
+  async function save() {
+    setSaving(true);
+    const patch: any = {
+      groqModel,
+      geminiModel,
+      chatFallbacks: chatFallbacks.filter((s) => s.model && s.model.trim()),
+      visionFallbacks: visionFallbacks.filter((s) => s.model && s.model.trim()),
+      language,
+      tone,
+      ownerProfile,
+      systemPrompt,
+      replyDelayMs,
+      replyToGroups,
+      voiceReplies,
+      whisperModel,
+      ttsModel,
+      ttsVoice,
+    };
+    if (groqKey.trim()) patch.groqApiKey = groqKey.trim();
+    if (geminiKey.trim()) patch.geminiApiKey = geminiKey.trim();
+    if (accessKey.trim() && !settings.accessKeyLocked) patch.accessKey = accessKey.trim();
+
+    await onSave(patch);
+    setGroqKey("");
+    setGeminiKey("");
+    setAccessKey("");
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1800);
+    // Keys may have changed → refresh discovered models.
+    loadModels();
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* AI providers */}
+      <section className="card p-5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">AI providers</h2>
+          <button type="button" onClick={loadModels} className="btn-ghost !py-1.5 text-xs" disabled={modelsLoading}>
+            {modelsLoading ? "Fetching…" : "↻ Refresh models from keys"}
+          </button>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="label">
+              Groq API key {settings.hasGroqKey && <span className="text-wa-green">• set</span>}
+            </label>
+            <input
+              type="password"
+              className="input"
+              placeholder={settings.hasGroqKey ? "•••••••• (leave blank to keep)" : "gsk_…"}
+              value={groqKey}
+              onChange={(e) => setGroqKey(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="label">
+              Gemini API key {settings.hasGeminiKey && <span className="text-wa-green">• set</span>}
+            </label>
+            <input
+              type="password"
+              className="input"
+              placeholder={settings.hasGeminiKey ? "•••••••• (leave blank to keep)" : "AIza…"}
+              value={geminiKey}
+              onChange={(e) => setGeminiKey(e.target.value)}
+            />
+          </div>
+        </div>
+        {modelsMsg && <p className="mt-2 text-xs text-slate-500">{modelsMsg}</p>}
+        <p className="mt-1 text-xs text-slate-600">
+          Models below are pulled live from your keys. Save a new key, then hit “Refresh models”.
+        </p>
+      </section>
+
+      {/* Text / chat models */}
+      <section className="card p-5">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">
+          Text replies &amp; fallback chain
+        </h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="label">Primary text model (Groq)</label>
+            <ModelField id="groq-primary" value={groqModel} onChange={setGroqModel} options={groqChat} placeholder="llama-3.3-70b-versatile" />
+          </div>
+          <div>
+            <label className="label">Global reply language</label>
+            <select className="input" value={language} onChange={(e) => setLanguage(e.target.value as any)}>
+              {LANGS.map((l) => (
+                <option key={l.value} value={l.value}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="mt-4 md:w-1/2">
+          <label className="label">Global reply tone</label>
+          <select className="input" value={tone} onChange={(e) => setTone(e.target.value as any)}>
+            {TONES.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-slate-500">Default tone for all chats. Override it per chat from the conversation header.</p>
+        </div>
+        <div className="mt-4">
+          <label className="label">Text fallback chain (tried in order if the primary fails)</label>
+          <ChainEditor
+            steps={chatFallbacks}
+            onChange={setChatFallbacks}
+            groqOptions={groqChat}
+            geminiOptions={geminiChat}
+            idBase="chat-fb"
+          />
+        </div>
+      </section>
+
+      {/* Vision models */}
+      <section className="card p-5">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">
+          Image (vision) replies &amp; fallback chain
+        </h2>
+        <div className="md:w-1/2">
+          <label className="label">Primary vision model (Gemini)</label>
+          <ModelField id="gemini-primary" value={geminiModel} onChange={setGeminiModel} options={geminiVision} placeholder="gemini-2.0-flash" />
+        </div>
+        <div className="mt-4">
+          <label className="label">Vision fallback chain</label>
+          <ChainEditor
+            steps={visionFallbacks}
+            onChange={setVisionFallbacks}
+            groqOptions={groqVision}
+            geminiOptions={geminiVision}
+            idBase="vision-fb"
+          />
+        </div>
+      </section>
+
+      {/* Voice */}
+      <section className="card p-5">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">Voice notes</h2>
+        <div className="mb-3 flex items-center gap-3">
+          <Toggle checked={voiceReplies} onChange={setVoiceReplies} />
+          <span className="text-sm text-slate-200">Reply to voice notes with a voice note</span>
+        </div>
+        <p className="mb-4 text-xs text-slate-500">
+          Best-effort — falls back to a text reply if TTS is unavailable for your account.
+        </p>
+        <div className="grid gap-4 md:grid-cols-3">
+          <div>
+            <label className="label">Transcription (Whisper)</label>
+            <ModelField id="whisper" value={whisperModel} onChange={setWhisperModel} options={groqWhisper} placeholder="whisper-large-v3" />
+          </div>
+          <div>
+            <label className="label">TTS model</label>
+            <ModelField id="tts-model" value={ttsModel} onChange={setTtsModel} options={groqTts} placeholder="playai-tts" />
+          </div>
+          <div>
+            <label className="label">Reply voice</label>
+            <ModelField id="tts-voice" value={ttsVoice} onChange={setTtsVoice} options={voices} placeholder="Fritz-PlayAI" />
+          </div>
+        </div>
+      </section>
+
+      {/* Behaviour */}
+      <section className="card p-5">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">Behaviour</h2>
+        <div className="mb-4">
+          <label className="label">Global persona / system prompt</label>
+          <textarea
+            className="input min-h-[90px] resize-y"
+            value={systemPrompt}
+            onChange={(e) => setSystemPrompt(e.target.value)}
+          />
+        </div>
+        <div className="mb-4">
+          <label className="label">About you (owner profile)</label>
+          <textarea
+            className="input min-h-[90px] resize-y"
+            value={ownerProfile}
+            onChange={(e) => setOwnerProfile(e.target.value)}
+            placeholder="Who you are — so the bot can answer questions about you and always defends you."
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            The bot uses this to answer questions about you and never insults you. It can still roast other people.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-6">
+          <div>
+            <label className="label">Reply delay (ms)</label>
+            <input
+              type="number"
+              className="input w-32"
+              min={0}
+              step={100}
+              value={replyDelayMs}
+              onChange={(e) => setReplyDelayMs(Number(e.target.value))}
+            />
+          </div>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-300">
+            <Toggle checked={replyToGroups} onChange={setReplyToGroups} />
+            Also reply in groups
+          </label>
+        </div>
+      </section>
+
+      {/* Security */}
+      <section className="card p-5">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">Security</h2>
+        <label className="label flex items-center gap-2">
+          Dashboard access key
+          {settings.accessKeyLocked && <span className="chip bg-white/5 !py-0.5 text-amber-300">managed by .env</span>}
+        </label>
+        <input
+          type="password"
+          className="input md:w-1/2"
+          placeholder={settings.accessKeyLocked ? "Locked — change ACCESS_KEY in .env" : "Enter a new access key to change it…"}
+          value={accessKey}
+          disabled={settings.accessKeyLocked}
+          onChange={(e) => setAccessKey(e.target.value)}
+        />
+        <p className="mt-1 text-xs text-slate-500">You&apos;ll need to unlock again with the new key.</p>
+        <div className="mt-4">
+          <button type="button" onClick={onLock} className="btn-danger">
+            Lock dashboard
+          </button>
+        </div>
+      </section>
+
+      {/* Save bar */}
+      <div className="sticky bottom-4 z-10 flex items-center justify-end gap-3 rounded-2xl border border-white/5 bg-ink-900/90 px-4 py-3 backdrop-blur">
+        {saved && <span className="text-sm text-wa-green">Saved ✓</span>}
+        <button type="button" className="btn-primary" onClick={save} disabled={saving}>
+          {saving ? "Saving…" : "Save settings"}
+        </button>
+      </div>
+    </div>
+  );
+}

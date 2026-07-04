@@ -1,0 +1,14 @@
+node_modules
+.next
+next-env.d.ts
+*.tsbuildinfo
+.env
+.env.local
+
+# WhatsApp session + local data (contains your login — never commit)
+.wwebjs_auth
+.wwebjs_cache
+data/db.json
+
+*.log
+.DS_Store
