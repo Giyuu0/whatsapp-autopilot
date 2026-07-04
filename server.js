@@ -88,6 +88,16 @@ app.prepare().then(() => {
       }
     });
 
+    // Preview a TTS voice — synthesize a short sample and return the audio.
+    socket.on("voice:preview", async (payload, ack) => {
+      try {
+        const audio = await wa.previewVoice(payload || {});
+        ack && ack({ ok: true, ...audio });
+      } catch (e) {
+        ack && ack({ ok: false, error: e.message });
+      }
+    });
+
     // Orb assistant: interpret a natural-language command and execute it.
     socket.on("assistant:command", async ({ text }, ack) => {
       try {

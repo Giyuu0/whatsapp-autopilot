@@ -87,6 +87,8 @@ export type ModelsResult = {
   error?: string;
 };
 
+export type VoicePreview = { ok: boolean; base64?: string; mimetype?: string; error?: string };
+
 export type AuthState = "connecting" | "authed" | "unauthorized";
 
 export type Stats = {
@@ -228,6 +230,13 @@ export function useWaSocket() {
     return emit("models:fetch", {});
   }, [emit]);
 
+  const previewVoice = useCallback(
+    async (voice: string, model: string): Promise<VoicePreview> => {
+      return emit("voice:preview", { voice, model });
+    },
+    [emit]
+  );
+
   const login = useCallback((key: string) => {
     if (typeof window !== "undefined") localStorage.setItem(KEY_STORAGE, key.trim());
     setAuthError(null);
@@ -253,6 +262,7 @@ export function useWaSocket() {
     sendMessage,
     assistantCommand,
     fetchModels,
+    previewVoice,
     authState,
     authError,
     login,

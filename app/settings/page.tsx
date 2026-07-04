@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useWaSocket } from "@/components/useWaSocket";
 import { LoginScreen } from "@/components/LoginScreen";
 import { SettingsForm } from "@/components/SettingsForm";
+import { Footer } from "@/components/Footer";
 
 export default function SettingsPage() {
-  const { connected, snap, emit, authState, authError, login, lock, fetchModels } = useWaSocket();
+  const { connected, snap, emit, authState, authError, login, lock, fetchModels, previewVoice } = useWaSocket();
 
   if (authState === "unauthorized") {
     return <LoginScreen onSubmit={login} error={authError} />;
@@ -45,7 +46,9 @@ export default function SettingsPage() {
         }}
         onLock={lock}
         onFetchModels={fetchModels}
+        onPreviewVoice={previewVoice}
       />
+      <Footer />
     </main>
   );
 }

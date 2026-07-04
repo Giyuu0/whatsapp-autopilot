@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { Toggle } from "@/components/ui";
-import type { Settings, ModelStep, ModelsResult } from "@/components/useWaSocket";
+import type { Settings, ModelStep, ModelsResult, VoicePreview } from "@/components/useWaSocket";
 
 /* ------------------------------ small helpers ------------------------------ */
 
@@ -158,11 +158,13 @@ export function SettingsForm({
   onSave,
   onLock,
   onFetchModels,
+  onPreviewVoice,
 }: {
   settings: Settings;
   onSave: (patch: any) => Promise<void>;
   onLock: () => void;
   onFetchModels: () => Promise<ModelsResult>;
+  onPreviewVoice: (voice: string, model: string) => Promise<VoicePreview>;
 }) {
   const [groqKey, setGroqKey] = useState("");
   const [geminiKey, setGeminiKey] = useState("");
@@ -184,6 +186,27 @@ export function SettingsForm({
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const [previewing, setPreviewing] = useState(false);
+  const [previewMsg, setPreviewMsg] = useState<string | null>(null);
+
+  async function playVoice() {
+    setPreviewing(true);
+    setPreviewMsg(null);
+    try {
+      const res = await onPreviewVoice(ttsVoice, ttsModel);
+      if (res?.ok && res.base64) {
+        const audio = new Audio(`data:${res.mimetype || "audio/wav"};base64,${res.base64}`);
+        await audio.play();
+      } else {
+        setPreviewMsg(res?.error || "Couldn't generate a preview for this voice/model.");
+      }
+    } catch (e: any) {
+      setPreviewMsg(e?.message || "Preview failed");
+    } finally {
+      setPreviewing(false);
+    }
+  }
 
   const [models, setModels] = useState<ModelsResult | null>(null);
   const [modelsLoading, setModelsLoading] = useState(false);
@@ -404,7 +427,30 @@ export function SettingsForm({
           </div>
           <div>
             <label className="label">Reply voice</label>
-            <ModelField id="tts-voice" value={ttsVoice} onChange={setTtsVoice} options={voices} placeholder="Fritz-PlayAI" />
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <ModelField id="tts-voice" value={ttsVoice} onChange={setTtsVoice} options={voices} placeholder="Fritz-PlayAI" />
+              </div>
+              <button
+                type="button"
+                onClick={playVoice}
+                disabled={previewing}
+                title="Play a sample of this voice"
+                className="btn-primary shrink-0 !px-3"
+              >
+                {previewing ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink-950/30 border-t-ink-950" />
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                    Play
+                  </>
+                )}
+              </button>
+            </div>
+            {previewMsg && <p className="mt-1 text-xs text-amber-300">{previewMsg}</p>}
           </div>
         </div>
       </section>

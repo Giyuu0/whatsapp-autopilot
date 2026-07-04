@@ -8,6 +8,7 @@ import { ChatView } from "@/components/ChatView";
 import { ChatbotOrb } from "@/components/ChatbotOrb";
 import { StatCards } from "@/components/StatCards";
 import { LoginScreen } from "@/components/LoginScreen";
+import { Footer } from "@/components/Footer";
 import { Toggle } from "@/components/ui";
 
 export default function Dashboard() {
@@ -183,10 +184,7 @@ export default function Dashboard() {
         />
       )}
 
-      <footer className="mt-8 text-center text-xs text-slate-600">
-        {connected ? <span className="text-wa-green">● live</span> : <span className="text-amber-400">● reconnecting…</span>}{" "}
-        · WhatsApp AutoPilot
-      </footer>
+      <Footer live={connected} />
     </main>
   );
 }
