@@ -817,7 +817,7 @@ export function ChatView(props: {
           ) : (
             <>
               {/* header */}
-              <div className="border-b border-white/10 bg-white/[0.02] p-3">
+              <div className="sticky top-0 z-10 border-b border-white/10 bg-gradient-to-b from-ink-850/80 to-ink-850/50 p-3 backdrop-blur-xl">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                   {/* back button (mobile only) */}
                   <button
@@ -828,7 +828,15 @@ export function ChatView(props: {
                   >
                     ‹ Back
                   </button>
-                  <Avatar id={activeChat.id} name={activeChat.name} size="lg" />
+                  <div className="relative shrink-0">
+                    <Avatar id={activeChat.id} name={activeChat.name} size="lg" />
+                    {activeChat.enabled && (
+                      <span
+                        className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-ink-850 bg-wa-green"
+                        title="Auto-reply active"
+                      />
+                    )}
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       {activeChat.isGroup && (
@@ -837,9 +845,30 @@ export function ChatView(props: {
                       <span className="truncate font-semibold text-white/90">
                         {activeChat.name}
                       </span>
+                      <button
+                        type="button"
+                        title={activeChat.favorite ? "Remove from favorites" : "Add to favorites"}
+                        onClick={() => onToggleFavorite(activeChat.id, !activeChat.favorite)}
+                        className={`shrink-0 text-sm leading-none transition ${
+                          activeChat.favorite ? "text-amber-400" : "text-white/25 hover:text-amber-300"
+                        }`}
+                      >
+                        {activeChat.favorite ? "★" : "☆"}
+                      </button>
                     </div>
-                    <div className="truncate text-xs text-white/45">
-                      +{activeChat.number}
+                    <div className="flex h-4 items-center truncate text-xs">
+                      {typing ? (
+                        <span className="flex items-center gap-1.5 font-medium text-wa-green">
+                          typing
+                          <span className="flex gap-0.5">
+                            <span className="h-1 w-1 animate-bounce rounded-full bg-wa-green [animation-delay:-0.3s]" />
+                            <span className="h-1 w-1 animate-bounce rounded-full bg-wa-green [animation-delay:-0.15s]" />
+                            <span className="h-1 w-1 animate-bounce rounded-full bg-wa-green" />
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="truncate text-white/45">+{activeChat.number}</span>
+                      )}
                     </div>
                   </div>
 

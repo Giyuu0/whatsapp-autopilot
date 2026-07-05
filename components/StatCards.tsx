@@ -1,8 +1,42 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Icon } from "./ui";
 import type { Stats } from "./useWaSocket";
+
+/** Smoothly animates a number toward its target whenever the target changes. */
+function CountUp({ value }: { value: number }) {
+  const [display, setDisplay] = useState(value);
+  const fromRef = useRef(value);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const from = fromRef.current;
+    const to = value;
+    if (from === to) return;
+    const duration = 600;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      // easeOutCubic
+      const eased = 1 - Math.pow(1 - t, 3);
+      const current = Math.round(from + (to - from) * eased);
+      setDisplay(current);
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        fromRef.current = to;
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      fromRef.current = to;
+    };
+  }, [value]);
+
+  return <>{display.toLocaleString()}</>;
+}
 
 function Stat({
   icon,
@@ -13,7 +47,7 @@ function Stat({
 }: {
   icon: React.ReactNode;
   label: string;
-  value: React.ReactNode;
+  value: number;
   accent: string;
   glow: string;
 }) {
@@ -30,7 +64,7 @@ function Stat({
       </div>
       <div className="min-w-0 animate-fade-up">
         <div className="text-2xl font-bold leading-none tracking-tight text-slate-50 tabular-nums sm:text-[1.75rem]">
-          {value}
+          <CountUp value={value} />
         </div>
         <div className="mt-1.5 truncate text-xs text-slate-400">{label}</div>
       </div>
