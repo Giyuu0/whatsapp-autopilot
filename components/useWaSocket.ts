@@ -20,6 +20,7 @@ export type Contact = {
   voiceReply?: VoiceReply;
   manualReply?: ManualReply;
   memory?: string;
+  favorite?: boolean;
 };
 
 export type Chat = {
@@ -37,6 +38,7 @@ export type Chat = {
   manualReply: ManualReply;
   memory: string;
   customPrompt?: string;
+  favorite?: boolean;
 };
 
 export type Message = {

@@ -160,16 +160,25 @@ function ChatRow({
   chat,
   active,
   onOpen,
+  onToggleFavorite,
 }: {
   chat: Chat;
   active: boolean;
   onOpen: (id: string) => void;
+  onToggleFavorite: (id: string, favorite: boolean) => void;
 }) {
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onOpen(chat.id)}
-      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen(chat.id);
+        }
+      }}
+      className={`group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
         active ? "bg-white/10 ring-1 ring-wa-green/40" : "hover:bg-white/5"
       }`}
     >
@@ -189,14 +198,33 @@ function ChatRow({
         </div>
         <div className="mt-0.5 flex items-center justify-between gap-2">
           <span className="truncate text-xs text-white/50">{chat.lastText || "No messages yet"}</span>
-          {chat.unread > 0 && (
-            <span className="ml-1 flex h-5 min-w-[1.25rem] shrink-0 items-center justify-center rounded-full bg-wa-green px-1.5 text-[11px] font-bold text-ink-950">
-              {chat.unread > 99 ? "99+" : chat.unread}
-            </span>
-          )}
+          <div className="ml-1 flex shrink-0 items-center gap-1.5">
+            {chat.unread > 0 && (
+              <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-wa-green px-1.5 text-[11px] font-bold text-ink-950">
+                {chat.unread > 99 ? "99+" : chat.unread}
+              </span>
+            )}
+            {/* favorite star — visible when starred, or on hover */}
+            <button
+              type="button"
+              title={chat.favorite ? "Remove from favorites" : "Add to favorites"}
+              aria-label={chat.favorite ? "Remove from favorites" : "Add to favorites"}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(chat.id, !chat.favorite);
+              }}
+              className={`text-base leading-none transition ${
+                chat.favorite
+                  ? "text-amber-400"
+                  : "text-white/30 opacity-0 hover:text-amber-300 group-hover:opacity-100"
+              }`}
+            >
+              {chat.favorite ? "★" : "☆"}
+            </button>
+          </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -496,6 +524,7 @@ export function ChatView(props: {
   onSetManual: (chatId: string, mode: ManualReply) => void;
   onSetCustomPrompt: (chatId: string, prompt: string) => void;
   onSetMemory: (chatId: string, memory: string) => void;
+  onToggleFavorite: (chatId: string, favorite: boolean) => void;
   onChatAssistant: (chatId: string, command: string) => Promise<any>;
   onLoadMedia: (chatId: string, messageId: string) => Promise<any>;
   onDeleteMessage: (chatId: string, messageId: string) => Promise<any>;
@@ -522,6 +551,7 @@ export function ChatView(props: {
     onSetManual,
     onSetCustomPrompt,
     onSetMemory,
+    onToggleFavorite,
     onChatAssistant,
     onLoadMedia,
     onDeleteMessage,
@@ -534,6 +564,7 @@ export function ChatView(props: {
   } = props;
 
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<"all" | "unread" | "fav">("all");
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -556,14 +587,19 @@ export function ChatView(props: {
     [chats, activeChatId]
   );
 
+  const unreadCount = useMemo(() => chats.filter((c) => c.unread > 0).length, [chats]);
+  const favCount = useMemo(() => chats.filter((c) => c.favorite).length, [chats]);
+
   const sortedChats = useMemo(() => {
-    const list = [...chats].sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0));
+    let list = [...chats].sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0));
+    if (filter === "unread") list = list.filter((c) => c.unread > 0);
+    else if (filter === "fav") list = list.filter((c) => c.favorite);
     const q = query.trim().toLowerCase();
     if (!q) return list;
     return list.filter(
       (c) => c.name.toLowerCase().includes(q) || (c.number || "").toLowerCase().includes(q)
     );
-  }, [chats, query]);
+  }, [chats, query, filter]);
 
   // Jump to the bottom when a chat opens.
   useEffect(() => {
@@ -700,11 +736,47 @@ export function ChatView(props: {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
+            {/* filter tabs */}
+            <div className="mt-2.5 flex items-center gap-1.5">
+              {([
+                { key: "all", label: "All", count: 0 },
+                { key: "unread", label: "Unread", count: unreadCount },
+                { key: "fav", label: "★ Favorites", count: favCount },
+              ] as const).map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setFilter(t.key)}
+                  className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition ${
+                    filter === t.key
+                      ? "bg-wa-green text-ink-950"
+                      : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80"
+                  }`}
+                >
+                  <span>{t.label}</span>
+                  {t.count > 0 && (
+                    <span
+                      className={`rounded-full px-1.5 text-[10px] font-bold ${
+                        filter === t.key ? "bg-ink-950/20 text-ink-950" : "bg-white/10 text-white/70"
+                      }`}
+                    >
+                      {t.count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
             {sortedChats.length === 0 ? (
               <div className="px-3 py-10 text-center text-sm text-white/40">
-                {chats.length === 0 ? "No chats yet" : "No chats match your search"}
+                {chats.length === 0
+                  ? "No chats yet"
+                  : filter === "unread"
+                    ? "No unread chats"
+                    : filter === "fav"
+                      ? "No favorites yet — tap the ★ on a chat to add it"
+                      : "No chats match your search"}
               </div>
             ) : (
               sortedChats.map((chat) => (
@@ -713,6 +785,7 @@ export function ChatView(props: {
                   chat={chat}
                   active={chat.id === activeChatId}
                   onOpen={onOpenChat}
+                  onToggleFavorite={onToggleFavorite}
                 />
               ))
             )}
