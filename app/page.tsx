@@ -20,6 +20,7 @@ export default function Dashboard() {
     openChat,
     sendMessage,
     assistantCommand,
+    chatAssistant,
     authState,
     authError,
     login,
@@ -168,6 +169,7 @@ export default function Dashboard() {
             onSetTone={(id, tone: Tone) => patchContact(id, { tone })}
             onSetVoiceReply={(id, pref: VoiceReply) => patchContact(id, { voiceReply: pref })}
             onSetCustomPrompt={(id, prompt) => patchContact(id, { customPrompt: prompt })}
+            onChatAssistant={chatAssistant}
           />
         </div>
       )}
@@ -175,12 +177,15 @@ export default function Dashboard() {
       {/* Floating assistant orb — only once WhatsApp is connected */}
       {isConnected && (
         <ChatbotOrb
-          onCommand={assistantCommand}
+          onCommand={(text, chatId) => assistantCommand(text, chatId ?? activeChatId)}
           connected={isConnected}
           chats={snap.chats}
           messagesByChat={messages}
           onOpenChat={handleOpenChat}
           onSendMessage={sendMessage}
+          onChatAssistant={chatAssistant}
+          activeChatId={activeChatId}
+          activeChatName={snap.chats.find((c) => c.id === activeChatId)?.name || null}
         />
       )}
 

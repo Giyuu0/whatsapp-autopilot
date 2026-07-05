@@ -42,6 +42,8 @@ export type Message = {
   ts: number;
   model: string | null;
   isAutoReply?: boolean;
+  private?: boolean; // @bot/@yati aside — shown only to you, never sent to the person
+  ack?: number; // WhatsApp delivery status: -1 err, 0 pending, 1 sent, 2 delivered, 3 read, 4 played
 };
 
 export type LogEntry = {
@@ -220,8 +222,15 @@ export function useWaSocket() {
   );
 
   const assistantCommand = useCallback(
-    async (text: string) => {
-      return emit("assistant:command", { text });
+    async (text: string, chatId?: string | null) => {
+      return emit("assistant:command", { text, chatId: chatId || undefined });
+    },
+    [emit]
+  );
+
+  const chatAssistant = useCallback(
+    async (chatId: string, text: string) => {
+      return emit("chat:assistant", { chatId, text });
     },
     [emit]
   );
@@ -261,6 +270,7 @@ export function useWaSocket() {
     openChat,
     sendMessage,
     assistantCommand,
+    chatAssistant,
     fetchModels,
     previewVoice,
     authState,

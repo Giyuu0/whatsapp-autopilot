@@ -73,11 +73,12 @@ type Msg = {
 type Mode = "assistant" | "picker" | "chat";
 
 const GREETING =
-  "Hi! Tell me what to do — e.g. “message Rahul I’ll be late”, “reply to Mom in Hindi”, or “pause auto-reply”.";
+  "Hi! Tell me what to do — e.g. “message Rahul I’ll be late”, “reply to Mom in Hindi”, or “talk about this chat”.";
 
 const EXAMPLES = [
   "Message Rahul I’ll be late",
-  "Reply to Mom in Hindi",
+  "Talk about this chat",
+  "Reply to this in Hindi",
   "Pause auto-reply",
 ];
 
@@ -95,14 +96,26 @@ const initials = (name: string) => {
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
 export function ChatbotOrb(props: {
-  onCommand: (text: string) => Promise<{ ok?: boolean; reply?: string; action?: any }>;
+  onCommand: (text: string, chatId?: string) => Promise<{ ok?: boolean; reply?: string; action?: any }>;
   connected: boolean;
   chats: Chat[];
   messagesByChat: Record<string, Message[]>;
   onOpenChat: (chatId: string) => void;
   onSendMessage: (chatId: string, text: string) => Promise<any>;
+  onChatAssistant: (chatId: string, command: string) => Promise<{ ok?: boolean; reply?: string }>;
+  activeChatId: string | null;
+  activeChatName: string | null;
 }) {
-  const { onCommand, connected, chats, messagesByChat, onOpenChat, onSendMessage } = props;
+  const {
+    onCommand,
+    connected,
+    chats,
+    messagesByChat,
+    onOpenChat,
+    onSendMessage,
+    onChatAssistant,
+    activeChatName,
+  } = props;
 
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("assistant");
@@ -354,20 +367,33 @@ export function ChatbotOrb(props: {
     }
   };
 
+  /* ---- does the current draft start with "@bot"? ---- */
+  const isBotDraft = /^@bot\b/i.test(chatInput.trimStart());
+
   /* ---- chat-mode: send a manual reply into the real chat ---- */
   const sendChat = useCallback(async () => {
     const text = chatInput.trim();
     if (!text || !activeChatId || !connected || sending) return;
+
+    // "@bot …" is a private aside to the assistant, not a real message.
+    const botMatch = /^@bot\b/i.exec(text);
     setSending(true);
     setChatInput("");
     try {
-      await onSendMessage(activeChatId, text);
+      if (botMatch) {
+        const command = text.slice(botMatch[0].length).trim();
+        if (command) {
+          await onChatAssistant(activeChatId, command);
+        }
+      } else {
+        await onSendMessage(activeChatId, text);
+      }
     } catch {
       /* the live message stream will reflect success; ignore local errors */
     } finally {
       setSending(false);
     }
-  }, [chatInput, activeChatId, connected, sending, onSendMessage]);
+  }, [chatInput, activeChatId, connected, sending, onSendMessage, onChatAssistant]);
 
   const handleChatKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -579,6 +605,14 @@ export function ChatbotOrb(props: {
 
               {/* Footer / composer */}
               <div className="border-t border-white/5 bg-ink-900/40 p-2.5">
+                {activeChatName && (
+                  <div className="mb-2 flex items-center gap-1.5 px-1 text-[11px] text-slate-400">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-wa-green/30 bg-wa-green/10 px-2 py-0.5 font-medium text-wa-green">
+                      <span className="h-1.5 w-1.5 rounded-full bg-wa-green" />
+                      Context: {activeChatName}
+                    </span>
+                  </div>
+                )}
                 {listening && (
                   <div className="mb-2 flex items-center gap-2 px-1 text-[11px] font-medium text-red-300">
                     <span className="relative flex h-2 w-2">
@@ -722,6 +756,35 @@ export function ChatbotOrb(props: {
                         : m.type === "image"
                         ? "📷 "
                         : "";
+
+                    /* Private @bot/@yati asides — visibly separate from real messages. */
+                    if (m.private) {
+                      return (
+                        <div
+                          key={m.id}
+                          className={`flex ${m.fromMe ? "justify-end" : "justify-start"}`}
+                        >
+                          <div
+                            className={`max-w-[82%] whitespace-pre-wrap break-words rounded-2xl border border-dashed px-3 py-2 text-sm leading-snug ${
+                              m.fromMe
+                                ? "rounded-br-sm border-amber-400/50 bg-amber-400/10 text-amber-100"
+                                : "rounded-bl-sm border-violet-400/50 bg-violet-400/10 text-violet-100"
+                            }`}
+                          >
+                            <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-wide opacity-80">
+                              🔒 Private
+                            </span>
+                            {(icon || m.text) && (
+                              <span>
+                                {icon}
+                                {m.text || (icon ? "" : "")}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+
                     return (
                       <div
                         key={m.id}
@@ -767,9 +830,15 @@ export function ChatbotOrb(props: {
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     onKeyDown={handleChatKeyDown}
-                    placeholder={connected ? "Type a reply…" : "Connect WhatsApp to reply…"}
+                    placeholder={
+                      connected
+                        ? 'Type a message — or "@bot …" to ask privately'
+                        : "Connect WhatsApp to reply…"
+                    }
                     disabled={!connected}
-                    className="input flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+                    className={`input flex-1 disabled:cursor-not-allowed disabled:opacity-50 ${
+                      isBotDraft ? "ring-2 ring-amber-400/60 focus:ring-amber-400/70" : ""
+                    }`}
                     aria-label="Message input"
                   />
                   <button

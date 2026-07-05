@@ -82,7 +82,17 @@ The floating orb at the bottom-right (it appears once WhatsApp is connected) is 
 - *"Open my chat with Mom"* — opens that conversation **inside the orb** so you can reply yourself
 - *"Pause auto-reply"* / *"Switch global language to Hindi"*
 
-It uses your browser's built-in speech recognition and speech synthesis — no extra keys needed (Chrome/Edge work best).
+It uses your browser's built-in speech recognition and speech synthesis — no extra keys needed (Chrome/Edge work best). It also knows **which chat is open on screen**, so *"talk about this"* works.
+
+## 🔒 Private `@bot` side-channel
+
+Inside any open conversation, start a message with **`@bot`** to talk to your assistant **privately** — it is **never sent to the other person**:
+
+```
+@bot what should I reply to this?
+```
+
+The bot reads the conversation and answers you inline, addressed **`@yati`** (also private, dashed/highlighted so you can't confuse it with a real message). Use it to brainstorm replies, get context, or ask questions mid-chat. Works in the main chat view and inside the orb.
 
 ---
 

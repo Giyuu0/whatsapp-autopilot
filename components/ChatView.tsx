@@ -43,6 +43,59 @@ function fmtTime(ts: number) {
   }
 }
 
+function dayKey(ts: number) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+function dayLabel(ts: number) {
+  const d = new Date(ts);
+  const today = new Date();
+  const yest = new Date();
+  yest.setDate(today.getDate() - 1);
+  if (dayKey(ts) === dayKey(today.getTime())) return "Today";
+  if (dayKey(ts) === dayKey(yest.getTime())) return "Yesterday";
+  return d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" });
+}
+
+/** WhatsApp-style delivery ticks (shown on your own sent messages). */
+function Ticks({ ack }: { ack?: number }) {
+  const a = ack ?? 1;
+  if (a <= 0) {
+    // pending — a little clock
+    return (
+      <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 text-wa-light/50" fill="none" stroke="currentColor" strokeWidth="1.4">
+        <circle cx="8" cy="8" r="6" />
+        <path d="M8 5v3l2 1.5" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  const read = a >= 3;
+  const color = read ? "#53bdeb" : "rgba(219,248,198,0.55)";
+  if (a === 1) {
+    return (
+      <svg viewBox="0 0 16 12" className="h-3.5 w-4" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 6.5 6 10.5 14 1.5" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 20 12" className="h-3.5 w-5" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 6.5 5 10.5 13 1.5" />
+      <path d="M7.5 10.2 8.5 9 13.5 1.5" />
+    </svg>
+  );
+}
+
+function DateDivider({ ts }: { ts: number }) {
+  return (
+    <div className="flex justify-center py-1">
+      <span className="rounded-full bg-black/30 px-3 py-1 text-[11px] font-medium text-white/60 shadow-sm backdrop-blur">
+        {dayLabel(ts)}
+      </span>
+    </div>
+  );
+}
+
 const LANGUAGE_OPTIONS: { value: Language; label: string }[] = [
   { value: "default", label: "Default (global)" },
   { value: "auto", label: "Auto-detect" },
@@ -143,32 +196,55 @@ function ChatRow({
 function MessageBubble({ msg }: { msg: Message }) {
   const mine = msg.fromMe;
   const showModel = msg.isAutoReply && msg.model;
+
+  // Private @bot / @yati aside — only you see this; it never went to the person.
+  if (msg.private) {
+    return (
+      <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+        <div
+          className={`max-w-[80%] rounded-2xl border border-dashed px-3 py-2 ${
+            mine
+              ? "rounded-br-md border-amber-400/40 bg-amber-400/10 text-amber-100"
+              : "rounded-bl-md border-violet-400/40 bg-violet-400/10 text-violet-100"
+          }`}
+        >
+          <div className="mb-0.5 flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wide opacity-70">
+            <span>🔒</span> Private · {mine ? "to bot" : "assistant"}
+          </div>
+          <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">{msg.text}</div>
+          <div className="mt-1 text-[10px] opacity-50">{fmtTime(msg.ts)}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[75%] rounded-2xl px-3 py-2 shadow-sm ${
+        className={`relative max-w-[75%] rounded-2xl px-3 py-1.5 shadow-md ring-1 ring-inset ${
           mine
-            ? "rounded-br-md bg-wa-green/15 text-wa-light"
-            : "rounded-bl-md bg-white/5 text-white/90"
+            ? "rounded-br-sm bg-gradient-to-br from-wa-green/25 to-wa-teal/15 text-wa-light ring-wa-green/10"
+            : "rounded-bl-sm bg-ink-700/60 text-white/90 ring-white/5"
         }`}
       >
-        <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+        <div className="whitespace-pre-wrap break-words pr-1 text-sm leading-relaxed">
           {msg.type === "voice" && <span className="mr-1">🎤</span>}
           {msg.type === "audio" && <span className="mr-1">🎧</span>}
           {msg.type === "image" && <span className="mr-1">📷</span>}
           {msg.text || (msg.type === "voice" ? "Voice message" : msg.type === "image" ? "Photo" : "")}
         </div>
         <div
-          className={`mt-1 flex items-center gap-2 text-[10px] ${
-            mine ? "justify-end text-wa-light/60" : "text-white/40"
+          className={`mt-0.5 flex items-center gap-1.5 text-[10px] ${
+            mine ? "justify-end text-wa-light/55" : "text-white/40"
           }`}
         >
           {showModel && (
-            <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] font-medium text-white/60">
+            <span className="rounded-full bg-black/25 px-1.5 py-0.5 text-[9px] font-medium text-white/60">
               {prettyModel(msg.model)}
             </span>
           )}
           <span>{fmtTime(msg.ts)}</span>
+          {mine && <Ticks ack={msg.ack} />}
         </div>
       </div>
     </div>
@@ -189,6 +265,7 @@ export function ChatView(props: {
   onSetTone: (chatId: string, tone: Tone) => void;
   onSetVoiceReply: (chatId: string, pref: VoiceReply) => void;
   onSetCustomPrompt: (chatId: string, prompt: string) => void;
+  onChatAssistant: (chatId: string, command: string) => Promise<any>;
   connected: boolean;
 }) {
   const {
@@ -202,6 +279,7 @@ export function ChatView(props: {
     onSetTone,
     onSetVoiceReply,
     onSetCustomPrompt,
+    onChatAssistant,
     connected,
   } = props;
 
@@ -211,7 +289,14 @@ export function ChatView(props: {
   const [showPrompt, setShowPrompt] = useState(false);
   const [promptDraft, setPromptDraft] = useState("");
 
-  const endRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const stickRef = useRef(true); // stay pinned to the bottom unless the user scrolls up
+
+  function onListScroll() {
+    const el = listRef.current;
+    if (!el) return;
+    stickRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+  }
 
   const activeChat = useMemo(
     () => chats.find((c) => c.id === activeChatId) || null,
@@ -227,10 +312,22 @@ export function ChatView(props: {
     );
   }, [chats, query]);
 
-  // auto-scroll to newest on message change / chat switch
+  // Jump to the bottom when a chat opens.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, activeChatId]);
+    const el = listRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+      stickRef.current = true;
+    }
+  }, [activeChatId]);
+
+  // On new messages, only stick to the bottom if the user was already there
+  // (so reading older messages isn't interrupted). Scoped to the list — never
+  // scrolls the page.
+  useEffect(() => {
+    const el = listRef.current;
+    if (el && stickRef.current) el.scrollTop = el.scrollHeight;
+  }, [messages]);
 
   // reset the persona editor when switching chats
   useEffect(() => {
@@ -241,10 +338,19 @@ export function ChatView(props: {
 
   async function handleSend() {
     const text = draft.trim();
-    if (!text || !activeChatId || !connected || sending) return;
+    if (!text || !activeChatId || sending) return;
+    // "@bot ..." is a PRIVATE aside to your assistant about this chat — it is
+    // NOT sent to the person. The bot replies "@yati ..." (also private).
+    const isBot = /^@bot\b/i.test(text);
+    if (!isBot && !connected) return;
     setSending(true);
     try {
-      await onSendMessage(activeChatId, text);
+      if (isBot) {
+        const cmd = text.replace(/^@bot\b[:,]?\s*/i, "").trim() || "help me with this chat";
+        await onChatAssistant(activeChatId, cmd);
+      } else {
+        await onSendMessage(activeChatId, text);
+      }
       setDraft("");
     } catch {
       /* keep draft on failure so the user can retry */
@@ -254,18 +360,21 @@ export function ChatView(props: {
   }
 
   const wallpaper: React.CSSProperties = {
-    backgroundColor: "rgba(255,255,255,0.01)",
-    backgroundImage:
-      "radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)",
-    backgroundSize: "22px 22px",
+    backgroundColor: "#0b1014",
+    backgroundImage: [
+      "radial-gradient(55rem 55rem at 100% 0%, rgba(37,211,102,0.06), transparent 60%)",
+      "radial-gradient(45rem 45rem at 0% 100%, rgba(18,140,126,0.06), transparent 55%)",
+      "radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)",
+    ].join(", "),
+    backgroundSize: "auto, auto, 24px 24px",
   };
 
   return (
     <div className="card overflow-hidden p-0">
-      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
+      <div className="grid h-[calc(100dvh-13rem)] min-h-[440px] grid-cols-1 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
         {/* ------------------------------ LEFT: list ------------------------------ */}
         <aside
-          className={`flex flex-col border-white/10 md:border-r ${
+          className={`flex min-h-0 flex-col border-white/10 md:border-r ${
             activeChatId ? "hidden md:flex" : "flex"
           }`}
         >
@@ -280,7 +389,7 @@ export function ChatView(props: {
               />
             </div>
           </div>
-          <div className="max-h-[70vh] flex-1 space-y-1 overflow-y-auto p-2">
+          <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
             {sortedChats.length === 0 ? (
               <div className="px-3 py-10 text-center text-sm text-white/40">
                 {chats.length === 0 ? "No chats yet" : "No chats match your search"}
@@ -300,7 +409,7 @@ export function ChatView(props: {
 
         {/* --------------------------- RIGHT: conversation --------------------------- */}
         <section
-          className={`flex min-h-[60vh] flex-col ${
+          className={`flex min-h-0 flex-col ${
             activeChatId ? "flex" : "hidden md:flex"
           }`}
         >
@@ -464,7 +573,9 @@ export function ChatView(props: {
 
               {/* messages */}
               <div
-                className="max-h-[70vh] flex-1 space-y-2 overflow-y-auto p-4"
+                ref={listRef}
+                onScroll={onListScroll}
+                className="min-h-0 flex-1 space-y-2 overflow-y-auto p-4"
                 style={wallpaper}
               >
                 {messages.length === 0 ? (
@@ -472,17 +583,27 @@ export function ChatView(props: {
                     No messages in this conversation yet
                   </div>
                 ) : (
-                  messages.map((m) => <MessageBubble key={m.id} msg={m} />)
+                  messages.map((m, idx) => {
+                    const prev = messages[idx - 1];
+                    const showDate = !prev || dayKey(prev.ts) !== dayKey(m.ts);
+                    return (
+                      <React.Fragment key={m.id}>
+                        {showDate && <DateDivider ts={m.ts} />}
+                        <MessageBubble msg={m} />
+                      </React.Fragment>
+                    );
+                  })
                 )}
-                <div ref={endRef} />
               </div>
 
               {/* composer */}
-              <div className="border-t border-white/10 bg-white/[0.02] p-3">
+              <div className="border-t border-white/10 bg-black/20 p-3">
                 <div className="flex items-center gap-2">
                   <input
-                    className="input flex-1"
-                    placeholder={connected ? "Type a message" : "Disconnected…"}
+                    className={`input flex-1 !rounded-full !bg-ink-800/80 px-4 ${
+                      /^@bot\b/i.test(draft) ? "ring-2 ring-amber-400/50" : ""
+                    }`}
+                    placeholder={connected ? "Type a message — or “@bot …” to ask privately" : "Disconnected…"}
                     value={draft}
                     disabled={!connected}
                     onChange={(e) => setDraft(e.target.value)}
@@ -495,7 +616,7 @@ export function ChatView(props: {
                   />
                   <button
                     type="button"
-                    className="btn-primary h-10 w-10 shrink-0 !p-0"
+                    className="btn-primary h-11 w-11 shrink-0 rounded-full !p-0 transition active:scale-95"
                     onClick={() => void handleSend()}
                     disabled={!connected || !draft.trim() || sending}
                     aria-label="Send message"

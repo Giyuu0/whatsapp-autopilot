@@ -99,9 +99,21 @@ app.prepare().then(() => {
     });
 
     // Orb assistant: interpret a natural-language command and execute it.
-    socket.on("assistant:command", async ({ text }, ack) => {
+    // chatId (optional) is the chat currently open on screen, so "this chat"
+    // and "talk about this" resolve correctly.
+    socket.on("assistant:command", async ({ text, chatId }, ack) => {
       try {
-        const res = await wa.handleCommand(text);
+        const res = await wa.handleCommand(text, chatId);
+        ack && ack(res);
+      } catch (e) {
+        ack && ack({ ok: false, reply: `Error: ${e.message}` });
+      }
+    });
+
+    // Private @bot side-channel for an open chat (never sent to the person).
+    socket.on("chat:assistant", async ({ chatId, text }, ack) => {
+      try {
+        const res = await wa.chatAssistant(chatId, text);
         ack && ack(res);
       } catch (e) {
         ack && ack({ ok: false, reply: `Error: ${e.message}` });
