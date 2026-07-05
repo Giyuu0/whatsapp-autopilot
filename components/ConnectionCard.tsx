@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Icon } from "./ui";
 import type { Snapshot } from "./useWaSocket";
 
@@ -27,6 +27,23 @@ export function ConnectionCard({
 }) {
   const meta = STATUS_META[snap.status] || STATUS_META.idle;
   const connected = snap.status === "connected";
+  const preparing = snap.status === "authenticating" || snap.status === "initializing";
+  const pct = Math.max(0, Math.min(100, snap.loadingPercent ?? 0));
+
+  // Track how long we've been preparing, so we can nudge the user if it stalls.
+  const [waited, setWaited] = useState(0);
+  const startRef = useRef<number>(Date.now());
+  useEffect(() => {
+    if (!preparing) {
+      startRef.current = Date.now();
+      setWaited(0);
+      return;
+    }
+    startRef.current = Date.now();
+    const t = setInterval(() => setWaited(Math.round((Date.now() - startRef.current) / 1000)), 1000);
+    return () => clearInterval(t);
+    // Reset the timer whenever we (re)enter a preparing phase.
+  }, [preparing]);
 
   return (
     <div className="card card-hover p-5">
@@ -69,11 +86,35 @@ export function ConnectionCard({
           </p>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-3 py-10 text-center">
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-fg/10 border-t-wa-green" />
           <p className="text-sm text-fg/60">
             {snap.error ? snap.error : "Preparing WhatsApp session…"}
+            {preparing && !snap.error && pct > 0 && (
+              <span className="ml-1 font-semibold text-fg/80">{pct}%</span>
+            )}
           </p>
+
+          {/* progress bar (shows sync moving vs. stuck) */}
+          {preparing && !snap.error && (
+            <div className="w-full max-w-[220px]">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-fg/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-wa-green to-wa-teal transition-all duration-500"
+                  style={{ width: `${pct > 0 ? pct : 6}%` }}
+                />
+              </div>
+              <p className="mt-1.5 text-[11px] tabular-nums text-fg/40">{waited}s elapsed</p>
+            </div>
+          )}
+
+          {/* nudge if it's clearly stalling */}
+          {preparing && !snap.error && waited >= 45 && (
+            <div className="mt-1 max-w-[240px] rounded-lg border border-amber-400/25 bg-amber-400/5 px-3 py-2 text-[11px] leading-relaxed text-amber-300/90">
+              This is taking longer than usual. WhatsApp is still syncing — give it
+              another moment, or hit <b>Restart</b> below to relaunch the session.
+            </div>
+          )}
         </div>
       )}
 

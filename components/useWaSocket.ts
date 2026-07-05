@@ -127,6 +127,7 @@ export type Snapshot = {
   qr: string | null;
   me: { number: string; name: string } | null;
   error: string | null;
+  loadingPercent?: number;
   startedAt: number;
   settings: Settings;
   contacts: Contact[];
@@ -182,7 +183,9 @@ export function useWaSocket() {
 
     socket.on("state", (s: Snapshot) => setSnap(s));
     socket.on("status", (p: any) =>
-      setSnap((prev) => (prev ? { ...prev, status: p.status, qr: p.qr, me: p.me, error: p.error } : prev))
+      setSnap((prev) =>
+        prev ? { ...prev, status: p.status, qr: p.qr, me: p.me, error: p.error, loadingPercent: p.loadingPercent } : prev
+      )
     );
     socket.on("settings", (settings: Settings) =>
       setSnap((prev) => (prev ? { ...prev, settings } : prev))
