@@ -283,6 +283,7 @@ export default function Dashboard() {
           messagesByChat={messages}
           onOpenChat={handleOpenChat}
           onSendMessage={sendMessage}
+          onSendMedia={sendMedia}
           onChatAssistant={chatAssistant}
           activeChatId={activeChatId}
           activeChatName={snap.chats.find((c) => c.id === activeChatId)?.name || null}

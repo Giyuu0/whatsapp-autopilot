@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Chat, Message } from "@/components/useWaSocket";
+import { VoiceRecorder } from "@/components/VoiceRecorder";
 
 /* ------------------------------------------------------------------ */
 /* Inline icons (kept local so the orb is self-contained)              */
@@ -102,6 +103,10 @@ export function ChatbotOrb(props: {
   messagesByChat: Record<string, Message[]>;
   onOpenChat: (chatId: string) => void;
   onSendMessage: (chatId: string, text: string) => Promise<any>;
+  onSendMedia?: (
+    chatId: string,
+    media: { base64: string; mimetype: string; filename?: string; caption?: string; asVoice?: boolean }
+  ) => Promise<any>;
   onChatAssistant: (chatId: string, command: string) => Promise<{ ok?: boolean; reply?: string }>;
   activeChatId: string | null;
   activeChatName: string | null;
@@ -113,6 +118,7 @@ export function ChatbotOrb(props: {
     messagesByChat,
     onOpenChat,
     onSendMessage,
+    onSendMedia,
     onChatAssistant,
     activeChatName,
   } = props;
@@ -841,6 +847,15 @@ export function ChatbotOrb(props: {
                     }`}
                     aria-label="Message input"
                   />
+                  {onSendMedia && activeChatId && (
+                    <VoiceRecorder
+                      size="sm"
+                      disabled={!connected || sending}
+                      onSend={async (base64, mimetype) => {
+                        await onSendMedia(activeChatId, { base64, mimetype, filename: "voice.ogg", asVoice: true });
+                      }}
+                    />
+                  )}
                   <button
                     type="button"
                     onClick={sendChat}

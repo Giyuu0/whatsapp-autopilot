@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Icon, Toggle, Select } from "./ui";
+import { VoiceRecorder } from "./VoiceRecorder";
 import type { Chat, Message, Language, Tone, VoiceReply, ManualReply, Suggestion } from "./useWaSocket";
 
 /* ---------------------------------- utils --------------------------------- */
@@ -1118,6 +1119,17 @@ export function ChatView(props: {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
                         void handleSend();
+                      }
+                    }}
+                  />
+                  <VoiceRecorder
+                    disabled={!connected || sendingMedia}
+                    onSend={async (base64, mimetype) => {
+                      setSendingMedia(true);
+                      try {
+                        await onSendMedia(activeChat.id, { base64, mimetype, filename: "voice.ogg", asVoice: true });
+                      } finally {
+                        setSendingMedia(false);
                       }
                     }}
                   />
