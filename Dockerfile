@@ -3,8 +3,8 @@ FROM node:20-slim
 
 # --- System Chromium + libraries required by whatsapp-web.js (puppeteer) ---
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    chromium \
-    ca-certificates fonts-liberation \
+    chromium dumb-init \
+    ca-certificates fonts-liberation fonts-noto-color-emoji \
     libatk-bridge2.0-0 libatk1.0-0 libasound2 libcairo2 libcups2 \
     libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libglib2.0-0 libgtk-3-0 \
     libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcomposite1 libxdamage1 \
@@ -28,4 +28,7 @@ RUN npm run build
 
 # The server reads $PORT (Railway/Render inject it); defaults to 4499.
 EXPOSE 4499
+# dumb-init reaps zombie Chromium child processes and forwards SIGTERM so the
+# app shuts down cleanly (flushes the store, closes the browser).
+ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "server.js"]

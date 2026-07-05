@@ -9,3 +9,6 @@ data/db.json
 npm-debug.log
 *.log
 .DS_Store
+.preview-wwebjs
+.preview-data
+.claude
