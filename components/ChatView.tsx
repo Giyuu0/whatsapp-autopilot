@@ -615,7 +615,13 @@ export function ChatView(props: {
     try {
       if (isBot) {
         const cmd = text.replace(/^@bot\b[:,]?\s*/i, "").trim() || "help me with this chat";
-        await onChatAssistant(activeChatId, cmd);
+        const res = await onChatAssistant(activeChatId, cmd);
+        // Manual mode: the bot returns a draft instead of sending — drop it
+        // straight into the composer so you can review and send it yourself.
+        if (res?.draft && res.message) {
+          setDraft(res.message);
+          return;
+        }
       } else {
         await onSendMessage(activeChatId, text);
       }
