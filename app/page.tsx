@@ -269,6 +269,7 @@ export default function Dashboard() {
             onEditMessage={editMessage}
             typing={activeChatId ? !!typing[activeChatId] : false}
             suggestion={activeChatId ? snap.suggestions?.[activeChatId] || null : null}
+            draftChatIds={Object.keys(snap.suggestions || {})}
             onClearSuggestion={clearSuggestion}
           />
         </div>

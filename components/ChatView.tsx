@@ -160,11 +160,13 @@ function Avatar({ id, name, size = "md" }: { id: string; name: string; size?: "s
 function ChatRow({
   chat,
   active,
+  hasDraft,
   onOpen,
   onToggleFavorite,
 }: {
   chat: Chat;
   active: boolean;
+  hasDraft?: boolean;
   onOpen: (id: string) => void;
   onToggleFavorite: (id: string, favorite: boolean) => void;
 }) {
@@ -198,7 +200,14 @@ function ChatRow({
           <span className="shrink-0 text-[11px] text-fg/40">{fmtTime(chat.lastTs)}</span>
         </div>
         <div className="mt-0.5 flex items-center justify-between gap-2">
-          <span className="truncate text-xs text-fg/50">{chat.lastText || "No messages yet"}</span>
+          {hasDraft ? (
+            <span className="truncate text-xs">
+              <span className="font-medium text-wa-green">✎ Draft</span>
+              <span className="text-fg/50"> — tap to review &amp; send</span>
+            </span>
+          ) : (
+            <span className="truncate text-xs text-fg/50">{chat.lastText || "No messages yet"}</span>
+          )}
           <div className="ml-1 flex shrink-0 items-center gap-1.5">
             {chat.unread > 0 && (
               <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-wa-green px-1.5 text-[11px] font-bold text-ink-950">
@@ -535,6 +544,7 @@ export function ChatView(props: {
     media: { base64: string; mimetype: string; filename?: string; caption?: string; asVoice?: boolean }
   ) => Promise<any>;
   suggestion: Suggestion | null;
+  draftChatIds?: string[];
   onClearSuggestion: (chatId: string) => void;
   connected: boolean;
   typing: boolean; // the bot is composing a reply to the active chat
@@ -559,6 +569,7 @@ export function ChatView(props: {
     onEditMessage,
     onSendMedia,
     suggestion,
+    draftChatIds,
     onClearSuggestion,
     connected,
     typing,
@@ -576,6 +587,14 @@ export function ChatView(props: {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const stickRef = useRef(true); // stay pinned to the bottom unless the user scrolls up
+  // Per-chat composer text, so switching chats never loses (or crosses) what
+  // you were writing/editing for each person.
+  const draftStore = useRef<Record<string, string>>({});
+  const draftRef = useRef("");
+  const prevChatRef = useRef<string | null>(null);
+  useEffect(() => {
+    draftRef.current = draft;
+  }, [draft]);
 
   function onListScroll() {
     const el = listRef.current;
@@ -590,6 +609,7 @@ export function ChatView(props: {
 
   const unreadCount = useMemo(() => chats.filter((c) => c.unread > 0).length, [chats]);
   const favCount = useMemo(() => chats.filter((c) => c.favorite).length, [chats]);
+  const draftSet = useMemo(() => new Set(draftChatIds || []), [draftChatIds]);
 
   const sortedChats = useMemo(() => {
     let list = [...chats].sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0));
@@ -625,19 +645,30 @@ export function ChatView(props: {
     if (el && stickRef.current) el.scrollTop = el.scrollHeight;
   }, [typing]);
 
-  // reset the persona + memory editors when switching chats
+  // Switch chats: reset editors, stash the previous chat's composer text, and
+  // load THIS chat's own text — its saved local draft, or a pending manual-mode
+  // draft. Strictly per-chat, so one person's draft can never land in another
+  // person's input box.
   useEffect(() => {
     setShowPrompt(false);
     setPromptDraft(activeChat?.customPrompt || "");
     setMemoryDraft(activeChat?.memory || "");
-    setDraft("");
+    const prev = prevChatRef.current;
+    if (prev && prev !== activeChatId) draftStore.current[prev] = draftRef.current;
+    prevChatRef.current = activeChatId;
+    let next = activeChatId ? draftStore.current[activeChatId] || "" : "";
+    if (!next && suggestion?.text && activeChatId) {
+      next = suggestion.text; // pull in a pending manual-mode draft
+      onClearSuggestion(activeChatId);
+    }
+    setDraft(next);
   }, [activeChatId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Manual mode (draft only): when the bot drafts a reply, drop it straight
-  // into the composer so you can edit and send it. Only auto-fills when you
-  // haven't typed anything yourself (never clobbers your own text).
+  // Manual mode (draft only): when the bot drafts a reply for the chat you're
+  // viewing, drop it straight into the composer — only if you haven't already
+  // typed something yourself (never clobbers your own text).
   useEffect(() => {
-    if (suggestion && suggestion.text && !draft.trim() && activeChatId) {
+    if (suggestion?.text && !draftRef.current.trim() && activeChatId) {
       setDraft(suggestion.text);
       onClearSuggestion(activeChatId);
     }
@@ -665,6 +696,7 @@ export function ChatView(props: {
       } else {
         await onSendMessage(activeChatId, text);
       }
+      if (activeChatId) delete draftStore.current[activeChatId];
       setDraft("");
     } catch {
       /* keep draft on failure so the user can retry */
@@ -775,6 +807,7 @@ export function ChatView(props: {
                   key={chat.id}
                   chat={chat}
                   active={chat.id === activeChatId}
+                  hasDraft={draftSet.has(chat.id) && chat.id !== activeChatId}
                   onOpen={onOpenChat}
                   onToggleFavorite={onToggleFavorite}
                 />
@@ -1026,51 +1059,8 @@ export function ChatView(props: {
                 )}
               </div>
 
-              {/* manual-mode suggested reply (drafted, not sent) */}
-              {suggestion && (
-                <div className="animate-fade-up border-t border-amber-400/20 bg-amber-400/[0.06] px-3 py-2.5">
-                  <div className="mb-1 flex items-center justify-between text-[11px]">
-                    <span className="flex items-center gap-1.5 font-medium text-amber-300">
-                      🤖 Suggested reply {suggestion.model && <span className="text-amber-200/50">· {prettyModel(suggestion.model)}</span>}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-fg/40 hover:text-fg/70"
-                      onClick={() => onClearSuggestion(activeChat.id)}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <p className="mb-2 whitespace-pre-wrap break-words text-sm text-fg">{suggestion.text}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      className="btn-primary !py-1.5 text-xs"
-                      disabled={!connected || sending}
-                      onClick={async () => {
-                        setSending(true);
-                        try {
-                          await onSendMessage(activeChat.id, suggestion.text);
-                        } finally {
-                          setSending(false);
-                        }
-                      }}
-                    >
-                      Send as-is
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-ghost !py-1.5 text-xs"
-                      onClick={() => {
-                        setDraft(suggestion.text);
-                        onClearSuggestion(activeChat.id);
-                      }}
-                    >
-                      Edit
-                    </button>
-                  </div>
-                </div>
-              )}
+              {/* Manual-mode drafts are dropped straight into the composer
+                  below (no separate suggestion card). */}
 
               {/* composer */}
               <div className="border-t border-fg/10 bg-fg/5 p-3">
