@@ -108,6 +108,7 @@ export function ChatbotOrb(props: {
     media: { base64: string; mimetype: string; filename?: string; caption?: string; asVoice?: boolean }
   ) => Promise<any>;
   onChatAssistant: (chatId: string, command: string) => Promise<{ ok?: boolean; reply?: string }>;
+  onRewrite?: (text: string, lang: string) => Promise<{ ok?: boolean; text?: string; error?: string }>;
   activeChatId: string | null;
   activeChatName: string | null;
 }) {
@@ -120,6 +121,7 @@ export function ChatbotOrb(props: {
     onSendMessage,
     onSendMedia,
     onChatAssistant,
+    onRewrite,
     activeChatName,
   } = props;
 
@@ -139,6 +141,11 @@ export function ChatbotOrb(props: {
   const [search, setSearch] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [sending, setSending] = useState(false);
+  // Compose-time translate/rewrite (English / English+slang), two-step send.
+  const [translateOn, setTranslateOn] = useState(false);
+  const [translateLang, setTranslateLang] = useState<"english" | "english-slang">("english");
+  const [rewriting, setRewriting] = useState(false);
+  const [rewrittenText, setRewrittenText] = useState("");
 
   // Is the Web Speech recognition API available?
   const [sttSupported, setSttSupported] = useState(false);
@@ -379,10 +386,27 @@ export function ChatbotOrb(props: {
   /* ---- chat-mode: send a manual reply into the real chat ---- */
   const sendChat = useCallback(async () => {
     const text = chatInput.trim();
-    if (!text || !activeChatId || !connected || sending) return;
+    if (!text || !activeChatId || !connected || sending || rewriting) return;
 
     // "@bot …" is a private aside to the assistant, not a real message.
     const botMatch = /^@bot\b/i.exec(text);
+
+    // Translate/rewrite mode: first Enter/Send rewrites the draft in place;
+    // second one sends it. Draft is "ready" once it matches the last rewrite.
+    if (translateOn && onRewrite && !botMatch && text !== rewrittenText.trim()) {
+      setRewriting(true);
+      try {
+        const res = await onRewrite(text, translateLang);
+        if (res?.ok && res.text) {
+          setChatInput(res.text);
+          setRewrittenText(res.text);
+        }
+      } finally {
+        setRewriting(false);
+      }
+      return; // don't send yet — review, then Enter/Send again
+    }
+
     setSending(true);
     setChatInput("");
     try {
@@ -399,7 +423,7 @@ export function ChatbotOrb(props: {
     } finally {
       setSending(false);
     }
-  }, [chatInput, activeChatId, connected, sending, onSendMessage, onChatAssistant]);
+  }, [chatInput, activeChatId, connected, sending, rewriting, translateOn, translateLang, rewrittenText, onRewrite, onSendMessage, onChatAssistant]);
 
   const handleChatKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -830,6 +854,56 @@ export function ChatbotOrb(props: {
 
               {/* Composer */}
               <div className="border-t border-fg/5 bg-surface-2/40 p-2.5">
+                {/* translate / rewrite controls */}
+                {onRewrite && (
+                  <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTranslateOn((v) => !v);
+                        setRewrittenText("");
+                      }}
+                      title="Rewrite your message into English before sending"
+                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium transition ${
+                        translateOn ? "bg-wa-green text-ink-950" : "bg-fg/5 text-fg/60 hover:bg-fg/10"
+                      }`}
+                    >
+                      🌐 Translate
+                    </button>
+                    {translateOn &&
+                      (
+                        [
+                          { key: "english", label: "English" },
+                          { key: "english-slang", label: "Slang" },
+                        ] as const
+                      ).map((o) => (
+                        <button
+                          key={o.key}
+                          type="button"
+                          onClick={() => {
+                            setTranslateLang(o.key);
+                            setRewrittenText("");
+                          }}
+                          className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition ${
+                            translateLang === o.key
+                              ? "bg-fg/15 text-fg/90 ring-1 ring-inset ring-wa-green/40"
+                              : "bg-fg/5 text-fg/55 hover:bg-fg/10"
+                          }`}
+                        >
+                          {o.label}
+                        </button>
+                      ))}
+                    {translateOn && (
+                      <span className="text-[10px] text-fg/40">
+                        {rewriting
+                          ? "Rewriting…"
+                          : chatInput.trim() && chatInput.trim() === rewrittenText.trim()
+                            ? "Ready — Enter to send"
+                            : "Enter to rewrite, again to send"}
+                      </span>
+                    )}
+                  </div>
+                )}
                 <div className="flex items-end gap-2">
                   <input
                     ref={chatInputRef}
@@ -856,16 +930,28 @@ export function ChatbotOrb(props: {
                       }}
                     />
                   )}
-                  <button
-                    type="button"
-                    onClick={sendChat}
-                    disabled={!chatInput.trim() || !connected || sending}
-                    className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-wa-green text-ink-950 shadow-glow transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
-                    title="Send message"
-                    aria-label="Send message"
-                  >
-                    <Icons.Send width={17} height={17} />
-                  </button>
+                  {(() => {
+                    const needsRewrite =
+                      translateOn && !!chatInput.trim() && chatInput.trim() !== rewrittenText.trim() && !isBotDraft;
+                    return (
+                      <button
+                        type="button"
+                        onClick={sendChat}
+                        disabled={!chatInput.trim() || !connected || sending || rewriting}
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-wa-green text-ink-950 shadow-glow transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+                        title={needsRewrite ? "Rewrite" : "Send message"}
+                        aria-label={needsRewrite ? "Rewrite message" : "Send message"}
+                      >
+                        {rewriting ? (
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink-950/30 border-t-ink-950" />
+                        ) : needsRewrite ? (
+                          <span className="text-sm">✨</span>
+                        ) : (
+                          <Icons.Send width={17} height={17} />
+                        )}
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </>
