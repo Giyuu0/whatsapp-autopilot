@@ -593,6 +593,17 @@ export function ChatView(props: {
     setDraft("");
   }, [activeChatId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Manual mode (draft only): when the bot drafts a reply, drop it straight
+  // into the composer so you can edit and send it. Only auto-fills when you
+  // haven't typed anything yourself (never clobbers your own text).
+  useEffect(() => {
+    if (suggestion && suggestion.text && !draft.trim() && activeChatId) {
+      setDraft(suggestion.text);
+      onClearSuggestion(activeChatId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suggestion]);
+
   async function handleSend() {
     const text = draft.trim();
     if (!text || !activeChatId || sending) return;
