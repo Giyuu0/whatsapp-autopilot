@@ -319,10 +319,10 @@ function MessageBubble({
   return (
     <div className={`group flex ${mine ? "justify-end" : "justify-start"}`}>
       <div
-        className={`relative max-w-[75%] rounded-2xl px-3 py-1.5 shadow-md ring-1 ring-inset ${
+        className={`relative max-w-[75%] animate-bubble-in rounded-2xl px-3 py-1.5 shadow-bubble ring-1 ring-inset backdrop-blur-sm ${
           mine
-            ? "rounded-br-sm bg-gradient-to-br from-wa-green/25 to-wa-teal/15 text-wa-light ring-wa-green/10"
-            : "rounded-bl-sm bg-ink-700/60 text-white/90 ring-white/5"
+            ? "rounded-br-sm bg-gradient-to-br from-wa-green/35 via-wa-green/25 to-wa-teal/20 text-wa-light ring-wa-green/20"
+            : "rounded-bl-sm bg-ink-700/70 text-white/90 ring-white/10"
         }`}
       >
         {/* hover actions — edit / delete your own messages */}
@@ -799,16 +799,19 @@ export function ChatView(props: {
           }`}
         >
           {!activeChat ? (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 p-10 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
-                <Icon.Send className="h-7 w-7 text-white/30" />
+            <div className="relative flex flex-1 flex-col items-center justify-center gap-4 p-10 text-center" style={wallpaper}>
+              <div className="relative animate-float">
+                <span className="absolute inset-0 -z-10 rounded-full bg-wa-green/25 blur-2xl" />
+                <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-wa-green/30 to-wa-teal/15 ring-1 ring-inset ring-wa-green/25 shadow-glow">
+                  <Icon.Send className="h-8 w-8 text-wa-green" />
+                </div>
               </div>
-              <div className="text-sm font-medium text-white/70">
-                Select a chat to view the conversation
+              <div className="text-base font-semibold text-white/85">
+                Select a chat to start
               </div>
-              <div className="max-w-xs text-xs text-white/40">
+              <div className="max-w-xs text-xs leading-relaxed text-white/45">
                 Pick a conversation from the list to read messages and manage its
-                auto-reply settings.
+                auto-reply settings — language, tone, voice replies and more.
               </div>
             </div>
           ) : (

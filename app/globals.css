@@ -143,3 +143,57 @@ textarea:focus-visible,
 .text-gradient-wa {
   @apply bg-gradient-to-r from-wa-green via-emerald-300 to-wa-teal bg-clip-text text-transparent;
 }
+
+/* Cards get a faint top-edge sheen so they read as glass, not flat panels */
+.card {
+  position: relative;
+  isolation: isolate;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 40%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Decorative accent glow used behind stat icons */
+.stat-glow {
+  position: absolute;
+  inset: -40% -20% auto -20%;
+  height: 120%;
+  filter: blur(28px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Animated gradient sweep for skeletons / accents */
+.shimmer-bg {
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.06) 60%,
+    transparent 80%
+  );
+  background-size: 200% 100%;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-bubble-in,
+  .animate-float,
+  .animate-shimmer,
+  .logo-glow,
+  .animate-drift {
+    animation: none !important;
+  }
+}
