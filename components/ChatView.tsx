@@ -199,11 +199,27 @@ function ChatRow({
 
 /* --------------------------------- bubble --------------------------------- */
 
-function MessageBubble({ msg, onLoadMedia }: { msg: Message; onLoadMedia: (id: string) => Promise<any> }) {
+function MessageBubble({
+  msg,
+  onLoadMedia,
+  onDelete,
+  onEdit,
+}: {
+  msg: Message;
+  onLoadMedia: (id: string) => Promise<any>;
+  onDelete: (messageId: string) => void;
+  onEdit: (messageId: string, text: string) => void;
+}) {
   const mine = msg.fromMe;
   const showModel = msg.isAutoReply && msg.model;
   const [loadingImg, setLoadingImg] = useState(false);
+  const [loadingMedia, setLoadingMedia] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editDraft, setEditDraft] = useState(msg.text || "");
   const caption = msg.text && msg.text !== "📷 Photo" ? msg.text : "";
+  const isVoice = msg.type === "voice" || msg.type === "audio";
+  // Edit/delete affordances only for your own, non-private, non-deleted messages.
+  const canModify = msg.fromMe && !msg.private && !msg.deleted;
 
   // Private @bot / @yati aside — only you see this; it never went to the person.
   if (msg.private) {
@@ -226,8 +242,34 @@ function MessageBubble({ msg, onLoadMedia }: { msg: Message; onLoadMedia: (id: s
     );
   }
 
+  // Deleted-for-everyone tombstone — muted italic, no media / ticks / actions.
+  if (msg.deleted) {
+    return (
+      <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+        <div
+          className={`relative max-w-[75%] rounded-2xl px-3 py-1.5 shadow-md ring-1 ring-inset ${
+            mine
+              ? "rounded-br-sm bg-gradient-to-br from-wa-green/15 to-wa-teal/10 ring-wa-green/10"
+              : "rounded-bl-sm bg-ink-700/40 ring-white/5"
+          }`}
+        >
+          <div className="whitespace-pre-wrap break-words pr-1 text-sm italic leading-relaxed text-white/40">
+            🚫 You deleted this message
+          </div>
+          <div
+            className={`mt-0.5 flex items-center gap-1.5 text-[10px] ${
+              mine ? "justify-end text-wa-light/40" : "text-white/30"
+            }`}
+          >
+            <span>{fmtTime(msg.ts)}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+    <div className={`group flex ${mine ? "justify-end" : "justify-start"}`}>
       <div
         className={`relative max-w-[75%] rounded-2xl px-3 py-1.5 shadow-md ring-1 ring-inset ${
           mine
@@ -235,7 +277,77 @@ function MessageBubble({ msg, onLoadMedia }: { msg: Message; onLoadMedia: (id: s
             : "rounded-bl-sm bg-ink-700/60 text-white/90 ring-white/5"
         }`}
       >
-        {msg.type === "image" ? (
+        {/* hover actions — edit / delete your own messages */}
+        {canModify && !editing && (
+          <div
+            className={`absolute -top-2 ${
+              mine ? "right-2" : "left-2"
+            } flex items-center gap-1 rounded-full bg-ink-900/90 px-1 py-0.5 opacity-0 shadow ring-1 ring-white/10 transition group-hover:opacity-100`}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setEditDraft(msg.text || "");
+                setEditing(true);
+              }}
+              className="rounded-full p-1 text-white/60 transition hover:bg-white/10 hover:text-white"
+              aria-label="Edit message"
+              title="Edit"
+            >
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Delete this message for everyone?")) onDelete(msg.id);
+              }}
+              className="rounded-full p-1 text-white/60 transition hover:bg-rose-500/20 hover:text-rose-300"
+              aria-label="Delete message"
+              title="Delete"
+            >
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18" />
+                <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6M14 11v6" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {editing ? (
+          <div className="min-w-[220px]">
+            <textarea
+              className="input min-h-[70px] w-full resize-y text-sm"
+              value={editDraft}
+              autoFocus
+              onChange={(e) => setEditDraft(e.target.value)}
+            />
+            <div className="mt-1.5 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                className="btn-ghost !py-1 text-xs"
+                onClick={() => setEditing(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-primary !py-1 text-xs"
+                onClick={() => {
+                  const next = editDraft.trim();
+                  onEdit(msg.id, next);
+                  setEditing(false);
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        ) : msg.type === "image" ? (
           <div className="max-w-[260px]">
             {msg.viewOnce && (
               <div className="mb-1 flex items-center gap-1 text-[10px] font-medium text-amber-300/90">
@@ -271,11 +383,48 @@ function MessageBubble({ msg, onLoadMedia }: { msg: Message; onLoadMedia: (id: s
             )}
             {caption && <div className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed">{caption}</div>}
           </div>
+        ) : isVoice ? (
+          <div className="min-w-[200px]">
+            {caption && (
+              <div className="mb-1 whitespace-pre-wrap break-words text-sm leading-relaxed">
+                {msg.type === "voice" && <span className="mr-1">🎤</span>}
+                {msg.type === "audio" && <span className="mr-1">🎧</span>}
+                {caption}
+              </div>
+            )}
+            {msg.media ? (
+              // eslint-disable-next-line jsx-a11y/media-has-caption
+              <audio controls src={msg.media} className="mt-1 h-9 w-full max-w-[240px]" />
+            ) : (
+              <button
+                type="button"
+                onClick={async () => {
+                  setLoadingMedia(true);
+                  try {
+                    await onLoadMedia(msg.id);
+                  } finally {
+                    setLoadingMedia(false);
+                  }
+                }}
+                disabled={loadingMedia}
+                className="mt-1 flex items-center gap-2 rounded-full bg-black/25 px-3 py-1.5 text-xs text-white/70 transition hover:bg-black/35"
+              >
+                {loadingMedia ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-wa-green" />
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                    <span>Play voice</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         ) : (
           <div className="whitespace-pre-wrap break-words pr-1 text-sm leading-relaxed">
-            {msg.type === "voice" && <span className="mr-1">🎤</span>}
-            {msg.type === "audio" && <span className="mr-1">🎧</span>}
-            {msg.text || (msg.type === "voice" ? "Voice message" : "")}
+            {msg.text || ""}
           </div>
         )}
         <div
@@ -288,6 +437,7 @@ function MessageBubble({ msg, onLoadMedia }: { msg: Message; onLoadMedia: (id: s
               {prettyModel(msg.model)}
             </span>
           )}
+          {msg.edited && <span className="italic opacity-70">edited</span>}
           <span>{fmtTime(msg.ts)}</span>
           {mine && <Ticks ack={msg.ack} />}
         </div>
@@ -314,6 +464,8 @@ export function ChatView(props: {
   onSetMemory: (chatId: string, memory: string) => void;
   onChatAssistant: (chatId: string, command: string) => Promise<any>;
   onLoadMedia: (chatId: string, messageId: string) => Promise<any>;
+  onDeleteMessage: (chatId: string, messageId: string) => Promise<any>;
+  onEditMessage: (chatId: string, messageId: string, text: string) => Promise<any>;
   onSendMedia: (
     chatId: string,
     media: { base64: string; mimetype: string; filename?: string; caption?: string; asVoice?: boolean }
@@ -338,6 +490,8 @@ export function ChatView(props: {
     onSetMemory,
     onChatAssistant,
     onLoadMedia,
+    onDeleteMessage,
+    onEditMessage,
     onSendMedia,
     suggestion,
     onClearSuggestion,
@@ -704,7 +858,12 @@ export function ChatView(props: {
                     return (
                       <React.Fragment key={m.id}>
                         {showDate && <DateDivider ts={m.ts} />}
-                        <MessageBubble msg={m} onLoadMedia={(id) => onLoadMedia(activeChat.id, id)} />
+                        <MessageBubble
+                          msg={m}
+                          onLoadMedia={(id) => onLoadMedia(activeChat.id, id)}
+                          onDelete={(id) => onDeleteMessage(activeChat.id, id)}
+                          onEdit={(id, t) => onEditMessage(activeChat.id, id, t)}
+                        />
                       </React.Fragment>
                     );
                   })

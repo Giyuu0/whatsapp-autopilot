@@ -50,8 +50,10 @@ export type Message = {
   isAutoReply?: boolean;
   private?: boolean; // @bot/@yati aside — shown only to you, never sent to the person
   ack?: number; // WhatsApp delivery status: -1 err, 0 pending, 1 sent, 2 delivered, 3 read, 4 played
-  media?: string | null; // image preview as a data URL
+  media?: string | null; // image/audio preview as a data URL
   viewOnce?: boolean; // WhatsApp "view once" photo
+  deleted?: boolean;
+  edited?: boolean;
 };
 
 export type LogEntry = {
@@ -266,6 +268,15 @@ export function useWaSocket() {
     [emit]
   );
 
+  const deleteMessage = useCallback(
+    async (chatId: string, messageId: string) => emit("message:delete", { chatId, messageId }),
+    [emit]
+  );
+  const editMessage = useCallback(
+    async (chatId: string, messageId: string, text: string) => emit("message:edit", { chatId, messageId, text }),
+    [emit]
+  );
+
   const sendMedia = useCallback(
     async (
       chatId: string,
@@ -355,6 +366,8 @@ export function useWaSocket() {
     openChat,
     sendMessage,
     sendMedia,
+    deleteMessage,
+    editMessage,
     assistantCommand,
     chatAssistant,
     clearSuggestion,

@@ -92,6 +92,26 @@ app.prepare().then(() => {
       }
     });
 
+    // Delete a message for everyone.
+    socket.on("message:delete", async ({ chatId, messageId }, ack) => {
+      try {
+        await wa.deleteMessage(chatId, messageId);
+        ack && ack({ ok: true });
+      } catch (e) {
+        ack && ack({ ok: false, error: e.message });
+      }
+    });
+
+    // Edit one of your own messages.
+    socket.on("message:edit", async ({ chatId, messageId, text }, ack) => {
+      try {
+        await wa.editMessage(chatId, messageId, text);
+        ack && ack({ ok: true });
+      } catch (e) {
+        ack && ack({ ok: false, error: e.message });
+      }
+    });
+
     // Send a message manually from the chat composer.
     socket.on("message:send", async ({ chatId, text }, ack) => {
       try {

@@ -21,6 +21,8 @@ export default function Dashboard() {
     openChat,
     sendMessage,
     sendMedia,
+    deleteMessage,
+    editMessage,
     assistantCommand,
     chatAssistant,
     clearSuggestion,
@@ -225,6 +227,8 @@ export default function Dashboard() {
             onChatAssistant={chatAssistant}
             onLoadMedia={loadMedia}
             onSendMedia={sendMedia}
+            onDeleteMessage={deleteMessage}
+            onEditMessage={editMessage}
             typing={activeChatId ? !!typing[activeChatId] : false}
             suggestion={activeChatId ? snap.suggestions?.[activeChatId] || null : null}
             onClearSuggestion={clearSuggestion}

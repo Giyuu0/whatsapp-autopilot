@@ -31,7 +31,8 @@ A beautiful, self-hosted dashboard that connects to WhatsApp (by scanning a QR c
 - 🧠 **Smart routing + fallback chains** — text → **Groq**, images → **Gemini Vision**, voice notes → **Groq Whisper**. Each has an ordered fallback chain that's tried in turn if a model errors or is rate-limited.
 - 🎭 **Per-chat tone** — reply **Professional**, **Friendly** (witty, roast-back), or **Flirty** — different for every chat.
 - 🗣️ **Per-chat language** — **Auto-detect** (mirror the sender), English, Hindi, Hinglish, or English + slang.
-- 🎙️ **Voice notes** — incoming voice messages are transcribed and answered; optionally reply *with a voice note* too. **Preview any voice** (▶ Play) in Settings before you pick it.
+- 🎙️ **Voice notes** — incoming voice messages are transcribed, **playable in the dashboard**, and answered; optionally reply *with a real voice note* too (Groq TTS → Ogg/Opus via bundled ffmpeg). **Preview any voice** (▶ Play) in Settings. Turn it on in Settings ("Reply to voice notes with a voice note") or per chat (Voice = Voice).
+- ✏️ **Delete & edit** sent messages — for everyone — from the chat (hover a message) or via `@bot delete` / `@bot edit … to …`.
 - 🧩 **Context-aware** — reads the recent conversation before replying, and says so honestly when it doesn't know something.
 - 🪄 **Assistant orb** — a floating voice/text control center. Talk or type to send messages, change a chat's tone/language, toggle auto-reply, or **open any conversation right inside the orb** so you and the AI can both reply.
 - 🔒 **Access-key gate** + **secure settings** — the dashboard is locked behind a key, and your API keys are write-only (never sent back to the browser).
