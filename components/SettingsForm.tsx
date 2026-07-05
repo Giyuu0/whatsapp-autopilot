@@ -97,11 +97,11 @@ function ChainEditor({
     <div>
       <div className="space-y-2">
         {steps.length === 0 && (
-          <p className="text-xs text-slate-500">No fallbacks — only the primary model is used.</p>
+          <p className="text-xs text-fg/45">No fallbacks — only the primary model is used.</p>
         )}
         {steps.map((s, i) => (
           <div key={i} className="flex flex-wrap items-center gap-2">
-            <span className="w-4 text-xs text-slate-500">{i + 1}.</span>
+            <span className="w-4 text-xs text-fg/45">{i + 1}.</span>
             <select
               className="input w-24 shrink-0"
               value={s.provider}
@@ -312,7 +312,7 @@ export function SettingsForm({
       {/* AI providers */}
       <section className="card p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">AI providers</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-fg/60">AI providers</h2>
           <button type="button" onClick={loadModels} className="btn-ghost !py-1.5 text-xs" disabled={modelsLoading}>
             {modelsLoading ? "Fetching…" : "↻ Refresh models from keys"}
           </button>
@@ -344,19 +344,19 @@ export function SettingsForm({
             />
           </div>
         </div>
-        {modelsMsg && <p className="mt-2 text-xs text-slate-500">{modelsMsg}</p>}
-        <p className="mt-1 text-xs text-slate-600">
+        {modelsMsg && <p className="mt-2 text-xs text-fg/45">{modelsMsg}</p>}
+        <p className="mt-1 text-xs text-fg/40">
           Models below are pulled live from your keys. Save a new key, then hit “Refresh models”.
         </p>
       </section>
 
       {/* Text / chat models */}
       <section className="card p-5">
-        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-fg/60">
           Text reply models
         </h2>
-        <p className="mb-4 text-xs text-slate-500">
-          Tried top to bottom — the <b className="text-slate-300">first</b> is primary, the rest are fallbacks if one fails or is rate-limited. Reorder providers as you like.
+        <p className="mb-4 text-xs text-fg/45">
+          Tried top to bottom — the <b className="text-fg/75">first</b> is primary, the rest are fallbacks if one fails or is rate-limited. Reorder providers as you like.
         </p>
         <ChainEditor
           steps={chatChain}
@@ -387,15 +387,15 @@ export function SettingsForm({
             </select>
           </div>
         </div>
-        <p className="mt-1 text-xs text-slate-500">Tone is a per-chat default — override it per chat from the conversation header.</p>
+        <p className="mt-1 text-xs text-fg/45">Tone is a per-chat default — override it per chat from the conversation header.</p>
       </section>
 
       {/* Vision models */}
       <section className="card p-5">
-        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-fg/60">
           Image (vision) reply models
         </h2>
-        <p className="mb-4 text-xs text-slate-500">
+        <p className="mb-4 text-xs text-fg/45">
           For images. Groq (llama-4-scout) is first because free-tier Gemini vision is often rate-limited (429). Add/reorder as you like.
         </p>
         <ChainEditor
@@ -409,12 +409,12 @@ export function SettingsForm({
 
       {/* Voice */}
       <section className="card p-5">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">Voice notes</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-fg/60">Voice notes</h2>
         <div className="mb-3 flex items-center gap-3">
           <Toggle checked={voiceReplies} onChange={setVoiceReplies} />
-          <span className="text-sm text-slate-200">Reply to voice notes with a voice note</span>
+          <span className="text-sm text-fg/90">Reply to voice notes with a voice note</span>
         </div>
-        <p className="mb-4 text-xs text-slate-500">
+        <p className="mb-4 text-xs text-fg/45">
           Best-effort — falls back to a text reply if TTS is unavailable for your account.
         </p>
         <div className="grid gap-4 md:grid-cols-3">
@@ -440,7 +440,7 @@ export function SettingsForm({
                 className="btn-primary shrink-0 !px-3"
               >
                 {previewing ? (
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink-950/30 border-t-ink-950" />
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-fg/10 border-t-ink-950" />
                 ) : (
                   <>
                     <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
@@ -458,7 +458,7 @@ export function SettingsForm({
 
       {/* Behaviour */}
       <section className="card p-5">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">Behaviour</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-fg/60">Behaviour</h2>
         <div className="mb-4">
           <label className="label">Global persona / system prompt</label>
           <textarea
@@ -475,7 +475,7 @@ export function SettingsForm({
             onChange={(e) => setOwnerProfile(e.target.value)}
             placeholder="Who you are — so the bot can answer questions about you and always defends you."
           />
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-fg/45">
             The bot uses this to answer questions about you and never insults you. It can still roast other people.
           </p>
         </div>
@@ -491,7 +491,7 @@ export function SettingsForm({
               onChange={(e) => setReplyDelayMs(Number(e.target.value))}
             />
           </div>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-300">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-fg/75">
             <Toggle checked={replyToGroups} onChange={setReplyToGroups} />
             Also reply in groups
           </label>
@@ -499,56 +499,56 @@ export function SettingsForm({
         <div className="mt-4 flex items-center gap-3">
           <Toggle checked={manualReply} onChange={setManualReply} />
           <div>
-            <span className="text-sm text-slate-200">Manual mode (draft, don&apos;t auto-send)</span>
-            <p className="text-xs text-slate-500">The AI writes a suggested reply for you to review and send yourself. Override per chat from the conversation header.</p>
+            <span className="text-sm text-fg/90">Manual mode (draft, don&apos;t auto-send)</span>
+            <p className="text-xs text-fg/45">The AI writes a suggested reply for you to review and send yourself. Override per chat from the conversation header.</p>
           </div>
         </div>
         <div className="mt-4 flex items-center gap-3">
           <Toggle checked={hideSensitive} onChange={setHideSensitive} />
           <div>
-            <span className="text-sm text-slate-200">Hide &amp; never reply to sensitive messages</span>
-            <p className="text-xs text-slate-500">OTPs, bank/transaction alerts and promotional messages are hidden from the dashboard and never auto-replied to.</p>
+            <span className="text-sm text-fg/90">Hide &amp; never reply to sensitive messages</span>
+            <p className="text-xs text-fg/45">OTPs, bank/transaction alerts and promotional messages are hidden from the dashboard and never auto-replied to.</p>
           </div>
         </div>
         <div className="mt-4 flex items-center gap-3">
           <Toggle checked={typingIndicator} onChange={setTypingIndicator} />
           <div>
-            <span className="text-sm text-slate-200">Show &ldquo;typing…&rdquo; before replying</span>
-            <p className="text-xs text-slate-500">The recipient sees a typing indicator, so replies feel human.</p>
+            <span className="text-sm text-fg/90">Show &ldquo;typing…&rdquo; before replying</span>
+            <p className="text-xs text-fg/45">The recipient sees a typing indicator, so replies feel human.</p>
           </div>
         </div>
         <div className="mt-4 flex items-center gap-3">
           <Toggle checked={contactMemoryEnabled} onChange={setContactMemoryEnabled} />
           <div>
-            <span className="text-sm text-slate-200">Remember facts about contacts</span>
-            <p className="text-xs text-slate-500">The bot learns durable facts about each person over time and uses them in replies. Edit or clear a chat&apos;s memory from its header.</p>
+            <span className="text-sm text-fg/90">Remember facts about contacts</span>
+            <p className="text-xs text-fg/45">The bot learns durable facts about each person over time and uses them in replies. Edit or clear a chat&apos;s memory from its header.</p>
           </div>
         </div>
       </section>
 
       {/* Privacy */}
       <section className="card p-5">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">Privacy &amp; data</h2>
-        <p className="mb-4 text-xs leading-relaxed text-slate-500">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-fg/60">Privacy &amp; data</h2>
+        <p className="mb-4 text-xs leading-relaxed text-fg/45">
           Everything runs on your own machine — your chats and login never leave it except for the AI calls that generate replies.
-          <b className="text-slate-300"> Groq</b> (your primary provider) does not use API inputs/outputs to train models.
-          <b className="text-slate-300"> Google Gemini</b> free-tier <i>can</i> use data to improve its products — so for maximum privacy, keep everything on Groq.
+          <b className="text-fg/75"> Groq</b> (your primary provider) does not use API inputs/outputs to train models.
+          <b className="text-fg/75"> Google Gemini</b> free-tier <i>can</i> use data to improve its products — so for maximum privacy, keep everything on Groq.
         </p>
         <div className="flex items-center gap-3">
           <Toggle checked={groqOnly} onChange={setGroqOnly} />
           <div>
-            <span className="text-sm text-slate-200">Groq only — never send anything to Google Gemini</span>
-            <p className="text-xs text-slate-500">Skips all Gemini steps in the model chains, so no message data ever reaches Google.</p>
+            <span className="text-sm text-fg/90">Groq only — never send anything to Google Gemini</span>
+            <p className="text-xs text-fg/45">Skips all Gemini steps in the model chains, so no message data ever reaches Google.</p>
           </div>
         </div>
       </section>
 
       {/* Security */}
       <section className="card p-5">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">Security</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-fg/60">Security</h2>
         <label className="label flex items-center gap-2">
           Dashboard access key
-          {settings.accessKeyLocked && <span className="chip bg-white/5 !py-0.5 text-amber-300">managed by .env</span>}
+          {settings.accessKeyLocked && <span className="chip bg-fg/5 !py-0.5 text-amber-300">managed by .env</span>}
         </label>
         <input
           type="password"
@@ -558,7 +558,7 @@ export function SettingsForm({
           disabled={settings.accessKeyLocked}
           onChange={(e) => setAccessKey(e.target.value)}
         />
-        <p className="mt-1 text-xs text-slate-500">You&apos;ll need to unlock again with the new key.</p>
+        <p className="mt-1 text-xs text-fg/45">You&apos;ll need to unlock again with the new key.</p>
         <div className="mt-4">
           <button type="button" onClick={onLock} className="btn-danger">
             Lock dashboard
@@ -567,7 +567,7 @@ export function SettingsForm({
       </section>
 
       {/* Save bar */}
-      <div className="sticky bottom-4 z-10 flex items-center justify-end gap-3 rounded-2xl border border-white/5 bg-ink-900/90 px-4 py-3 backdrop-blur">
+      <div className="sticky bottom-4 z-10 flex items-center justify-end gap-3 rounded-2xl border border-fg/5 bg-surface-2/90 px-4 py-3 backdrop-blur">
         {saved && <span className="text-sm text-wa-green">Saved ✓</span>}
         <button type="button" className="btn-primary" onClick={save} disabled={saving}>
           {saving ? "Saving…" : "Save settings"}

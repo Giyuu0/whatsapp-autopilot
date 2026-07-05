@@ -2,8 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+:root,
+[data-theme="dark"] {
   color-scheme: dark;
+  --surface: 10 15 20; /* ink-950 — page bg */
+  --surface-1: 19 27 36; /* ink-850 — cards */
+  --surface-2: 14 20 27; /* ink-900 — inputs / raised */
+  --surface-3: 34 48 60; /* ink-700 — bubbles / hover */
+  --fg: 255 255 255; /* foreground (text + subtle overlays) */
+  --chat-bg: 11 16 20; /* chat wallpaper base */
+  --chat-dot: 255 255 255; /* chat wallpaper dot */
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --surface: 237 241 246; /* soft grey page bg */
+  --surface-1: 255 255 255; /* white cards */
+  --surface-2: 244 246 250; /* inputs / raised */
+  --surface-3: 226 232 240; /* bubbles / hover */
+  --fg: 17 24 39; /* slate-900 text */
+  --chat-bg: 233 237 242;
+  --chat-dot: 15 23 42;
 }
 
 html,
@@ -12,7 +31,7 @@ body {
 }
 
 body {
-  @apply bg-ink-950 text-slate-200 antialiased;
+  @apply bg-surface text-fg/80 antialiased;
   background-image:
     linear-gradient(to bottom, rgba(37, 211, 102, 0.05), transparent 18rem),
     radial-gradient(42rem 24rem at 50% -8rem, rgba(37, 211, 102, 0.08), transparent 70%),
@@ -42,7 +61,7 @@ body {
 }
 
 .card {
-  @apply rounded-2xl border border-white/[0.07] bg-ink-850/70 backdrop-blur-md;
+  @apply rounded-2xl border border-fg/[0.07] bg-surface-1/70 backdrop-blur-md;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 1px 2px rgba(0, 0, 0, 0.3),
@@ -80,15 +99,15 @@ body {
   @apply btn bg-wa-green text-ink-950 hover:brightness-110 shadow-glow;
 }
 .btn-ghost {
-  @apply btn bg-white/5 text-slate-200 hover:bg-white/10;
+  @apply btn bg-fg/5 text-fg/90 hover:bg-fg/10;
 }
 .btn-danger {
   @apply btn bg-red-500/15 text-red-300 hover:bg-red-500/25;
 }
 
 .input {
-  @apply w-full rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 text-sm text-slate-100
-    placeholder:text-slate-500 outline-none focus:border-wa-green/60 focus:ring-2 focus:ring-wa-green/20;
+  @apply w-full rounded-xl border border-fg/10 bg-surface-2/70 px-3 py-2 text-sm text-fg
+    placeholder:text-fg/40 outline-none focus:border-wa-green/60 focus:ring-2 focus:ring-wa-green/20;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 .input:focus {
@@ -96,7 +115,17 @@ body {
 }
 
 .label {
-  @apply mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400;
+  @apply mb-1.5 block text-xs font-medium uppercase tracking-wide text-fg/55;
+}
+
+/* Themed chat wallpaper (flips with the theme) */
+.chat-wallpaper {
+  background-color: rgb(var(--chat-bg));
+  background-image:
+    radial-gradient(55rem 55rem at 100% 0%, rgba(37, 211, 102, 0.06), transparent 60%),
+    radial-gradient(45rem 45rem at 0% 100%, rgba(18, 140, 126, 0.06), transparent 55%),
+    radial-gradient(rgb(var(--chat-dot) / 0.03) 1px, transparent 1px);
+  background-size: auto, auto, 24px 24px;
 }
 
 /* Consistent, subtle wa-green focus rings for keyboard users */

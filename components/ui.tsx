@@ -40,19 +40,19 @@ export function Select<T extends string>({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`flex h-8 items-center justify-between gap-1.5 rounded-lg border border-white/10 bg-ink-800/80 px-2.5 text-xs text-slate-100 outline-none transition hover:border-white/20 ${
+        className={`flex h-8 items-center justify-between gap-1.5 rounded-lg border border-fg/10 bg-surface-2/80 px-2.5 text-xs text-fg outline-none transition hover:border-fg/20 ${
           open ? "border-wa-green/60 ring-2 ring-wa-green/20" : ""
         } ${buttonClassName}`}
       >
         <span className="truncate">{current?.label ?? "Select"}</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition ${open ? "rotate-180" : ""}`}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`h-3.5 w-3.5 shrink-0 text-fg/60 transition ${open ? "rotate-180" : ""}`}>
           <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
 
       {open && (
         <div
-          className={`animate-fade-up absolute z-40 mt-1 min-w-[9rem] overflow-hidden rounded-xl border border-white/10 bg-ink-850 p-1 shadow-xl shadow-black/40 ${
+          className={`animate-fade-up absolute z-40 mt-1 min-w-[9rem] overflow-hidden rounded-xl border border-fg/10 bg-surface-1 p-1 shadow-xl shadow-black/40 ${
             align === "right" ? "right-0" : "left-0"
           }`}
         >
@@ -67,7 +67,7 @@ export function Select<T extends string>({
                   setOpen(false);
                 }}
                 className={`flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-left text-xs transition ${
-                  active ? "bg-wa-green/15 text-wa-green" : "text-slate-200 hover:bg-white/10"
+                  active ? "bg-wa-green/15 text-wa-green" : "text-fg/90 hover:bg-fg/10"
                 }`}
               >
                 <span className="truncate">{o.label}</span>
@@ -102,12 +102,12 @@ export function Toggle({
       type="button"
       onClick={() => onChange(!checked)}
       className={`relative inline-flex ${w} shrink-0 items-center rounded-full transition ${
-        checked ? "bg-wa-green" : "bg-white/15"
+        checked ? "bg-wa-green" : "bg-fg/15"
       }`}
       aria-pressed={checked}
     >
       <span
-        className={`inline-block ${dot} transform rounded-full bg-white shadow transition ${
+        className={`inline-block ${dot} transform rounded-full bg-fg shadow transition ${
           checked ? shift : "translate-x-1"
         }`}
       />

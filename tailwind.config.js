@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // Dark is the default; `dark:` utilities apply when <html data-theme="dark">.
+  darkMode: ["selector", '[data-theme="dark"]'],
   content: [
     "./app/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
@@ -21,6 +23,14 @@ module.exports = {
           700: "#22303c",
           600: "#2a3942",
         },
+        // Theme-aware semantic tokens (driven by CSS variables in globals.css).
+        // In dark mode these equal the old ink/white values, so dark is
+        // unchanged; in light mode they flip. Alpha works via <alpha-value>.
+        surface: "rgb(var(--surface) / <alpha-value>)",
+        "surface-1": "rgb(var(--surface-1) / <alpha-value>)",
+        "surface-2": "rgb(var(--surface-2) / <alpha-value>)",
+        "surface-3": "rgb(var(--surface-3) / <alpha-value>)",
+        fg: "rgb(var(--fg) / <alpha-value>)",
       },
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],

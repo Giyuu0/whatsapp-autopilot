@@ -18,8 +18,8 @@ export default function SettingsPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/10 border-t-wa-green" />
-          <p className="text-sm text-slate-400">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-fg/10 border-t-wa-green" />
+          <p className="text-sm text-fg/60">
             {connected ? "Loading settings…" : "Connecting to server…"}
           </p>
         </div>
@@ -32,11 +32,11 @@ export default function SettingsPage() {
       <header className="mb-6">
         <Link
           href="/"
-          className="text-sm text-slate-400 transition hover:text-wa-green"
+          className="text-sm text-fg/60 transition hover:text-wa-green"
         >
           ← Back to dashboard
         </Link>
-        <h1 className="mt-2 text-xl font-bold tracking-tight text-slate-50">Settings</h1>
+        <h1 className="mt-2 text-xl font-bold tracking-tight text-fg">Settings</h1>
       </header>
 
       <SettingsForm

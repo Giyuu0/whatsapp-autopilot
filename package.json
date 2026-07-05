@@ -5,6 +5,7 @@
   "description": "Beautiful WhatsApp auto-reply dashboard — Groq for text, Gemini vision for images, per-contact control.",
   "scripts": {
     "dev": "node server.js",
+    "dev:preview": "cross-env PORT=4610 WWEBJS_DIR=./.preview-wwebjs DATA_DIR=./.preview-data node server.js",
     "build": "next build",
     "start": "cross-env NODE_ENV=production node server.js",
     "lint": "next lint"

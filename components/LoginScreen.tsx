@@ -49,10 +49,10 @@ export function LoginScreen({
               </div>
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tighter text-slate-50">
+              <h1 className="text-lg font-bold tracking-tighter text-fg">
                 WhatsApp <span className="text-gradient-wa">AutoPilot</span>
               </h1>
-              <p className="mt-1 text-sm text-slate-400">Enter your access key to continue</p>
+              <p className="mt-1 text-sm text-fg/60">Enter your access key to continue</p>
             </div>
           </div>
 
@@ -77,8 +77,8 @@ export function LoginScreen({
             </button>
           </form>
 
-          <p className="mt-4 text-center text-xs text-slate-600">
-            Default key is <code className="text-slate-400">wa-admin-2025</code> — change it in Settings or via <code className="text-slate-400">.env</code>.
+          <p className="mt-4 text-center text-xs text-fg/40">
+            Default key is <code className="text-fg/60">wa-admin-2025</code> — change it in Settings or via <code className="text-fg/60">.env</code>.
           </p>
         </div>
       </div>

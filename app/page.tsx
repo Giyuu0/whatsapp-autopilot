@@ -36,9 +36,22 @@ export default function Dashboard() {
 
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [notifOn, setNotifOn] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   React.useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) setNotifOn(Notification.permission === "granted");
+    try {
+      const t = localStorage.getItem("wa-theme");
+      if (t === "light" || t === "dark") setTheme(t);
+    } catch {}
   }, []);
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    document.documentElement.setAttribute("data-theme", next);
+    try {
+      localStorage.setItem("wa-theme", next);
+    } catch {}
+  };
 
   if (authState === "unauthorized") {
     return <LoginScreen onSubmit={login} error={authError} />;
@@ -48,8 +61,8 @@ export default function Dashboard() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/10 border-t-wa-green" />
-          <p className="text-sm text-slate-400">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-fg/10 border-t-wa-green" />
+          <p className="text-sm text-fg/60">
             {connected ? "Loading dashboard…" : "Connecting to server…"}
           </p>
         </div>
@@ -77,10 +90,10 @@ export default function Dashboard() {
             </svg>
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg font-bold tracking-tighter text-slate-50 sm:text-xl">
+            <h1 className="text-lg font-bold tracking-tighter text-fg sm:text-xl">
               WhatsApp <span className="text-gradient-wa">AutoPilot</span>
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-fg/60">
               Groq replies to text &amp; voice · Gemini sees images · you pick who gets replies
             </p>
           </div>
@@ -90,8 +103,8 @@ export default function Dashboard() {
           {/* Master switch */}
           <div className="card card-hover flex flex-1 items-center gap-3 !rounded-2xl px-3 py-2.5 sm:flex-none sm:px-4">
             <div className="mr-auto text-left sm:mr-0 sm:text-right">
-              <p className="text-sm font-semibold text-slate-100">Auto-reply</p>
-              <p className={`text-xs ${s.autoReplyEnabled ? "text-wa-green" : "text-slate-500"}`}>
+              <p className="text-sm font-semibold text-fg">Auto-reply</p>
+              <p className={`text-xs ${s.autoReplyEnabled ? "text-wa-green" : "text-fg/45"}`}>
                 {s.autoReplyEnabled ? "Active" : "Paused"}
               </p>
             </div>
@@ -110,8 +123,8 @@ export default function Dashboard() {
                 setNotifOn(p === "granted");
               }}
               title={notifOn ? "Notifications on" : "Enable browser notifications"}
-              className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors hover:bg-white/5 ${
-                notifOn ? "text-wa-green" : "text-slate-400 hover:text-slate-200"
+              className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors hover:bg-fg/5 ${
+                notifOn ? "text-wa-green" : "text-fg/60 hover:text-fg/90"
               }`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
@@ -120,11 +133,30 @@ export default function Dashboard() {
               </svg>
             </button>
 
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label="Toggle theme"
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-fg/60 transition-colors hover:bg-fg/5 hover:text-wa-green"
+            >
+              {theme === "dark" ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" strokeLinecap="round" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" strokeLinejoin="round" />
+                </svg>
+              )}
+            </button>
+
             {/* Settings link */}
             <Link
               href="/settings"
               title="Settings"
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-white/5 hover:text-wa-green"
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-fg/60 transition-colors hover:bg-fg/5 hover:text-wa-green"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
                 <circle cx="12" cy="12" r="3" />
@@ -136,7 +168,7 @@ export default function Dashboard() {
             <button
               onClick={lock}
               title="Lock dashboard"
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-white/5 hover:text-red-300"
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-fg/60 transition-colors hover:bg-fg/5 hover:text-red-300"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
                 <rect x="3" y="11" width="18" height="11" rx="2" />
@@ -171,9 +203,9 @@ export default function Dashboard() {
                 <span className="absolute inline-flex h-full w-full animate-pulse-ring rounded-full bg-wa-green opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-wa-green" />
               </span>
-              <span className="min-w-0 break-words text-slate-200">
+              <span className="min-w-0 break-words text-fg/90">
                 Connected as <b>{snap.me?.name || "you"}</b>{" "}
-                <span className="text-slate-500">+{snap.me?.number}</span>
+                <span className="text-fg/45">+{snap.me?.number}</span>
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -197,15 +229,15 @@ export default function Dashboard() {
           {snap.sync?.syncing && (
             <div className="card animate-fade-up px-4 py-3.5">
               <div className="mb-2 flex items-center justify-between text-xs">
-                <span className="flex items-center gap-2 text-slate-300">
-                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/15 border-t-wa-green" />
+                <span className="flex items-center gap-2 text-fg/75">
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-fg/15 border-t-wa-green" />
                   Syncing your chats &amp; contacts…
                 </span>
-                <span className="tabular-nums text-slate-400">
+                <span className="tabular-nums text-fg/60">
                   {snap.sync.done}/{snap.sync.total || "…"}
                 </span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-white/10 ring-1 ring-inset ring-white/5">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-fg/10 ring-1 ring-inset ring-fg/5">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-wa-green to-wa-teal shadow-[0_0_10px_rgba(37,211,102,0.45)] transition-all duration-300"
                   style={{ width: `${snap.sync.total ? Math.round((snap.sync.done / snap.sync.total) * 100) : 8}%` }}

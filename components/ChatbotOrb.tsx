@@ -444,13 +444,13 @@ export function ChatbotOrb(props: {
           {/* CHAT MODE HEADER                                            */}
           {/* =========================================================== */}
           {mode === "chat" ? (
-            <div className="flex items-center gap-2 border-b border-white/5 bg-gradient-to-r from-wa-teal/20 to-wa-green/10 px-3 py-3">
+            <div className="flex items-center gap-2 border-b border-fg/5 bg-gradient-to-r from-wa-teal/20 to-wa-green/10 px-3 py-3">
               <button
                 type="button"
                 onClick={() => {
                   setMode("picker");
                 }}
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-slate-100"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-fg/5 text-fg/75 transition hover:bg-fg/10 hover:text-fg"
                 title="Back to chats"
                 aria-label="Back to chats"
               >
@@ -460,17 +460,17 @@ export function ChatbotOrb(props: {
                 {initials(activeChat?.name || activeChat?.number || "?")}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold text-slate-100">
+                <div className="truncate text-sm font-semibold text-fg">
                   {activeChat?.name || activeChat?.number || "Chat"}
                 </div>
-                <div className="truncate text-[11px] text-slate-400">
+                <div className="truncate text-[11px] text-fg/60">
                   {activeChat?.number ? `+${activeChat.number}` : ""}
                 </div>
               </div>
               <button
                 type="button"
                 onClick={toggleOpen}
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-slate-200"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-fg/5 text-fg/60 transition hover:bg-fg/10 hover:text-fg/90"
                 title="Close"
                 aria-label="Close assistant"
               >
@@ -481,15 +481,15 @@ export function ChatbotOrb(props: {
             /* =========================================================== */
             /* ASSISTANT / PICKER HEADER                                   */
             /* =========================================================== */
-            <div className="flex items-center gap-3 border-b border-white/5 bg-gradient-to-r from-wa-teal/20 to-wa-green/10 px-4 py-3">
+            <div className="flex items-center gap-3 border-b border-fg/5 bg-gradient-to-r from-wa-teal/20 to-wa-green/10 px-4 py-3">
               <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-wa-green to-wa-teal text-ink-950 shadow-glow">
                 <Icons.Sparkle width={18} height={18} />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold text-slate-100">
+                <div className="truncate text-sm font-semibold text-fg">
                   {mode === "picker" ? "Chats" : "Assistant"}
                 </div>
-                <div className="truncate text-[11px] text-slate-400">
+                <div className="truncate text-[11px] text-fg/60">
                   {mode === "picker"
                     ? "pick a conversation to open"
                     : "talk or type to control WhatsApp"}
@@ -503,7 +503,7 @@ export function ChatbotOrb(props: {
                 className={`grid h-8 w-8 place-items-center rounded-lg transition ${
                   mode === "picker"
                     ? "bg-wa-green/20 text-wa-green hover:bg-wa-green/30"
-                    : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
+                    : "bg-fg/5 text-fg/60 hover:bg-fg/10 hover:text-fg/90"
                 }`}
                 title={mode === "picker" ? "Back to assistant" : "Open chats"}
                 aria-label={mode === "picker" ? "Back to assistant" : "Open chats"}
@@ -519,7 +519,7 @@ export function ChatbotOrb(props: {
                 className={`grid h-8 w-8 place-items-center rounded-lg transition ${
                   speakOn
                     ? "bg-wa-green/15 text-wa-green hover:bg-wa-green/25"
-                    : "bg-white/5 text-slate-400 hover:bg-white/10"
+                    : "bg-fg/5 text-fg/60 hover:bg-fg/10"
                 }`}
                 title={speakOn ? "Voice replies on — tap to mute" : "Voice replies muted — tap to unmute"}
                 aria-label={speakOn ? "Mute voice replies" : "Unmute voice replies"}
@@ -535,7 +535,7 @@ export function ChatbotOrb(props: {
               <button
                 type="button"
                 onClick={toggleOpen}
-                className="grid h-8 w-8 place-items-center rounded-lg bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-slate-200"
+                className="grid h-8 w-8 place-items-center rounded-lg bg-fg/5 text-fg/60 transition hover:bg-fg/10 hover:text-fg/90"
                 title="Close"
                 aria-label="Close assistant"
               >
@@ -566,8 +566,8 @@ export function ChatbotOrb(props: {
                     <div
                       className={`max-w-[82%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-sm leading-snug ${
                         m.role === "user"
-                          ? "rounded-br-sm bg-wa-green/20 text-wa-light"
-                          : "rounded-bl-sm bg-white/5 text-slate-200"
+                          ? "rounded-br-sm bg-wa-green/20 text-emerald-950 dark:text-wa-light"
+                          : "rounded-bl-sm bg-fg/5 text-fg/90"
                       }`}
                     >
                       {m.text}
@@ -583,7 +583,7 @@ export function ChatbotOrb(props: {
                         key={ex}
                         type="button"
                         onClick={() => submit(ex)}
-                        className="chip border border-white/10 bg-white/5 text-slate-300 transition hover:border-wa-green/40 hover:bg-wa-green/10 hover:text-wa-green"
+                        className="chip border border-fg/10 bg-fg/5 text-fg/75 transition hover:border-wa-green/40 hover:bg-wa-green/10 hover:text-wa-green"
                       >
                         {ex}
                       </button>
@@ -594,7 +594,7 @@ export function ChatbotOrb(props: {
                 {/* Thinking indicator */}
                 {thinking && (
                   <div className="flex justify-start">
-                    <div className="flex items-center gap-1 rounded-2xl rounded-bl-sm bg-white/5 px-3 py-2.5">
+                    <div className="flex items-center gap-1 rounded-2xl rounded-bl-sm bg-fg/5 px-3 py-2.5">
                       <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
                       <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
                       <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
@@ -604,9 +604,9 @@ export function ChatbotOrb(props: {
               </div>
 
               {/* Footer / composer */}
-              <div className="border-t border-white/5 bg-ink-900/40 p-2.5">
+              <div className="border-t border-fg/5 bg-surface-2/40 p-2.5">
                 {activeChatName && (
-                  <div className="mb-2 flex items-center gap-1.5 px-1 text-[11px] text-slate-400">
+                  <div className="mb-2 flex items-center gap-1.5 px-1 text-[11px] text-fg/60">
                     <span className="inline-flex items-center gap-1 rounded-full border border-wa-green/30 bg-wa-green/10 px-2 py-0.5 font-medium text-wa-green">
                       <span className="h-1.5 w-1.5 rounded-full bg-wa-green" />
                       Context: {activeChatName}
@@ -641,7 +641,7 @@ export function ChatbotOrb(props: {
                       className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl transition ${
                         listening
                           ? "bg-red-500/20 text-red-300 ring-2 ring-red-400/40"
-                          : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-wa-green"
+                          : "bg-fg/5 text-fg/75 hover:bg-fg/10 hover:text-wa-green"
                       }`}
                       title={listening ? "Stop listening" : "Speak a command"}
                       aria-label={listening ? "Stop listening" : "Speak a command"}
@@ -651,7 +651,7 @@ export function ChatbotOrb(props: {
                     </button>
                   ) : (
                     <div
-                      className="grid h-9 w-9 shrink-0 cursor-not-allowed place-items-center rounded-xl bg-white/5 text-slate-600"
+                      className="grid h-9 w-9 shrink-0 cursor-not-allowed place-items-center rounded-xl bg-fg/5 text-fg/40"
                       title="Voice input not supported in this browser"
                       aria-label="Voice input not supported in this browser"
                     >
@@ -681,14 +681,14 @@ export function ChatbotOrb(props: {
           {mode === "picker" && (
             <>
               {/* Search */}
-              <div className="border-b border-white/5 bg-ink-900/40 p-2.5">
-                <div className="flex items-center gap-2 rounded-xl bg-white/5 px-2.5">
+              <div className="border-b border-fg/5 bg-surface-2/40 p-2.5">
+                <div className="flex items-center gap-2 rounded-xl bg-fg/5 px-2.5">
                   <Icons.Search width={15} height={15} />
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search chats…"
-                    className="w-full bg-transparent py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none"
+                    className="w-full bg-transparent py-2 text-sm text-fg/90 placeholder:text-fg/45 focus:outline-none"
                     aria-label="Search chats"
                   />
                 </div>
@@ -697,11 +697,11 @@ export function ChatbotOrb(props: {
               {/* Chat list */}
               <div className="flex-1 overflow-y-auto px-1.5 py-1.5">
                 {!connected ? (
-                  <div className="px-3 py-8 text-center text-[13px] text-slate-500">
+                  <div className="px-3 py-8 text-center text-[13px] text-fg/45">
                     WhatsApp not connected yet — chats will appear here once linked.
                   </div>
                 ) : filteredChats.length === 0 ? (
-                  <div className="px-3 py-8 text-center text-[13px] text-slate-500">
+                  <div className="px-3 py-8 text-center text-[13px] text-fg/45">
                     {search.trim() ? "No chats match your search." : "No chats yet."}
                   </div>
                 ) : (
@@ -710,18 +710,18 @@ export function ChatbotOrb(props: {
                       key={c.id}
                       type="button"
                       onClick={() => enterChat(c.id)}
-                      className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition hover:bg-white/5"
+                      className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition hover:bg-fg/5"
                     >
                       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-wa-teal/60 to-wa-green/50 text-[13px] font-bold text-ink-950">
                         {initials(c.name || c.number)}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="truncate text-sm font-medium text-slate-100">
+                          <span className="truncate text-sm font-medium text-fg">
                             {c.name || c.number}
                           </span>
                         </div>
-                        <div className="truncate text-[12px] text-slate-400">
+                        <div className="truncate text-[12px] text-fg/60">
                           {c.lastText || (c.number ? `+${c.number}` : "")}
                         </div>
                       </div>
@@ -745,7 +745,7 @@ export function ChatbotOrb(props: {
               {/* Bubbles */}
               <div ref={chatListRef} className="flex-1 space-y-2 overflow-y-auto px-3 py-3">
                 {activeMessages.length === 0 ? (
-                  <div className="px-3 py-8 text-center text-[13px] text-slate-500">
+                  <div className="px-3 py-8 text-center text-[13px] text-fg/45">
                     No messages loaded yet…
                   </div>
                 ) : (
@@ -767,8 +767,8 @@ export function ChatbotOrb(props: {
                           <div
                             className={`max-w-[82%] whitespace-pre-wrap break-words rounded-2xl border border-dashed px-3 py-2 text-sm leading-snug ${
                               m.fromMe
-                                ? "rounded-br-sm border-amber-400/50 bg-amber-400/10 text-amber-100"
-                                : "rounded-bl-sm border-violet-400/50 bg-violet-400/10 text-violet-100"
+                                ? "rounded-br-sm border-amber-400/50 bg-amber-400/10 text-amber-800 dark:text-amber-100"
+                                : "rounded-bl-sm border-violet-400/50 bg-violet-400/10 text-violet-800 dark:text-violet-100"
                             }`}
                           >
                             <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-wide opacity-80">
@@ -793,8 +793,8 @@ export function ChatbotOrb(props: {
                         <div
                           className={`max-w-[82%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-sm leading-snug ${
                             m.fromMe
-                              ? "rounded-br-sm bg-wa-green/20 text-wa-light"
-                              : "rounded-bl-sm bg-white/5 text-slate-200"
+                              ? "rounded-br-sm bg-wa-green/20 text-emerald-950 dark:text-wa-light"
+                              : "rounded-bl-sm bg-fg/5 text-fg/90"
                           }`}
                         >
                           {(icon || m.text) && (
@@ -823,7 +823,7 @@ export function ChatbotOrb(props: {
               )}
 
               {/* Composer */}
-              <div className="border-t border-white/5 bg-ink-900/40 p-2.5">
+              <div className="border-t border-fg/5 bg-surface-2/40 p-2.5">
                 <div className="flex items-end gap-2">
                   <input
                     ref={chatInputRef}

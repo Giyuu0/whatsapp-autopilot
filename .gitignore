@@ -15,3 +15,5 @@ data/db.json
 
 # Local Claude Code / preview config — not needed in the repo
 .claude/
+.preview-wwebjs/
+.preview-data/

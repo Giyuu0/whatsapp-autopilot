@@ -19,14 +19,14 @@ function initials(name: string) {
 }
 
 const AVATAR_COLORS = [
-  "bg-rose-500/25 text-rose-100",
-  "bg-sky-500/25 text-sky-100",
-  "bg-emerald-500/25 text-emerald-100",
-  "bg-amber-500/25 text-amber-100",
-  "bg-violet-500/25 text-violet-100",
-  "bg-cyan-500/25 text-cyan-100",
-  "bg-fuchsia-500/25 text-fuchsia-100",
-  "bg-teal-500/25 text-teal-100",
+  "bg-rose-500/25 text-rose-700 dark:text-rose-100",
+  "bg-sky-500/25 text-sky-700 dark:text-sky-100",
+  "bg-emerald-500/25 text-emerald-700 dark:text-emerald-100",
+  "bg-amber-500/25 text-amber-700 dark:text-amber-100",
+  "bg-violet-500/25 text-violet-700 dark:text-violet-100",
+  "bg-cyan-500/25 text-cyan-700 dark:text-cyan-100",
+  "bg-fuchsia-500/25 text-fuchsia-700 dark:text-fuchsia-100",
+  "bg-teal-500/25 text-teal-700 dark:text-teal-100",
 ];
 function avatarColor(id: string) {
   let h = 0;
@@ -92,7 +92,7 @@ function Ticks({ ack }: { ack?: number }) {
 function DateDivider({ ts }: { ts: number }) {
   return (
     <div className="flex justify-center py-1">
-      <span className="rounded-full bg-black/30 px-3 py-1 text-[11px] font-medium text-white/60 shadow-sm backdrop-blur">
+      <span className="rounded-full bg-fg/10 px-3 py-1 text-[11px] font-medium text-fg/70 shadow-sm backdrop-blur">
         {dayLabel(ts)}
       </span>
     </div>
@@ -179,25 +179,25 @@ function ChatRow({
         }
       }}
       className={`group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
-        active ? "bg-white/10 ring-1 ring-wa-green/40" : "hover:bg-white/5"
+        active ? "bg-fg/10 ring-1 ring-wa-green/40" : "hover:bg-fg/5"
       }`}
     >
       <div className="relative">
         <Avatar id={chat.id} name={chat.name} />
         {chat.enabled && (
-          <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-ink-900 bg-wa-green" />
+          <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-fg/10 bg-wa-green" />
         )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1.5">
-            {chat.isGroup && <Icon.Users className="h-3.5 w-3.5 shrink-0 text-white/40" />}
-            <span className="truncate font-semibold text-white/90">{chat.name}</span>
+            {chat.isGroup && <Icon.Users className="h-3.5 w-3.5 shrink-0 text-fg/40" />}
+            <span className="truncate font-semibold text-fg/90">{chat.name}</span>
           </div>
-          <span className="shrink-0 text-[11px] text-white/40">{fmtTime(chat.lastTs)}</span>
+          <span className="shrink-0 text-[11px] text-fg/40">{fmtTime(chat.lastTs)}</span>
         </div>
         <div className="mt-0.5 flex items-center justify-between gap-2">
-          <span className="truncate text-xs text-white/50">{chat.lastText || "No messages yet"}</span>
+          <span className="truncate text-xs text-fg/50">{chat.lastText || "No messages yet"}</span>
           <div className="ml-1 flex shrink-0 items-center gap-1.5">
             {chat.unread > 0 && (
               <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-wa-green px-1.5 text-[11px] font-bold text-ink-950">
@@ -216,7 +216,7 @@ function ChatRow({
               className={`text-base leading-none transition ${
                 chat.favorite
                   ? "text-amber-400"
-                  : "text-white/30 opacity-0 hover:text-amber-300 group-hover:opacity-100"
+                  : "text-fg/30 opacity-0 hover:text-amber-300 group-hover:opacity-100"
               }`}
             >
               {chat.favorite ? "★" : "☆"}
@@ -239,8 +239,8 @@ function StickerLoader({ onLoad }: { onLoad: () => Promise<any> }) {
     onLoad().catch(() => {});
   }, [onLoad]);
   return (
-    <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-black/10">
-      <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-wa-green" />
+    <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-fg/10">
+      <span className="h-5 w-5 animate-spin rounded-full border-2 border-fg/20 border-t-wa-green" />
     </div>
   );
 }
@@ -276,8 +276,8 @@ function MessageBubble({
         <div
           className={`max-w-[80%] rounded-2xl border border-dashed px-3 py-2 ${
             mine
-              ? "rounded-br-md border-amber-400/40 bg-amber-400/10 text-amber-100"
-              : "rounded-bl-md border-violet-400/40 bg-violet-400/10 text-violet-100"
+              ? "rounded-br-md border-amber-400/40 bg-amber-400/10 text-amber-800 dark:text-amber-100"
+              : "rounded-bl-md border-violet-400/40 bg-violet-400/10 text-violet-800 dark:text-violet-100"
           }`}
         >
           <div className="mb-0.5 flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wide opacity-70">
@@ -298,15 +298,15 @@ function MessageBubble({
           className={`relative max-w-[75%] rounded-2xl px-3 py-1.5 shadow-md ring-1 ring-inset ${
             mine
               ? "rounded-br-sm bg-gradient-to-br from-wa-green/15 to-wa-teal/10 ring-wa-green/10"
-              : "rounded-bl-sm bg-ink-700/40 ring-white/5"
+              : "rounded-bl-sm bg-surface-3/40 ring-fg/5"
           }`}
         >
-          <div className="whitespace-pre-wrap break-words pr-1 text-sm italic leading-relaxed text-white/40">
+          <div className="whitespace-pre-wrap break-words pr-1 text-sm italic leading-relaxed text-fg/40">
             🚫 You deleted this message
           </div>
           <div
             className={`mt-0.5 flex items-center gap-1.5 text-[10px] ${
-              mine ? "justify-end text-wa-light/40" : "text-white/30"
+              mine ? "justify-end text-emerald-900/50 dark:text-wa-light/40" : "text-fg/30"
             }`}
           >
             <span>{fmtTime(msg.ts)}</span>
@@ -321,8 +321,8 @@ function MessageBubble({
       <div
         className={`relative max-w-[75%] animate-bubble-in rounded-2xl px-3 py-1.5 shadow-bubble ring-1 ring-inset backdrop-blur-sm ${
           mine
-            ? "rounded-br-sm bg-gradient-to-br from-wa-green/35 via-wa-green/25 to-wa-teal/20 text-wa-light ring-wa-green/20"
-            : "rounded-bl-sm bg-ink-700/70 text-white/90 ring-white/10"
+            ? "rounded-br-sm bg-gradient-to-br from-wa-green/35 via-wa-green/25 to-wa-teal/20 text-emerald-950 dark:text-wa-light ring-wa-green/20"
+            : "rounded-bl-sm bg-surface-3/70 text-fg/90 ring-fg/10"
         }`}
       >
         {/* hover actions — edit / delete your own messages */}
@@ -330,7 +330,7 @@ function MessageBubble({
           <div
             className={`absolute -top-2 ${
               mine ? "right-2" : "left-2"
-            } flex items-center gap-1 rounded-full bg-ink-900/90 px-1 py-0.5 opacity-0 shadow ring-1 ring-white/10 transition group-hover:opacity-100`}
+            } flex items-center gap-1 rounded-full bg-surface-2/90 px-1 py-0.5 opacity-0 shadow ring-1 ring-fg/10 transition group-hover:opacity-100`}
           >
             <button
               type="button"
@@ -338,7 +338,7 @@ function MessageBubble({
                 setEditDraft(msg.text || "");
                 setEditing(true);
               }}
-              className="rounded-full p-1 text-white/60 transition hover:bg-white/10 hover:text-white"
+              className="rounded-full p-1 text-fg/60 transition hover:bg-fg/10 hover:text-fg"
               aria-label="Edit message"
               title="Edit"
             >
@@ -352,7 +352,7 @@ function MessageBubble({
               onClick={() => {
                 if (window.confirm("Delete this message for everyone?")) onDelete(msg.id);
               }}
-              className="rounded-full p-1 text-white/60 transition hover:bg-rose-500/20 hover:text-rose-300"
+              className="rounded-full p-1 text-fg/60 transition hover:bg-rose-500/20 hover:text-rose-300"
               aria-label="Delete message"
               title="Delete"
             >
@@ -429,10 +429,10 @@ function MessageBubble({
                   }
                 }}
                 disabled={loadingImg}
-                className="flex h-32 w-full min-w-[180px] flex-col items-center justify-center gap-1 rounded-xl bg-black/25 text-xs text-white/70 transition hover:bg-black/35"
+                className="flex h-32 w-full min-w-[180px] flex-col items-center justify-center gap-1 rounded-xl bg-fg/10 text-xs text-fg/70 transition hover:bg-fg/20"
               >
                 {loadingImg ? (
-                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-wa-green" />
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-fg/20 border-t-wa-green" />
                 ) : (
                   <>
                     <span className="text-2xl">📷</span>
@@ -469,10 +469,10 @@ function MessageBubble({
                   }
                 }}
                 disabled={loadingMedia}
-                className="mt-1 flex items-center gap-2 rounded-full bg-black/25 px-3 py-1.5 text-xs text-white/70 transition hover:bg-black/35"
+                className="mt-1 flex items-center gap-2 rounded-full bg-fg/10 px-3 py-1.5 text-xs text-fg/70 transition hover:bg-fg/20"
               >
                 {loadingMedia ? (
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-wa-green" />
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-fg/20 border-t-wa-green" />
                 ) : (
                   <>
                     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
@@ -491,11 +491,11 @@ function MessageBubble({
         )}
         <div
           className={`mt-0.5 flex items-center gap-1.5 text-[10px] ${
-            mine ? "justify-end text-wa-light/55" : "text-white/40"
+            mine ? "justify-end text-emerald-900/60 dark:text-wa-light/55" : "text-fg/40"
           }`}
         >
           {showModel && (
-            <span className="rounded-full bg-black/25 px-1.5 py-0.5 text-[9px] font-medium text-white/60">
+            <span className="rounded-full bg-fg/10 px-1.5 py-0.5 text-[9px] font-medium text-fg/60">
               {prettyModel(msg.model)}
             </span>
           )}
@@ -707,28 +707,18 @@ export function ChatView(props: {
     }
   }
 
-  const wallpaper: React.CSSProperties = {
-    backgroundColor: "#0b1014",
-    backgroundImage: [
-      "radial-gradient(55rem 55rem at 100% 0%, rgba(37,211,102,0.06), transparent 60%)",
-      "radial-gradient(45rem 45rem at 0% 100%, rgba(18,140,126,0.06), transparent 55%)",
-      "radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)",
-    ].join(", "),
-    backgroundSize: "auto, auto, 24px 24px",
-  };
-
   return (
     <div className="card overflow-hidden p-0">
       <div className="grid h-[calc(100dvh-13rem)] min-h-[440px] grid-cols-1 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
         {/* ------------------------------ LEFT: list ------------------------------ */}
         <aside
-          className={`flex min-h-0 flex-col border-white/10 md:border-r ${
+          className={`flex min-h-0 flex-col border-fg/10 md:border-r ${
             activeChatId ? "hidden md:flex" : "flex"
           }`}
         >
-          <div className="border-b border-white/10 p-3">
+          <div className="border-b border-fg/10 p-3">
             <div className="relative">
-              <Icon.Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+              <Icon.Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg/40" />
               <input
                 className="input pl-9"
                 placeholder="Search chats"
@@ -750,14 +740,14 @@ export function ChatView(props: {
                   className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition ${
                     filter === t.key
                       ? "bg-wa-green text-ink-950"
-                      : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80"
+                      : "bg-fg/5 text-fg/60 hover:bg-fg/10 hover:text-fg/80"
                   }`}
                 >
                   <span>{t.label}</span>
                   {t.count > 0 && (
                     <span
                       className={`rounded-full px-1.5 text-[10px] font-bold ${
-                        filter === t.key ? "bg-ink-950/20 text-ink-950" : "bg-white/10 text-white/70"
+                        filter === t.key ? "bg-surface/20 text-ink-950" : "bg-fg/10 text-fg/70"
                       }`}
                     >
                       {t.count}
@@ -769,7 +759,7 @@ export function ChatView(props: {
           </div>
           <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
             {sortedChats.length === 0 ? (
-              <div className="px-3 py-10 text-center text-sm text-white/40">
+              <div className="px-3 py-10 text-center text-sm text-fg/40">
                 {chats.length === 0
                   ? "No chats yet"
                   : filter === "unread"
@@ -799,17 +789,17 @@ export function ChatView(props: {
           }`}
         >
           {!activeChat ? (
-            <div className="relative flex flex-1 flex-col items-center justify-center gap-4 p-10 text-center" style={wallpaper}>
+            <div className="chat-wallpaper relative flex flex-1 flex-col items-center justify-center gap-4 p-10 text-center">
               <div className="relative animate-float">
                 <span className="absolute inset-0 -z-10 rounded-full bg-wa-green/25 blur-2xl" />
                 <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-wa-green/30 to-wa-teal/15 ring-1 ring-inset ring-wa-green/25 shadow-glow">
                   <Icon.Send className="h-8 w-8 text-wa-green" />
                 </div>
               </div>
-              <div className="text-base font-semibold text-white/85">
+              <div className="text-base font-semibold text-fg/85">
                 Select a chat to start
               </div>
-              <div className="max-w-xs text-xs leading-relaxed text-white/45">
+              <div className="max-w-xs text-xs leading-relaxed text-fg/45">
                 Pick a conversation from the list to read messages and manage its
                 auto-reply settings — language, tone, voice replies and more.
               </div>
@@ -817,7 +807,7 @@ export function ChatView(props: {
           ) : (
             <>
               {/* header */}
-              <div className="sticky top-0 z-10 border-b border-white/10 bg-gradient-to-b from-ink-850/80 to-ink-850/50 p-3 backdrop-blur-xl">
+              <div className="sticky top-0 z-10 border-b border-fg/10 bg-gradient-to-b from-surface-1/80 to-surface-1/50 p-3 backdrop-blur-xl">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                   {/* back button (mobile only) */}
                   <button
@@ -832,7 +822,7 @@ export function ChatView(props: {
                     <Avatar id={activeChat.id} name={activeChat.name} size="lg" />
                     {activeChat.enabled && (
                       <span
-                        className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-ink-850 bg-wa-green"
+                        className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-fg/10 bg-wa-green"
                         title="Auto-reply active"
                       />
                     )}
@@ -840,9 +830,9 @@ export function ChatView(props: {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       {activeChat.isGroup && (
-                        <Icon.Users className="h-3.5 w-3.5 shrink-0 text-white/40" />
+                        <Icon.Users className="h-3.5 w-3.5 shrink-0 text-fg/40" />
                       )}
-                      <span className="truncate font-semibold text-white/90">
+                      <span className="truncate font-semibold text-fg/90">
                         {activeChat.name}
                       </span>
                       <button
@@ -850,7 +840,7 @@ export function ChatView(props: {
                         title={activeChat.favorite ? "Remove from favorites" : "Add to favorites"}
                         onClick={() => onToggleFavorite(activeChat.id, !activeChat.favorite)}
                         className={`shrink-0 text-sm leading-none transition ${
-                          activeChat.favorite ? "text-amber-400" : "text-white/25 hover:text-amber-300"
+                          activeChat.favorite ? "text-amber-400" : "text-fg/25 hover:text-amber-300"
                         }`}
                       >
                         {activeChat.favorite ? "★" : "☆"}
@@ -867,7 +857,7 @@ export function ChatView(props: {
                           </span>
                         </span>
                       ) : (
-                        <span className="truncate text-white/45">+{activeChat.number}</span>
+                        <span className="truncate text-fg/45">+{activeChat.number}</span>
                       )}
                     </div>
                   </div>
@@ -875,7 +865,7 @@ export function ChatView(props: {
                   {/* controls */}
                   <div className="flex w-full flex-wrap items-center justify-start gap-2 md:w-auto md:justify-end">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] text-white/50">Auto-reply</span>
+                      <span className="text-[11px] text-fg/50">Auto-reply</span>
                       <Toggle
                         checked={activeChat.enabled}
                         onChange={(v) => onToggleEnabled(activeChat.id, v)}
@@ -884,7 +874,7 @@ export function ChatView(props: {
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <span className="hidden text-[11px] text-white/50 lg:inline">Lang</span>
+                      <span className="hidden text-[11px] text-fg/50 lg:inline">Lang</span>
                       <Select
                         value={activeChat.language}
                         onChange={(v) => onSetLanguage(activeChat.id, v as Language)}
@@ -894,7 +884,7 @@ export function ChatView(props: {
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <span className="hidden text-[11px] text-white/50 lg:inline">Tone</span>
+                      <span className="hidden text-[11px] text-fg/50 lg:inline">Tone</span>
                       <Select
                         value={activeChat.tone}
                         onChange={(v) => onSetTone(activeChat.id, v as Tone)}
@@ -904,7 +894,7 @@ export function ChatView(props: {
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <span className="hidden text-[11px] text-white/50 lg:inline">Voice</span>
+                      <span className="hidden text-[11px] text-fg/50 lg:inline">Voice</span>
                       <Select
                         value={activeChat.voiceReply}
                         onChange={(v) => onSetVoiceReply(activeChat.id, v as VoiceReply)}
@@ -914,7 +904,7 @@ export function ChatView(props: {
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <span className="hidden text-[11px] text-white/50 lg:inline">Mode</span>
+                      <span className="hidden text-[11px] text-fg/50 lg:inline">Mode</span>
                       <Select
                         value={activeChat.manualReply}
                         onChange={(v) => onSetManual(activeChat.id, v as ManualReply)}
@@ -930,7 +920,7 @@ export function ChatView(props: {
                         setShowPrompt((s) => !s);
                       }}
                       className={`btn-ghost h-8 shrink-0 px-2 ${
-                        showPrompt ? "bg-white/10 text-white" : ""
+                        showPrompt ? "bg-fg/10 text-fg" : ""
                       }`}
                       aria-label="Edit persona"
                       title="Per-chat persona"
@@ -942,7 +932,7 @@ export function ChatView(props: {
 
                 {/* inline persona editor */}
                 {showPrompt && (
-                  <div className="animate-fade-up mt-3 rounded-xl border border-white/10 bg-black/20 p-3">
+                  <div className="animate-fade-up mt-3 rounded-xl border border-fg/10 bg-fg/5 p-3">
                     <label className="label">Custom persona for this chat</label>
                     <textarea
                       className="input mt-1 min-h-[80px] resize-y text-sm"
@@ -971,7 +961,7 @@ export function ChatView(props: {
                     </div>
 
                     {/* contact memory editor */}
-                    <div className="mt-4 border-t border-white/10 pt-3">
+                    <div className="mt-4 border-t border-fg/10 pt-3">
                       <label className="label">Memory (what the bot knows about this person)</label>
                       <textarea
                         className="input mt-1 min-h-[80px] resize-y text-sm"
@@ -979,7 +969,7 @@ export function ChatView(props: {
                         value={memoryDraft}
                         onChange={(e) => setMemoryDraft(e.target.value)}
                       />
-                      <p className="mt-1 text-[11px] text-white/40">
+                      <p className="mt-1 text-[11px] text-fg/40">
                         The bot updates this automatically over time — you can edit or clear it.
                       </p>
                       <div className="mt-2 flex items-center justify-end">
@@ -1000,11 +990,10 @@ export function ChatView(props: {
               <div
                 ref={listRef}
                 onScroll={onListScroll}
-                className="min-h-0 flex-1 space-y-2 overflow-y-auto p-4"
-                style={wallpaper}
+                className="chat-wallpaper min-h-0 flex-1 space-y-2 overflow-y-auto p-4"
               >
                 {messages.length === 0 ? (
-                  <div className="flex h-full items-center justify-center text-center text-sm text-white/40">
+                  <div className="flex h-full items-center justify-center text-center text-sm text-fg/40">
                     No messages in this conversation yet
                   </div>
                 ) : (
@@ -1026,11 +1015,11 @@ export function ChatView(props: {
                 )}
                 {typing && (
                   <div className="animate-fade-up flex justify-start">
-                    <div className="flex items-center gap-1 rounded-2xl rounded-bl-sm bg-ink-700/60 px-3 py-2.5 shadow-md ring-1 ring-inset ring-white/5">
+                    <div className="flex items-center gap-1 rounded-2xl rounded-bl-sm bg-surface-3/60 px-3 py-2.5 shadow-md ring-1 ring-inset ring-fg/5">
                       <span className="sr-only">typing…</span>
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/50 [animation-delay:-0.3s]" />
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/50 [animation-delay:-0.15s]" />
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/50" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-fg/50 [animation-delay:-0.3s]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-fg/50 [animation-delay:-0.15s]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-fg/50" />
                     </div>
                   </div>
                 )}
@@ -1045,13 +1034,13 @@ export function ChatView(props: {
                     </span>
                     <button
                       type="button"
-                      className="text-white/40 hover:text-white/70"
+                      className="text-fg/40 hover:text-fg/70"
                       onClick={() => onClearSuggestion(activeChat.id)}
                     >
                       ✕
                     </button>
                   </div>
-                  <p className="mb-2 whitespace-pre-wrap break-words text-sm text-slate-100">{suggestion.text}</p>
+                  <p className="mb-2 whitespace-pre-wrap break-words text-sm text-fg">{suggestion.text}</p>
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
@@ -1083,7 +1072,7 @@ export function ChatView(props: {
               )}
 
               {/* composer */}
-              <div className="border-t border-white/10 bg-black/20 p-3">
+              <div className="border-t border-fg/10 bg-fg/5 p-3">
                 <div className="flex items-center gap-2">
                   <input
                     ref={fileRef}
@@ -1101,7 +1090,7 @@ export function ChatView(props: {
                     title="Attach image, PDF or audio"
                   >
                     {sendingMedia ? (
-                      <span className="mx-auto h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-wa-green" />
+                      <span className="mx-auto h-4 w-4 animate-spin rounded-full border-2 border-fg/20 border-t-wa-green" />
                     ) : (
                       <svg
                         viewBox="0 0 24 24"
@@ -1118,7 +1107,7 @@ export function ChatView(props: {
                     )}
                   </button>
                   <input
-                    className={`input flex-1 !rounded-full !bg-ink-800/80 px-4 ${
+                    className={`input flex-1 !rounded-full !bg-surface-2/80 px-4 ${
                       /^@bot\b/i.test(draft) ? "ring-2 ring-amber-400/50" : ""
                     }`}
                     placeholder={connected ? "Type a message — or “@bot …” to ask privately" : "Disconnected…"}

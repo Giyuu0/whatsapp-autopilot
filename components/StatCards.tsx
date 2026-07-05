@@ -58,15 +58,15 @@ function Stat({
         className={`stat-glow bg-gradient-to-r ${glow} transition-opacity duration-300 group-hover:opacity-80`}
       />
       <div
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-inner ring-1 ring-inset ring-white/10 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${accent}`}
+        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-inner ring-1 ring-inset ring-fg/10 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${accent}`}
       >
         {icon}
       </div>
       <div className="min-w-0 animate-fade-up">
-        <div className="text-2xl font-bold leading-none tracking-tight text-slate-50 tabular-nums sm:text-[1.75rem]">
+        <div className="text-2xl font-bold leading-none tracking-tight text-fg tabular-nums sm:text-[1.75rem]">
           <CountUp value={value} />
         </div>
-        <div className="mt-1.5 truncate text-xs text-slate-400">{label}</div>
+        <div className="mt-1.5 truncate text-xs text-fg/60">{label}</div>
       </div>
     </div>
   );
