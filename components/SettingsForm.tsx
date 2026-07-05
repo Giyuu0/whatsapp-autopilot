@@ -176,6 +176,7 @@ export function SettingsForm({
   const [systemPrompt, setSystemPrompt] = useState(settings.systemPrompt);
   const [replyDelayMs, setReplyDelayMs] = useState(settings.replyDelayMs);
   const [replyToGroups, setReplyToGroups] = useState(settings.replyToGroups);
+  const [manualReply, setManualReply] = useState(settings.manualReply);
   const [voiceReplies, setVoiceReplies] = useState(settings.voiceReplies);
   const [whisperModel, setWhisperModel] = useState(settings.whisperModel);
   const [ttsModel, setTtsModel] = useState(settings.ttsModel);
@@ -220,6 +221,7 @@ export function SettingsForm({
     setSystemPrompt(settings.systemPrompt);
     setReplyDelayMs(settings.replyDelayMs);
     setReplyToGroups(settings.replyToGroups);
+    setManualReply(settings.manualReply);
     setVoiceReplies(settings.voiceReplies);
     setWhisperModel(settings.whisperModel);
     setTtsModel(settings.ttsModel);
@@ -272,6 +274,7 @@ export function SettingsForm({
       systemPrompt,
       replyDelayMs,
       replyToGroups,
+      manualReply,
       voiceReplies,
       whisperModel,
       ttsModel,
@@ -480,6 +483,13 @@ export function SettingsForm({
             <Toggle checked={replyToGroups} onChange={setReplyToGroups} />
             Also reply in groups
           </label>
+        </div>
+        <div className="mt-4 flex items-center gap-3">
+          <Toggle checked={manualReply} onChange={setManualReply} />
+          <div>
+            <span className="text-sm text-slate-200">Manual mode (draft, don&apos;t auto-send)</span>
+            <p className="text-xs text-slate-500">The AI writes a suggested reply for you to review and send yourself. Override per chat from the conversation header.</p>
+          </div>
         </div>
       </section>
 

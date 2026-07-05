@@ -6,6 +6,8 @@ import { io, Socket } from "socket.io-client";
 export type Language = "default" | "auto" | "english" | "hindi" | "hinglish" | "english-slang";
 export type VoiceReply = "default" | "voice" | "text";
 export type Tone = "default" | "professional" | "friendly" | "flirty";
+export type ManualReply = "default" | "on" | "off";
+export type Suggestion = { text: string; model: string | null; ts: number };
 
 export type Contact = {
   id: string;
@@ -16,6 +18,7 @@ export type Contact = {
   language?: Language;
   tone?: Tone;
   voiceReply?: VoiceReply;
+  manualReply?: ManualReply;
 };
 
 export type Chat = {
@@ -30,6 +33,7 @@ export type Chat = {
   language: Language;
   tone: Tone;
   voiceReply: VoiceReply;
+  manualReply: ManualReply;
   customPrompt?: string;
 };
 
@@ -66,6 +70,7 @@ export type Settings = {
   autoReplyEnabled: boolean;
   replyDelayMs: number;
   replyToGroups: boolean;
+  manualReply: boolean;
   language: Exclude<Language, "default">; // "auto" | "english" | "hindi" | "hinglish" | "english-slang"
   tone: Exclude<Tone, "default">; // "professional" | "friendly" | "flirty"
   ownerProfile: string;
@@ -118,6 +123,7 @@ export type Snapshot = {
   logs: LogEntry[];
   stats: Stats;
   sync: SyncState;
+  suggestions: Record<string, Suggestion>;
 };
 
 const KEY_STORAGE = "wa_access_key";
@@ -181,6 +187,15 @@ export function useWaSocket() {
     socket.on("sync", (sync: SyncState) =>
       setSnap((prev) => (prev ? { ...prev, sync } : prev))
     );
+    socket.on("suggestion", ({ chatId, suggestion }: { chatId: string; suggestion: Suggestion | null }) =>
+      setSnap((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev.suggestions };
+        if (suggestion) next[chatId] = suggestion;
+        else delete next[chatId];
+        return { ...prev, suggestions: next };
+      })
+    );
     socket.on("log", (entry: LogEntry) =>
       setSnap((prev) => (prev ? { ...prev, logs: [...prev.logs, entry].slice(-250) } : prev))
     );
@@ -241,6 +256,11 @@ export function useWaSocket() {
     [emit]
   );
 
+  const clearSuggestion = useCallback(
+    async (chatId: string) => emit("suggestion:clear", { chatId }),
+    [emit]
+  );
+
   const loadMedia = useCallback(
     async (chatId: string, messageId: string) => {
       const res = await emit("message:media", { messageId });
@@ -292,6 +312,7 @@ export function useWaSocket() {
     sendMessage,
     assistantCommand,
     chatAssistant,
+    clearSuggestion,
     loadMedia,
     fetchModels,
     previewVoice,

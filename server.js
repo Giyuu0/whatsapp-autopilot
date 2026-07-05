@@ -66,6 +66,12 @@ app.prepare().then(() => {
       }
     });
 
+    // Dismiss a manual-mode draft suggestion.
+    socket.on("suggestion:clear", ({ chatId }, ack) => {
+      wa.setSuggestion(chatId, null);
+      ack && ack({ ok: true });
+    });
+
     // Load an image's preview on demand (for history photos).
     socket.on("message:media", async ({ messageId }, ack) => {
       try {

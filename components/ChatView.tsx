@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Icon, Toggle, Select } from "./ui";
-import type { Chat, Message, Language, Tone, VoiceReply } from "./useWaSocket";
+import type { Chat, Message, Language, Tone, VoiceReply, ManualReply, Suggestion } from "./useWaSocket";
 
 /* ---------------------------------- utils --------------------------------- */
 
@@ -110,6 +110,12 @@ const TONE_OPTIONS: { value: Tone; label: string }[] = [
   { value: "professional", label: "Professional" },
   { value: "friendly", label: "Friendly" },
   { value: "flirty", label: "Flirty" },
+];
+
+const MANUAL_OPTIONS: { value: ManualReply; label: string }[] = [
+  { value: "default", label: "Default (global)" },
+  { value: "off", label: "Auto-send" },
+  { value: "on", label: "Manual (draft only)" },
 ];
 
 const VOICE_OPTIONS: { value: VoiceReply; label: string }[] = [
@@ -303,9 +309,12 @@ export function ChatView(props: {
   onSetLanguage: (chatId: string, language: Language) => void;
   onSetTone: (chatId: string, tone: Tone) => void;
   onSetVoiceReply: (chatId: string, pref: VoiceReply) => void;
+  onSetManual: (chatId: string, mode: ManualReply) => void;
   onSetCustomPrompt: (chatId: string, prompt: string) => void;
   onChatAssistant: (chatId: string, command: string) => Promise<any>;
   onLoadMedia: (chatId: string, messageId: string) => Promise<any>;
+  suggestion: Suggestion | null;
+  onClearSuggestion: (chatId: string) => void;
   connected: boolean;
 }) {
   const {
@@ -318,9 +327,12 @@ export function ChatView(props: {
     onSetLanguage,
     onSetTone,
     onSetVoiceReply,
+    onSetManual,
     onSetCustomPrompt,
     onChatAssistant,
     onLoadMedia,
+    suggestion,
+    onClearSuggestion,
     connected,
   } = props;
 
@@ -537,6 +549,16 @@ export function ChatView(props: {
                       />
                     </div>
 
+                    <div className="flex items-center gap-1">
+                      <span className="hidden text-[11px] text-white/50 lg:inline">Mode</span>
+                      <Select
+                        value={activeChat.manualReply}
+                        onChange={(v) => onSetManual(activeChat.id, v as ManualReply)}
+                        options={MANUAL_OPTIONS}
+                        align="right"
+                      />
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -611,6 +633,52 @@ export function ChatView(props: {
                   })
                 )}
               </div>
+
+              {/* manual-mode suggested reply (drafted, not sent) */}
+              {suggestion && (
+                <div className="animate-fade-up border-t border-amber-400/20 bg-amber-400/[0.06] px-3 py-2.5">
+                  <div className="mb-1 flex items-center justify-between text-[11px]">
+                    <span className="flex items-center gap-1.5 font-medium text-amber-300">
+                      🤖 Suggested reply {suggestion.model && <span className="text-amber-200/50">· {prettyModel(suggestion.model)}</span>}
+                    </span>
+                    <button
+                      type="button"
+                      className="text-white/40 hover:text-white/70"
+                      onClick={() => onClearSuggestion(activeChat.id)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <p className="mb-2 whitespace-pre-wrap break-words text-sm text-slate-100">{suggestion.text}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="btn-primary !py-1.5 text-xs"
+                      disabled={!connected || sending}
+                      onClick={async () => {
+                        setSending(true);
+                        try {
+                          await onSendMessage(activeChat.id, suggestion.text);
+                        } finally {
+                          setSending(false);
+                        }
+                      }}
+                    >
+                      Send as-is
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ghost !py-1.5 text-xs"
+                      onClick={() => {
+                        setDraft(suggestion.text);
+                        onClearSuggestion(activeChat.id);
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* composer */}
               <div className="border-t border-white/10 bg-black/20 p-3">
