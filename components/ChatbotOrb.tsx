@@ -190,6 +190,7 @@ export function ChatbotOrb(props: {
       setActiveChatId(chatId);
       setMode("chat");
       setChatInput("");
+      setRewrittenText(""); // translate "ready" state never carries across chats
     },
     [onOpenChat]
   );
@@ -409,6 +410,7 @@ export function ChatbotOrb(props: {
 
     setSending(true);
     setChatInput("");
+    setRewrittenText(""); // next identical draft must go through rewrite again
     try {
       if (botMatch) {
         const command = text.slice(botMatch[0].length).trim();

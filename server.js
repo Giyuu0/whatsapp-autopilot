@@ -19,6 +19,9 @@ function safeEqual(a, b) {
 
 const dev = process.env.NODE_ENV !== "production";
 const port = parseInt(process.env.PORT || "4499", 10);
+// Bind address. Default keeps LAN access (0.0.0.0); set HOST=127.0.0.1 in .env
+// to lock the dashboard to this machine only.
+const host = process.env.HOST || "0.0.0.0";
 
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -28,14 +31,34 @@ app.prepare().then(() => {
   const wa = require("./lib/wa/client");
 
   const server = createServer((req, res) => handle(req, res));
-  const io = new Server(server, { cors: { origin: "*" } });
+  // Same-origin only — the dashboard is served by this very server, so no
+  // cross-origin access is needed (removes the old wildcard CORS).
+  const io = new Server(server);
 
   wa.attachIo(io);
 
   // ---- Access gate: every socket must present the correct access key ----
+  // Brute-force protection: after MAX_FAILS bad keys from an IP, block that IP
+  // for BLOCK_MS. Successful auth clears the counter.
+  const authFails = new Map(); // ip -> { count, blockedUntil }
+  const MAX_FAILS = 10;
+  const BLOCK_MS = 15 * 60 * 1000;
   io.use((socket, next) => {
+    const ip = socket.handshake.address || "?";
+    const rec = authFails.get(ip);
+    if (rec && rec.blockedUntil > Date.now()) return next(new Error("unauthorized"));
     const provided = socket.handshake.auth && socket.handshake.auth.key;
-    if (provided && safeEqual(provided, store.accessKey())) return next();
+    if (provided && safeEqual(provided, store.accessKey())) {
+      authFails.delete(ip);
+      return next();
+    }
+    const r = rec && rec.blockedUntil <= Date.now() && rec.count >= MAX_FAILS ? { count: 0, blockedUntil: 0 } : rec || { count: 0, blockedUntil: 0 };
+    r.count++;
+    if (r.count >= MAX_FAILS) {
+      r.blockedUntil = Date.now() + BLOCK_MS;
+      console.warn(`[auth] blocked ${ip} for 15 min after ${r.count} failed key attempts`);
+    }
+    authFails.set(ip, r);
     next(new Error("unauthorized"));
   });
 
@@ -43,10 +66,10 @@ app.prepare().then(() => {
     // Send the full current state to the newcomer.
     socket.emit("state", wa.snapshot());
 
-    // When the dashboard tab closes, no chat is "on screen" anymore — clear it
-    // so incoming messages resume raising the unread badge.
+    // When this tab closes, forget which chat IT was viewing (per-socket, so
+    // other open tabs keep their own view state).
     socket.on("disconnect", () => {
-      wa.activeChatId = null;
+      wa.setViewer(socket.id, null);
     });
 
     socket.on("wa:restart", (ack) => {
@@ -74,6 +97,7 @@ app.prepare().then(() => {
     // Open a conversation → returns its messages (fetched from WhatsApp).
     socket.on("chat:open", async (chatId, ack) => {
       try {
+        wa.setViewer(socket.id, chatId || null);
         const messages = await wa.openChat(chatId);
         ack && ack({ ok: true, chatId, messages });
       } catch (e) {
@@ -214,7 +238,7 @@ app.prepare().then(() => {
     });
   });
 
-  server.listen(port, () => {
+  server.listen(port, host, () => {
     console.log(`\n  ▶ WhatsApp AutoPilot running:  http://localhost:${port}\n`);
     // Boot the WhatsApp client (async — QR will stream to the dashboard).
     wa.init().catch((e) => console.error("[server] wa init error:", e.message));
@@ -226,6 +250,9 @@ app.prepare().then(() => {
   const shutdown = async () => {
     if (shuttingDown) return;
     shuttingDown = true;
+    try {
+      store.flush(); // write any pending (debounced) db change before we die
+    } catch {}
     try {
       if (wa.client) await wa.client.destroy();
     } catch {}

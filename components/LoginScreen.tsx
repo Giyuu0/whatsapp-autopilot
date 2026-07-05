@@ -78,7 +78,7 @@ export function LoginScreen({
           </form>
 
           <p className="mt-4 text-center text-xs text-fg/40">
-            Default key is <code className="text-fg/60">wa-admin-2025</code> — change it in Settings or via <code className="text-fg/60">.env</code>.
+            The access key is set in <code className="text-fg/60">.env</code> (or in Settings).
           </p>
         </div>
       </div>

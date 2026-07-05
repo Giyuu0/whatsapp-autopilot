@@ -599,6 +599,10 @@ export function ChatView(props: {
   const draftStore = useRef<Record<string, string>>({});
   const draftRef = useRef("");
   const prevChatRef = useRef<string | null>(null);
+  // Which server draft (by timestamp) each chat's composer already picked up.
+  // We do NOT clear the server-side draft on pickup — it survives a page
+  // refresh; the server clears it itself when the message is actually sent.
+  const consumedDraftRef = useRef<Record<string, number>>({});
   useEffect(() => {
     draftRef.current = draft;
   }, [draft]);
@@ -663,10 +667,11 @@ export function ChatView(props: {
     const prev = prevChatRef.current;
     if (prev && prev !== activeChatId) draftStore.current[prev] = draftRef.current;
     prevChatRef.current = activeChatId;
+    setRewrittenText(""); // translate "ready" state never carries across chats
     let next = activeChatId ? draftStore.current[activeChatId] || "" : "";
-    if (!next && suggestion?.text && activeChatId) {
+    if (!next && suggestion?.text && activeChatId && consumedDraftRef.current[activeChatId] !== suggestion.ts) {
       next = suggestion.text; // pull in a pending manual-mode draft
-      onClearSuggestion(activeChatId);
+      consumedDraftRef.current[activeChatId] = suggestion.ts;
     }
     setDraft(next);
   }, [activeChatId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -675,9 +680,14 @@ export function ChatView(props: {
   // viewing, drop it straight into the composer — only if you haven't already
   // typed something yourself (never clobbers your own text).
   useEffect(() => {
-    if (suggestion?.text && !draftRef.current.trim() && activeChatId) {
+    if (
+      suggestion?.text &&
+      !draftRef.current.trim() &&
+      activeChatId &&
+      consumedDraftRef.current[activeChatId] !== suggestion.ts
+    ) {
       setDraft(suggestion.text);
-      onClearSuggestion(activeChatId);
+      consumedDraftRef.current[activeChatId] = suggestion.ts;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [suggestion]);
@@ -723,6 +733,7 @@ export function ChatView(props: {
       }
       if (activeChatId) delete draftStore.current[activeChatId];
       setDraft("");
+      setRewrittenText(""); // next identical draft must go through rewrite again
     } catch {
       /* keep draft on failure so the user can retry */
     } finally {
