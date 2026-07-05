@@ -43,6 +43,12 @@ app.prepare().then(() => {
     // Send the full current state to the newcomer.
     socket.emit("state", wa.snapshot());
 
+    // When the dashboard tab closes, no chat is "on screen" anymore — clear it
+    // so incoming messages resume raising the unread badge.
+    socket.on("disconnect", () => {
+      wa.activeChatId = null;
+    });
+
     socket.on("wa:restart", (ack) => {
       wa.restart();
       ack && ack({ ok: true });
