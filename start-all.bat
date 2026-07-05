@@ -43,6 +43,11 @@ for /f "tokens=5" %%p in ('netstat -ano ^| findstr :4499 ^| findstr LISTENING') 
   taskkill /F /PID %%p >nul 2>nul
 )
 
+REM --- 2c. Kill any ORPHANED headless Chromium from this app --------
+REM (only ones whose profile points at this app's .wwebjs_auth — never your
+REM  normal Chrome). This clears the leftover that locks the WhatsApp session.
+powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='chrome.exe' OR Name='chromium.exe'\" | Where-Object { $_.CommandLine -like '*wwebjs_auth*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }" >nul 2>nul
+
 REM --- 3. Open the browser once the server is ready ------------------
 echo.
 echo Starting server on http://localhost:4499

@@ -174,4 +174,18 @@ app.prepare().then(() => {
     // Boot the WhatsApp client (async — QR will stream to the dashboard).
     wa.init().catch((e) => console.error("[server] wa init error:", e.message));
   });
+
+  // Graceful shutdown → close the headless browser so it doesn't linger and
+  // lock the session for the next launch.
+  let shuttingDown = false;
+  const shutdown = async () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    try {
+      if (wa.client) await wa.client.destroy();
+    } catch {}
+    process.exit(0);
+  };
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 });
