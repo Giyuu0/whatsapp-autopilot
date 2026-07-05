@@ -7,6 +7,7 @@ import { ConnectionCard } from "@/components/ConnectionCard";
 import { ChatView } from "@/components/ChatView";
 import { ChatbotOrb } from "@/components/ChatbotOrb";
 import { StatCards } from "@/components/StatCards";
+import { ActivityLog } from "@/components/ActivityLog";
 import { LoginScreen } from "@/components/LoginScreen";
 import { Footer } from "@/components/Footer";
 import { Toggle } from "@/components/ui";
@@ -274,6 +275,9 @@ export default function Dashboard() {
             draftChatIds={Object.keys(snap.suggestions || {})}
             onClearSuggestion={clearSuggestion}
           />
+
+          {/* Activity feed — received / auto-replied / errors */}
+          <ActivityLog logs={snap.logs || []} onClear={() => emit("logs:clear")} />
         </div>
       )}
 
