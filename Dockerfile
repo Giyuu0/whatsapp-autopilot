@@ -18,6 +18,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Puppeteer downloads Chrome for Testing during npm ci into this fixed path.
 ENV PUPPETEER_CACHE_DIR=/app/.puppeteer-cache
 ENV NODE_ENV=production
+# Keep the Node heap modest so usage-based billing stays low (the app idles
+# around ~150MB; Chromium is managed separately by puppeteer).
+ENV NODE_OPTIONS=--max-old-space-size=256
 # Chromium wants writable config/cache dirs in a container.
 ENV XDG_CONFIG_HOME=/tmp/.chromium-config
 ENV XDG_CACHE_HOME=/tmp/.chromium-cache
