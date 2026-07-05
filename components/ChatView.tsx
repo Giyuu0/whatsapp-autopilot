@@ -57,32 +57,35 @@ function dayLabel(ts: number) {
   return d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" });
 }
 
-/** WhatsApp-style delivery ticks (shown on your own sent messages). */
+/**
+ * Delivery status shown on your own sent messages as three colored dots:
+ * red = sent, yellow = delivered, green = read (played counts as read).
+ * Pending shows dim grey dots.
+ */
 function Ticks({ ack }: { ack?: number }) {
   const a = ack ?? 1;
-  if (a <= 0) {
-    // pending — a little clock
-    return (
-      <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 text-wa-light/50" fill="none" stroke="currentColor" strokeWidth="1.4">
-        <circle cx="8" cy="8" r="6" />
-        <path d="M8 5v3l2 1.5" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  const read = a >= 3;
-  const color = read ? "#53bdeb" : "rgba(219,248,198,0.55)";
-  if (a === 1) {
-    return (
-      <svg viewBox="0 0 16 12" className="h-3.5 w-4" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 6.5 6 10.5 14 1.5" />
-      </svg>
-    );
+  let color = "rgba(219,248,198,0.35)"; // pending / unknown → dim
+  let label = "Pending";
+  if (a >= 3) {
+    color = "#22c55e"; // read (or played) → green
+    label = "Read";
+  } else if (a === 2) {
+    color = "#facc15"; // delivered → yellow
+    label = "Delivered";
+  } else if (a === 1) {
+    color = "#ef4444"; // sent → red
+    label = "Sent";
   }
   return (
-    <svg viewBox="0 0 20 12" className="h-3.5 w-5" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 6.5 5 10.5 13 1.5" />
-      <path d="M7.5 10.2 8.5 9 13.5 1.5" />
-    </svg>
+    <span className="inline-flex items-center gap-[3px]" title={label} aria-label={label}>
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="h-[5px] w-[5px] rounded-full"
+          style={{ backgroundColor: color }}
+        />
+      ))}
+    </span>
   );
 }
 
