@@ -168,10 +168,8 @@ export function SettingsForm({
 }) {
   const [groqKey, setGroqKey] = useState("");
   const [geminiKey, setGeminiKey] = useState("");
-  const [groqModel, setGroqModel] = useState(settings.groqModel);
-  const [geminiModel, setGeminiModel] = useState(settings.geminiModel);
-  const [chatFallbacks, setChatFallbacks] = useState<ModelStep[]>(settings.chatFallbacks || []);
-  const [visionFallbacks, setVisionFallbacks] = useState<ModelStep[]>(settings.visionFallbacks || []);
+  const [chatChain, setChatChain] = useState<ModelStep[]>(settings.chatChain || []);
+  const [visionChain, setVisionChain] = useState<ModelStep[]>(settings.visionChain || []);
   const [language, setLanguage] = useState(settings.language);
   const [tone, setTone] = useState(settings.tone);
   const [ownerProfile, setOwnerProfile] = useState(settings.ownerProfile);
@@ -214,10 +212,8 @@ export function SettingsForm({
 
   // Re-seed when settings change from the server.
   useEffect(() => {
-    setGroqModel(settings.groqModel);
-    setGeminiModel(settings.geminiModel);
-    setChatFallbacks(settings.chatFallbacks || []);
-    setVisionFallbacks(settings.visionFallbacks || []);
+    setChatChain(settings.chatChain || []);
+    setVisionChain(settings.visionChain || []);
     setLanguage(settings.language);
     setTone(settings.tone);
     setOwnerProfile(settings.ownerProfile);
@@ -268,10 +264,8 @@ export function SettingsForm({
   async function save() {
     setSaving(true);
     const patch: any = {
-      groqModel,
-      geminiModel,
-      chatFallbacks: chatFallbacks.filter((s) => s.model && s.model.trim()),
-      visionFallbacks: visionFallbacks.filter((s) => s.model && s.model.trim()),
+      chatChain: chatChain.filter((s) => s.model && s.model.trim()),
+      visionChain: visionChain.filter((s) => s.model && s.model.trim()),
       language,
       tone,
       ownerProfile,
@@ -343,14 +337,20 @@ export function SettingsForm({
 
       {/* Text / chat models */}
       <section className="card p-5">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">
-          Text replies &amp; fallback chain
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
+          Text reply models
         </h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="label">Primary text model (Groq)</label>
-            <ModelField id="groq-primary" value={groqModel} onChange={setGroqModel} options={groqChat} placeholder="llama-3.3-70b-versatile" />
-          </div>
+        <p className="mb-4 text-xs text-slate-500">
+          Tried top to bottom — the <b className="text-slate-300">first</b> is primary, the rest are fallbacks if one fails or is rate-limited. Reorder providers as you like.
+        </p>
+        <ChainEditor
+          steps={chatChain}
+          onChange={setChatChain}
+          groqOptions={groqChat}
+          geminiOptions={geminiChat}
+          idBase="chat-chain"
+        />
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
           <div>
             <label className="label">Global reply language</label>
             <select className="input" value={language} onChange={(e) => setLanguage(e.target.value as any)}>
@@ -361,49 +361,35 @@ export function SettingsForm({
               ))}
             </select>
           </div>
+          <div>
+            <label className="label">Global reply tone</label>
+            <select className="input" value={tone} onChange={(e) => setTone(e.target.value as any)}>
+              {TONES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="mt-4 md:w-1/2">
-          <label className="label">Global reply tone</label>
-          <select className="input" value={tone} onChange={(e) => setTone(e.target.value as any)}>
-            {TONES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-          <p className="mt-1 text-xs text-slate-500">Default tone for all chats. Override it per chat from the conversation header.</p>
-        </div>
-        <div className="mt-4">
-          <label className="label">Text fallback chain (tried in order if the primary fails)</label>
-          <ChainEditor
-            steps={chatFallbacks}
-            onChange={setChatFallbacks}
-            groqOptions={groqChat}
-            geminiOptions={geminiChat}
-            idBase="chat-fb"
-          />
-        </div>
+        <p className="mt-1 text-xs text-slate-500">Tone is a per-chat default — override it per chat from the conversation header.</p>
       </section>
 
       {/* Vision models */}
       <section className="card p-5">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">
-          Image (vision) replies &amp; fallback chain
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
+          Image (vision) reply models
         </h2>
-        <div className="md:w-1/2">
-          <label className="label">Primary vision model (Gemini)</label>
-          <ModelField id="gemini-primary" value={geminiModel} onChange={setGeminiModel} options={geminiVision} placeholder="gemini-2.0-flash" />
-        </div>
-        <div className="mt-4">
-          <label className="label">Vision fallback chain</label>
-          <ChainEditor
-            steps={visionFallbacks}
-            onChange={setVisionFallbacks}
-            groqOptions={groqVision}
-            geminiOptions={geminiVision}
-            idBase="vision-fb"
-          />
-        </div>
+        <p className="mb-4 text-xs text-slate-500">
+          For images. Groq (llama-4-scout) is first because free-tier Gemini vision is often rate-limited (429). Add/reorder as you like.
+        </p>
+        <ChainEditor
+          steps={visionChain}
+          onChange={setVisionChain}
+          groqOptions={groqVision}
+          geminiOptions={geminiVision}
+          idBase="vision-chain"
+        />
       </section>
 
       {/* Voice */}

@@ -58,8 +58,8 @@ export type LogEntry = {
 };
 
 export type Settings = {
-  groqModel: string;
-  geminiModel: string;
+  chatChain: ModelStep[];
+  visionChain: ModelStep[];
   systemPrompt: string;
   autoReplyEnabled: boolean;
   replyDelayMs: number;
@@ -71,8 +71,6 @@ export type Settings = {
   voiceReplies: boolean;
   ttsModel: string;
   ttsVoice: string;
-  chatFallbacks: { provider: "groq" | "gemini"; model: string }[];
-  visionFallbacks: { provider: "groq" | "gemini"; model: string }[];
   hasGroqKey: boolean;
   hasGeminiKey: boolean;
   accessKeyLocked: boolean;
