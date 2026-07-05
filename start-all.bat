@@ -35,6 +35,14 @@ if not exist "node_modules" (
   echo Dependencies already installed - skipping.
 )
 
+REM --- 2b. Stop any previous instance holding port 4499 --------------
+REM (prevents "browser is already running" from two instances sharing the
+REM  WhatsApp session)
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :4499 ^| findstr LISTENING') do (
+  echo Stopping previous instance (PID %%p)...
+  taskkill /F /PID %%p >nul 2>nul
+)
+
 REM --- 3. Open the browser once the server is ready ------------------
 echo.
 echo Starting server on http://localhost:4499
