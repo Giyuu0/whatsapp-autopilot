@@ -1,6 +1,89 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+
+/** A fully-themed dropdown (native <select> menus can't be styled and look
+ *  broken on Windows). Button + popover list, closes on outside-click/escape. */
+export function Select<T extends string>({
+  value,
+  onChange,
+  options,
+  buttonClassName = "",
+  align = "left",
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: { value: T; label: string }[];
+  buttonClassName?: string;
+  align?: "left" | "right";
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const current = options.find((o) => o.value === value);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className={`flex h-8 items-center justify-between gap-1.5 rounded-lg border border-white/10 bg-ink-800/80 px-2.5 text-xs text-slate-100 outline-none transition hover:border-white/20 ${
+          open ? "border-wa-green/60 ring-2 ring-wa-green/20" : ""
+        } ${buttonClassName}`}
+      >
+        <span className="truncate">{current?.label ?? "Select"}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition ${open ? "rotate-180" : ""}`}>
+          <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          className={`animate-fade-up absolute z-40 mt-1 min-w-[9rem] overflow-hidden rounded-xl border border-white/10 bg-ink-850 p-1 shadow-xl shadow-black/40 ${
+            align === "right" ? "right-0" : "left-0"
+          }`}
+        >
+          {options.map((o) => {
+            const active = o.value === value;
+            return (
+              <button
+                key={o.value}
+                type="button"
+                onClick={() => {
+                  onChange(o.value);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-left text-xs transition ${
+                  active ? "bg-wa-green/15 text-wa-green" : "text-slate-200 hover:bg-white/10"
+                }`}
+              >
+                <span className="truncate">{o.label}</span>
+                {active && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="h-3.5 w-3.5 shrink-0">
+                    <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Toggle({
   checked,

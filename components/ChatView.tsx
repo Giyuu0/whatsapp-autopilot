@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Icon, Toggle } from "./ui";
+import { Icon, Toggle, Select } from "./ui";
 import type { Chat, Message, Language, Tone, VoiceReply } from "./useWaSocket";
 
 /* ---------------------------------- utils --------------------------------- */
@@ -466,59 +466,34 @@ export function ChatView(props: {
                       />
                     </div>
 
-                    <div className="flex min-w-0 items-center gap-1">
-                      <span className="hidden text-[11px] text-white/50 lg:inline">
-                        Lang
-                      </span>
-                      <select
-                        className="input h-8 w-[7.5rem] min-w-0 py-0 text-xs sm:w-auto"
+                    <div className="flex items-center gap-1">
+                      <span className="hidden text-[11px] text-white/50 lg:inline">Lang</span>
+                      <Select
                         value={activeChat.language}
-                        onChange={(e) =>
-                          onSetLanguage(activeChat.id, e.target.value as Language)
-                        }
-                      >
-                        {LANGUAGE_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(v) => onSetLanguage(activeChat.id, v as Language)}
+                        options={LANGUAGE_OPTIONS}
+                        align="right"
+                      />
                     </div>
 
-                    <div className="flex min-w-0 items-center gap-1">
-                      <span className="hidden text-[11px] text-white/50 lg:inline">
-                        Tone
-                      </span>
-                      <select
-                        className="input h-8 w-[7.5rem] min-w-0 py-0 text-xs sm:w-auto"
+                    <div className="flex items-center gap-1">
+                      <span className="hidden text-[11px] text-white/50 lg:inline">Tone</span>
+                      <Select
                         value={activeChat.tone}
-                        onChange={(e) => onSetTone(activeChat.id, e.target.value as Tone)}
-                      >
-                        {TONE_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(v) => onSetTone(activeChat.id, v as Tone)}
+                        options={TONE_OPTIONS}
+                        align="right"
+                      />
                     </div>
 
-                    <div className="flex min-w-0 items-center gap-1">
-                      <span className="hidden text-[11px] text-white/50 lg:inline">
-                        Voice reply
-                      </span>
-                      <select
-                        className="input h-8 w-[5.5rem] min-w-0 py-0 text-xs sm:w-auto"
+                    <div className="flex items-center gap-1">
+                      <span className="hidden text-[11px] text-white/50 lg:inline">Voice</span>
+                      <Select
                         value={activeChat.voiceReply}
-                        onChange={(e) =>
-                          onSetVoiceReply(activeChat.id, e.target.value as VoiceReply)
-                        }
-                      >
-                        {VOICE_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(v) => onSetVoiceReply(activeChat.id, v as VoiceReply)}
+                        options={VOICE_OPTIONS}
+                        align="right"
+                      />
                     </div>
 
                     <button
