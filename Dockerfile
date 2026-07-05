@@ -18,9 +18,10 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-# Install deps (dev deps are needed for the Next.js build).
+# Install deps — dev deps INCLUDED (tailwind/postcss/typescript are needed for
+# the Next.js build; NODE_ENV=production above would otherwise skip them).
 COPY package*.json ./
-RUN npm install
+RUN npm ci --include=dev --no-audit --no-fund
 
 # Build the Next.js app.
 COPY . .
