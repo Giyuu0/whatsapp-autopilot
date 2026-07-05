@@ -84,7 +84,7 @@ app.prepare().then(() => {
 
     socket.on("contacts:refresh", async (ack) => {
       await wa.refreshChats();
-      ack && ack({ ok: true, contacts: store.getContacts(), chats: wa.chatsForClient() });
+      ack && ack({ ok: true, contacts: wa.contactsForClient(), chats: wa.chatsForClient() });
     });
 
     socket.on("contact:update", ({ id, patch }, ack) => {
@@ -221,6 +221,10 @@ app.prepare().then(() => {
       const clean = { ...partial };
       if (clean.groqApiKey === "" || clean.groqApiKey === undefined) delete clean.groqApiKey;
       if (clean.geminiApiKey === "" || clean.geminiApiKey === undefined) delete clean.geminiApiKey;
+      // Persona prompts are write-only (their contents never go to the
+      // browser) — an empty field means "keep what's stored".
+      if (!String(clean.systemPrompt || "").trim()) delete clean.systemPrompt;
+      if (!String(clean.ownerProfile || "").trim()) delete clean.ownerProfile;
       // Never let the access key be blanked, and ignore attempts to change it
       // while it is locked by .env.
       if (clean.accessKey === "" || clean.accessKey === undefined || store.accessKeyLocked()) {

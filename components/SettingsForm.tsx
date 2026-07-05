@@ -172,8 +172,9 @@ export function SettingsForm({
   const [visionChain, setVisionChain] = useState<ModelStep[]>(settings.visionChain || []);
   const [language, setLanguage] = useState(settings.language);
   const [tone, setTone] = useState(settings.tone);
-  const [ownerProfile, setOwnerProfile] = useState(settings.ownerProfile);
-  const [systemPrompt, setSystemPrompt] = useState(settings.systemPrompt);
+  // Write-only fields: start empty; a non-empty value REPLACES what's stored.
+  const [ownerProfile, setOwnerProfile] = useState("");
+  const [systemPrompt, setSystemPrompt] = useState("");
   const [replyDelayMs, setReplyDelayMs] = useState(settings.replyDelayMs);
   const [replyToGroups, setReplyToGroups] = useState(settings.replyToGroups);
   const [manualReply, setManualReply] = useState(settings.manualReply);
@@ -223,8 +224,8 @@ export function SettingsForm({
     setVisionChain(settings.visionChain || []);
     setLanguage(settings.language);
     setTone(settings.tone);
-    setOwnerProfile(settings.ownerProfile);
-    setSystemPrompt(settings.systemPrompt);
+    setOwnerProfile(""); // write-only — cleared after save/refresh
+    setSystemPrompt("");
     setReplyDelayMs(settings.replyDelayMs);
     setReplyToGroups(settings.replyToGroups);
     setManualReply(settings.manualReply);
@@ -466,23 +467,38 @@ export function SettingsForm({
       <section className="card p-5">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-fg/60">Behaviour</h2>
         <div className="mb-4">
-          <label className="label">Global persona / system prompt</label>
+          <label className="label">
+            Global persona / system prompt{" "}
+            {settings.hasSystemPrompt && <span className="chip bg-fg/5 !py-0.5 text-wa-green">set · hidden</span>}
+          </label>
           <textarea
             className="input min-h-[90px] resize-y"
             value={systemPrompt}
             onChange={(e) => setSystemPrompt(e.target.value)}
+            placeholder={
+              settings.hasSystemPrompt
+                ? "Configured — contents stay on the server. Type here to REPLACE it; leave empty to keep it."
+                : "How the bot should behave when replying on your behalf…"
+            }
           />
         </div>
         <div className="mb-4">
-          <label className="label">About you (owner profile)</label>
+          <label className="label">
+            About you (owner profile){" "}
+            {settings.hasOwnerProfile && <span className="chip bg-fg/5 !py-0.5 text-wa-green">set · hidden</span>}
+          </label>
           <textarea
             className="input min-h-[90px] resize-y"
             value={ownerProfile}
             onChange={(e) => setOwnerProfile(e.target.value)}
-            placeholder="Who you are — so the bot can answer questions about you and always defends you."
+            placeholder={
+              settings.hasOwnerProfile
+                ? "Configured — contents stay on the server. Type here to REPLACE it; leave empty to keep it."
+                : "Who you are — so the bot can answer questions about you and always defends you."
+            }
           />
           <p className="mt-1 text-xs text-fg/45">
-            The bot uses this to answer questions about you and never insults you. It can still roast other people.
+            For privacy, these prompts are write-only: the dashboard never receives their contents — you can only replace them.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-6">

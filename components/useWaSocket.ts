@@ -75,7 +75,7 @@ export type LogEntry = {
 export type Settings = {
   chatChain: ModelStep[];
   visionChain: ModelStep[];
-  systemPrompt: string;
+  hasSystemPrompt: boolean; // prompt contents are write-only (never sent to the browser)
   autoReplyEnabled: boolean;
   replyDelayMs: number;
   replyToGroups: boolean;
@@ -88,7 +88,7 @@ export type Settings = {
   groqOnly: boolean;
   language: Exclude<Language, "default">; // "auto" | "english" | "hindi" | "hinglish" | "english-slang"
   tone: Exclude<Tone, "default">; // "professional" | "friendly" | "flirty"
-  ownerProfile: string;
+  hasOwnerProfile: boolean; // profile contents are write-only (never sent to the browser)
   whisperModel: string;
   voiceReplies: boolean;
   ttsModel: string;
