@@ -197,6 +197,23 @@ function ChatRow({
   );
 }
 
+/* ------------------------------- sticker loader --------------------------- */
+
+/** Stickers always auto-preview: fetch the media once on mount, no button. */
+function StickerLoader({ onLoad }: { onLoad: () => Promise<any> }) {
+  const tried = useRef(false);
+  useEffect(() => {
+    if (tried.current) return;
+    tried.current = true;
+    onLoad().catch(() => {});
+  }, [onLoad]);
+  return (
+    <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-black/10">
+      <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-wa-green" />
+    </div>
+  );
+}
+
 /* --------------------------------- bubble --------------------------------- */
 
 function MessageBubble({
@@ -348,7 +365,7 @@ function MessageBubble({
             </div>
           </div>
         ) : msg.type === "image" ? (
-          <div className="max-w-[260px]">
+          <div className={msg.sticker ? "max-w-[160px]" : "max-w-[260px]"}>
             {msg.viewOnce && (
               <div className="mb-1 flex items-center gap-1 text-[10px] font-medium text-amber-300/90">
                 👁️ View once
@@ -356,7 +373,19 @@ function MessageBubble({
             )}
             {msg.media ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={msg.media} alt="photo" className="max-h-72 w-full rounded-xl object-cover" />
+              <img
+                src={msg.media}
+                alt={msg.sticker ? "sticker" : "photo"}
+                className={
+                  msg.sticker
+                    ? "max-h-40 w-auto object-contain drop-shadow-sm"
+                    : "max-h-72 w-full rounded-xl object-cover"
+                }
+              />
+            ) : msg.sticker ? (
+              // Sticker media is auto-loaded server-side; if it isn't ready yet,
+              // fetch it silently once (no button — stickers always preview).
+              <StickerLoader onLoad={() => onLoadMedia(msg.id)} />
             ) : (
               <button
                 type="button"
@@ -381,7 +410,9 @@ function MessageBubble({
                 )}
               </button>
             )}
-            {caption && <div className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed">{caption}</div>}
+            {caption && !msg.sticker && (
+              <div className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed">{caption}</div>
+            )}
           </div>
         ) : isVoice ? (
           <div className="min-w-[200px]">

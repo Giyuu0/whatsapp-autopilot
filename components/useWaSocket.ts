@@ -52,6 +52,7 @@ export type Message = {
   ack?: number; // WhatsApp delivery status: -1 err, 0 pending, 1 sent, 2 delivered, 3 read, 4 played
   media?: string | null; // image/audio preview as a data URL
   viewOnce?: boolean; // WhatsApp "view once" photo
+  sticker?: boolean; // WhatsApp sticker (auto-previewed, rendered transparent)
   deleted?: boolean;
   edited?: boolean;
 };
