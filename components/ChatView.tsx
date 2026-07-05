@@ -376,6 +376,13 @@ function MessageBubble({
           </div>
         )}
 
+        {/* "needs you" flag on incoming messages the bot held for the owner */}
+        {msg.attention && !mine && (
+          <div className="mb-0.5 flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wide text-amber-300">
+            🔔 {msg.attentionReason || "needs you"}
+          </div>
+        )}
+
         {editing ? (
           <div className="min-w-[220px]">
             <textarea

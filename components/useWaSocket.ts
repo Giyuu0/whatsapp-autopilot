@@ -55,6 +55,8 @@ export type Message = {
   media?: string | null; // image/audio preview as a data URL
   viewOnce?: boolean; // WhatsApp "view once" photo
   sticker?: boolean; // WhatsApp sticker (auto-previewed, rendered transparent)
+  attention?: boolean; // flagged as needing the owner personally
+  attentionReason?: string; // why it was flagged (e.g. "asking when you're free")
   deleted?: boolean;
   edited?: boolean;
 };
@@ -81,6 +83,8 @@ export type Settings = {
   hideSensitive: boolean;
   typingIndicator: boolean;
   contactMemoryEnabled: boolean;
+  attentionAlerts: boolean;
+  attentionHold: boolean;
   groqOnly: boolean;
   language: Exclude<Language, "default">; // "auto" | "english" | "hindi" | "hinglish" | "english-slang"
   tone: Exclude<Tone, "default">; // "professional" | "friendly" | "flirty"
@@ -216,6 +220,23 @@ export function useWaSocket() {
     );
     socket.on("log", (entry: LogEntry) =>
       setSnap((prev) => (prev ? { ...prev, logs: [...prev.logs, entry].slice(-250) } : prev))
+    );
+
+    // "Needs your attention" — always notify (even with the tab visible),
+    // unlike ordinary messages which only notify when the tab is hidden.
+    socket.on(
+      "attention",
+      ({ chatId, name, text, reason }: { chatId: string; name: string; text: string; reason: string }) => {
+        if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+          try {
+            new Notification(`🔔 ${name} needs you — ${reason}`, {
+              body: text || "",
+              tag: `attn-${chatId}`,
+              requireInteraction: true, // stays on screen until dismissed
+            });
+          } catch {}
+        }
+      }
     );
 
     // Live message → append to that chat if we've loaded it.

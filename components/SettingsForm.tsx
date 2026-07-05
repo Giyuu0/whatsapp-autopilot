@@ -180,6 +180,8 @@ export function SettingsForm({
   const [hideSensitive, setHideSensitive] = useState(settings.hideSensitive);
   const [typingIndicator, setTypingIndicator] = useState(settings.typingIndicator);
   const [contactMemoryEnabled, setContactMemoryEnabled] = useState(settings.contactMemoryEnabled);
+  const [attentionAlerts, setAttentionAlerts] = useState(settings.attentionAlerts);
+  const [attentionHold, setAttentionHold] = useState(settings.attentionHold);
   const [groqOnly, setGroqOnly] = useState(settings.groqOnly);
   const [voiceReplies, setVoiceReplies] = useState(settings.voiceReplies);
   const [whisperModel, setWhisperModel] = useState(settings.whisperModel);
@@ -229,6 +231,8 @@ export function SettingsForm({
     setHideSensitive(settings.hideSensitive);
     setTypingIndicator(settings.typingIndicator);
     setContactMemoryEnabled(settings.contactMemoryEnabled);
+    setAttentionAlerts(settings.attentionAlerts);
+    setAttentionHold(settings.attentionHold);
     setGroqOnly(settings.groqOnly);
     setVoiceReplies(settings.voiceReplies);
     setWhisperModel(settings.whisperModel);
@@ -286,6 +290,8 @@ export function SettingsForm({
       hideSensitive,
       typingIndicator,
       contactMemoryEnabled,
+      attentionAlerts,
+      attentionHold,
       groqOnly,
       voiceReplies,
       whisperModel,
@@ -524,6 +530,25 @@ export function SettingsForm({
             <p className="text-xs text-fg/45">The bot learns durable facts about each person over time and uses them in replies. Edit or clear a chat&apos;s memory from its header.</p>
           </div>
         </div>
+        <div className="mt-4 flex items-center gap-3">
+          <Toggle checked={attentionAlerts} onChange={setAttentionAlerts} />
+          <div>
+            <span className="text-sm text-fg/90">🔔 Alert me when a message needs ME</span>
+            <p className="text-xs text-fg/45">
+              Pushes a notification when someone asks things only you can answer — &ldquo;when will you be free?&rdquo;, &ldquo;where are you?&rdquo;,
+              duty/shift questions, urgent matters, money requests, meeting plans, or a decision/confirmation. Needs browser notifications enabled (bell icon in the header).
+            </p>
+          </div>
+        </div>
+        {attentionAlerts && (
+          <div className="ml-2 mt-3 flex items-center gap-3 border-l-2 border-amber-400/30 pl-4">
+            <Toggle checked={attentionHold} onChange={setAttentionHold} size="sm" />
+            <div>
+              <span className="text-sm text-fg/90">Hold the auto-reply for those messages</span>
+              <p className="text-xs text-fg/45">Instead of auto-sending, the AI drafts a reply into the composer so YOU answer personally. Turn off to notify but still auto-reply.</p>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Privacy */}
