@@ -76,6 +76,7 @@ export type Settings = {
   hideSensitive: boolean;
   typingIndicator: boolean;
   contactMemoryEnabled: boolean;
+  groqOnly: boolean;
   language: Exclude<Language, "default">; // "auto" | "english" | "hindi" | "hinglish" | "english-slang"
   tone: Exclude<Tone, "default">; // "professional" | "friendly" | "flirty"
   ownerProfile: string;

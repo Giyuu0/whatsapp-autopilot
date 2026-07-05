@@ -180,6 +180,7 @@ export function SettingsForm({
   const [hideSensitive, setHideSensitive] = useState(settings.hideSensitive);
   const [typingIndicator, setTypingIndicator] = useState(settings.typingIndicator);
   const [contactMemoryEnabled, setContactMemoryEnabled] = useState(settings.contactMemoryEnabled);
+  const [groqOnly, setGroqOnly] = useState(settings.groqOnly);
   const [voiceReplies, setVoiceReplies] = useState(settings.voiceReplies);
   const [whisperModel, setWhisperModel] = useState(settings.whisperModel);
   const [ttsModel, setTtsModel] = useState(settings.ttsModel);
@@ -228,6 +229,7 @@ export function SettingsForm({
     setHideSensitive(settings.hideSensitive);
     setTypingIndicator(settings.typingIndicator);
     setContactMemoryEnabled(settings.contactMemoryEnabled);
+    setGroqOnly(settings.groqOnly);
     setVoiceReplies(settings.voiceReplies);
     setWhisperModel(settings.whisperModel);
     setTtsModel(settings.ttsModel);
@@ -284,6 +286,7 @@ export function SettingsForm({
       hideSensitive,
       typingIndicator,
       contactMemoryEnabled,
+      groqOnly,
       voiceReplies,
       whisperModel,
       ttsModel,
@@ -519,6 +522,23 @@ export function SettingsForm({
           <div>
             <span className="text-sm text-slate-200">Remember facts about contacts</span>
             <p className="text-xs text-slate-500">The bot learns durable facts about each person over time and uses them in replies. Edit or clear a chat&apos;s memory from its header.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Privacy */}
+      <section className="card p-5">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">Privacy &amp; data</h2>
+        <p className="mb-4 text-xs leading-relaxed text-slate-500">
+          Everything runs on your own machine — your chats and login never leave it except for the AI calls that generate replies.
+          <b className="text-slate-300"> Groq</b> (your primary provider) does not use API inputs/outputs to train models.
+          <b className="text-slate-300"> Google Gemini</b> free-tier <i>can</i> use data to improve its products — so for maximum privacy, keep everything on Groq.
+        </p>
+        <div className="flex items-center gap-3">
+          <Toggle checked={groqOnly} onChange={setGroqOnly} />
+          <div>
+            <span className="text-sm text-slate-200">Groq only — never send anything to Google Gemini</span>
+            <p className="text-xs text-slate-500">Skips all Gemini steps in the model chains, so no message data ever reaches Google.</p>
           </div>
         </div>
       </section>
