@@ -24,6 +24,10 @@ A beautiful, self-hosted dashboard that connects to WhatsApp (by scanning a QR c
 - 💬 **WhatsApp-style chat UI** — a real two-pane view: chat list on the left, live conversation on the right. Messages sync **both ways** in real time.
 - 🎯 **Per-chat control** — flip a toggle per person to enable auto-reply.
 - ✍️ **Manual (draft) mode** — global or per-chat: the AI writes a suggested reply but **doesn't send it** — you review, edit, and send it yourself.
+- 🛡️ **Sensitive guard** — OTPs, bank/transaction alerts and promotional spam are **hidden and never auto-replied to**.
+- 🧠 **Contact memory** — learns and remembers durable facts about each person and uses them in replies (editable per chat).
+- 📄 **Reads links & PDFs** — if someone shares a URL or a PDF, it reads the content and replies about it.
+- ⌨️ **Typing indicator**, 📎 **send images/files/voice** from the dashboard, and 🔔 **browser notifications**.
 - 🧠 **Smart routing + fallback chains** — text → **Groq**, images → **Gemini Vision**, voice notes → **Groq Whisper**. Each has an ordered fallback chain that's tried in turn if a model errors or is rate-limited.
 - 🎭 **Per-chat tone** — reply **Professional**, **Friendly** (witty, roast-back), or **Flirty** — different for every chat.
 - 🗣️ **Per-chat language** — **Auto-detect** (mirror the sender), English, Hindi, Hinglish, or English + slang.

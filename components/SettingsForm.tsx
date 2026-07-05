@@ -177,6 +177,9 @@ export function SettingsForm({
   const [replyDelayMs, setReplyDelayMs] = useState(settings.replyDelayMs);
   const [replyToGroups, setReplyToGroups] = useState(settings.replyToGroups);
   const [manualReply, setManualReply] = useState(settings.manualReply);
+  const [hideSensitive, setHideSensitive] = useState(settings.hideSensitive);
+  const [typingIndicator, setTypingIndicator] = useState(settings.typingIndicator);
+  const [contactMemoryEnabled, setContactMemoryEnabled] = useState(settings.contactMemoryEnabled);
   const [voiceReplies, setVoiceReplies] = useState(settings.voiceReplies);
   const [whisperModel, setWhisperModel] = useState(settings.whisperModel);
   const [ttsModel, setTtsModel] = useState(settings.ttsModel);
@@ -222,6 +225,9 @@ export function SettingsForm({
     setReplyDelayMs(settings.replyDelayMs);
     setReplyToGroups(settings.replyToGroups);
     setManualReply(settings.manualReply);
+    setHideSensitive(settings.hideSensitive);
+    setTypingIndicator(settings.typingIndicator);
+    setContactMemoryEnabled(settings.contactMemoryEnabled);
     setVoiceReplies(settings.voiceReplies);
     setWhisperModel(settings.whisperModel);
     setTtsModel(settings.ttsModel);
@@ -275,6 +281,9 @@ export function SettingsForm({
       replyDelayMs,
       replyToGroups,
       manualReply,
+      hideSensitive,
+      typingIndicator,
+      contactMemoryEnabled,
       voiceReplies,
       whisperModel,
       ttsModel,
@@ -489,6 +498,27 @@ export function SettingsForm({
           <div>
             <span className="text-sm text-slate-200">Manual mode (draft, don&apos;t auto-send)</span>
             <p className="text-xs text-slate-500">The AI writes a suggested reply for you to review and send yourself. Override per chat from the conversation header.</p>
+          </div>
+        </div>
+        <div className="mt-4 flex items-center gap-3">
+          <Toggle checked={hideSensitive} onChange={setHideSensitive} />
+          <div>
+            <span className="text-sm text-slate-200">Hide &amp; never reply to sensitive messages</span>
+            <p className="text-xs text-slate-500">OTPs, bank/transaction alerts and promotional messages are hidden from the dashboard and never auto-replied to.</p>
+          </div>
+        </div>
+        <div className="mt-4 flex items-center gap-3">
+          <Toggle checked={typingIndicator} onChange={setTypingIndicator} />
+          <div>
+            <span className="text-sm text-slate-200">Show &ldquo;typing…&rdquo; before replying</span>
+            <p className="text-xs text-slate-500">The recipient sees a typing indicator, so replies feel human.</p>
+          </div>
+        </div>
+        <div className="mt-4 flex items-center gap-3">
+          <Toggle checked={contactMemoryEnabled} onChange={setContactMemoryEnabled} />
+          <div>
+            <span className="text-sm text-slate-200">Remember facts about contacts</span>
+            <p className="text-xs text-slate-500">The bot learns durable facts about each person over time and uses them in replies. Edit or clear a chat&apos;s memory from its header.</p>
           </div>
         </div>
       </section>

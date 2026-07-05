@@ -82,6 +82,16 @@ app.prepare().then(() => {
       }
     });
 
+    // Send a file (image/document/voice) from the composer.
+    socket.on("message:sendMedia", async ({ chatId, media }, ack) => {
+      try {
+        const message = await wa.sendMediaManual(chatId, media || {});
+        ack && ack({ ok: true, message });
+      } catch (e) {
+        ack && ack({ ok: false, error: e.message });
+      }
+    });
+
     // Send a message manually from the chat composer.
     socket.on("message:send", async ({ chatId, text }, ack) => {
       try {

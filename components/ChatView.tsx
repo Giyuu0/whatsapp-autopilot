@@ -311,11 +311,17 @@ export function ChatView(props: {
   onSetVoiceReply: (chatId: string, pref: VoiceReply) => void;
   onSetManual: (chatId: string, mode: ManualReply) => void;
   onSetCustomPrompt: (chatId: string, prompt: string) => void;
+  onSetMemory: (chatId: string, memory: string) => void;
   onChatAssistant: (chatId: string, command: string) => Promise<any>;
   onLoadMedia: (chatId: string, messageId: string) => Promise<any>;
+  onSendMedia: (
+    chatId: string,
+    media: { base64: string; mimetype: string; filename?: string; caption?: string; asVoice?: boolean }
+  ) => Promise<any>;
   suggestion: Suggestion | null;
   onClearSuggestion: (chatId: string) => void;
   connected: boolean;
+  typing: boolean; // the bot is composing a reply to the active chat
 }) {
   const {
     chats,
@@ -329,11 +335,14 @@ export function ChatView(props: {
     onSetVoiceReply,
     onSetManual,
     onSetCustomPrompt,
+    onSetMemory,
     onChatAssistant,
     onLoadMedia,
+    onSendMedia,
     suggestion,
     onClearSuggestion,
     connected,
+    typing,
   } = props;
 
   const [query, setQuery] = useState("");
@@ -341,7 +350,10 @@ export function ChatView(props: {
   const [sending, setSending] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
   const [promptDraft, setPromptDraft] = useState("");
+  const [memoryDraft, setMemoryDraft] = useState("");
+  const [sendingMedia, setSendingMedia] = useState(false);
 
+  const fileRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const stickRef = useRef(true); // stay pinned to the bottom unless the user scrolls up
 
@@ -382,10 +394,17 @@ export function ChatView(props: {
     if (el && stickRef.current) el.scrollTop = el.scrollHeight;
   }, [messages]);
 
-  // reset the persona editor when switching chats
+  // Keep the typing indicator visible if the user is pinned to the bottom.
+  useEffect(() => {
+    const el = listRef.current;
+    if (el && stickRef.current) el.scrollTop = el.scrollHeight;
+  }, [typing]);
+
+  // reset the persona + memory editors when switching chats
   useEffect(() => {
     setShowPrompt(false);
     setPromptDraft(activeChat?.customPrompt || "");
+    setMemoryDraft(activeChat?.memory || "");
     setDraft("");
   }, [activeChatId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -409,6 +428,41 @@ export function ChatView(props: {
       /* keep draft on failure so the user can retry */
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
+    const file = input.files?.[0];
+    if (!file || !activeChatId || !connected || sendingMedia) {
+      input.value = "";
+      return;
+    }
+    setSendingMedia(true);
+    try {
+      const base64: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result || "");
+          // strip the "data:...;base64," prefix
+          const comma = result.indexOf(",");
+          resolve(comma >= 0 ? result.slice(comma + 1) : result);
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      await onSendMedia(activeChatId, {
+        base64,
+        mimetype: file.type,
+        filename: file.name,
+        caption: draft.trim() || undefined,
+      });
+      setDraft("");
+    } catch {
+      /* leave draft intact so the user can retry */
+    } finally {
+      setSendingMedia(false);
+      input.value = "";
     }
   }
 
@@ -605,6 +659,29 @@ export function ChatView(props: {
                         Save
                       </button>
                     </div>
+
+                    {/* contact memory editor */}
+                    <div className="mt-4 border-t border-white/10 pt-3">
+                      <label className="label">Memory (what the bot knows about this person)</label>
+                      <textarea
+                        className="input mt-1 min-h-[80px] resize-y text-sm"
+                        placeholder="e.g. Prefers short replies. Works night shifts. Has a dog named Rex…"
+                        value={memoryDraft}
+                        onChange={(e) => setMemoryDraft(e.target.value)}
+                      />
+                      <p className="mt-1 text-[11px] text-white/40">
+                        The bot updates this automatically over time — you can edit or clear it.
+                      </p>
+                      <div className="mt-2 flex items-center justify-end">
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          onClick={() => onSetMemory(activeChat.id, memoryDraft.trim())}
+                        >
+                          Save memory
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -631,6 +708,16 @@ export function ChatView(props: {
                       </React.Fragment>
                     );
                   })
+                )}
+                {typing && (
+                  <div className="animate-fade-up flex justify-start">
+                    <div className="flex items-center gap-1 rounded-2xl rounded-bl-sm bg-ink-700/60 px-3 py-2.5 shadow-md ring-1 ring-inset ring-white/5">
+                      <span className="sr-only">typing…</span>
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/50 [animation-delay:-0.3s]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/50 [animation-delay:-0.15s]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/50" />
+                    </div>
+                  </div>
                 )}
               </div>
 
@@ -683,6 +770,38 @@ export function ChatView(props: {
               {/* composer */}
               <div className="border-t border-white/10 bg-black/20 p-3">
                 <div className="flex items-center gap-2">
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*,application/pdf,audio/*"
+                    className="hidden"
+                    onChange={handleFile}
+                  />
+                  <button
+                    type="button"
+                    className="btn-ghost h-11 w-11 shrink-0 rounded-full !p-0 transition active:scale-95"
+                    onClick={() => fileRef.current?.click()}
+                    disabled={!connected || sendingMedia}
+                    aria-label="Attach a file"
+                    title="Attach image, PDF or audio"
+                  >
+                    {sendingMedia ? (
+                      <span className="mx-auto h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-wa-green" />
+                    ) : (
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="mx-auto h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M21.44 11.05 12.25 20.24a5 5 0 0 1-7.07-7.07l9.19-9.19a3.34 3.34 0 0 1 4.72 4.72l-9.2 9.19a1.67 1.67 0 0 1-2.36-2.36l8.49-8.48" />
+                      </svg>
+                    )}
+                  </button>
                   <input
                     className={`input flex-1 !rounded-full !bg-ink-800/80 px-4 ${
                       /^@bot\b/i.test(draft) ? "ring-2 ring-amber-400/50" : ""

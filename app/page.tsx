@@ -16,12 +16,15 @@ export default function Dashboard() {
     connected,
     snap,
     messages,
+    typing,
     emit,
     openChat,
     sendMessage,
+    sendMedia,
     assistantCommand,
     chatAssistant,
     clearSuggestion,
+    enableNotifications,
     loadMedia,
     authState,
     authError,
@@ -30,6 +33,10 @@ export default function Dashboard() {
   } = useWaSocket();
 
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [notifOn, setNotifOn] = useState(false);
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) setNotifOn(Notification.permission === "granted");
+  }, []);
 
   if (authState === "unauthorized") {
     return <LoginScreen onSubmit={login} error={authError} />;
@@ -89,6 +96,23 @@ export default function Dashboard() {
               onChange={(v) => emit("settings:update", { autoReplyEnabled: v })}
             />
           </div>
+
+          {/* Notifications */}
+          <button
+            onClick={async () => {
+              const p = await enableNotifications();
+              setNotifOn(p === "granted");
+            }}
+            title={notifOn ? "Notifications on" : "Enable browser notifications"}
+            className={`flex h-11 w-11 items-center justify-center rounded-2xl border border-white/5 bg-ink-850/70 ${
+              notifOn ? "text-wa-green" : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </button>
 
           {/* Settings link */}
           <Link
@@ -196,9 +220,12 @@ export default function Dashboard() {
             onSetTone={(id, tone: Tone) => patchContact(id, { tone })}
             onSetVoiceReply={(id, pref: VoiceReply) => patchContact(id, { voiceReply: pref })}
             onSetManual={(id, mode: ManualReply) => patchContact(id, { manualReply: mode })}
+            onSetMemory={(id, memory) => patchContact(id, { memory })}
             onSetCustomPrompt={(id, prompt) => patchContact(id, { customPrompt: prompt })}
             onChatAssistant={chatAssistant}
             onLoadMedia={loadMedia}
+            onSendMedia={sendMedia}
+            typing={activeChatId ? !!typing[activeChatId] : false}
             suggestion={activeChatId ? snap.suggestions?.[activeChatId] || null : null}
             onClearSuggestion={clearSuggestion}
           />

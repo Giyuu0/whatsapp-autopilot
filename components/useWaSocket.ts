@@ -19,6 +19,7 @@ export type Contact = {
   tone?: Tone;
   voiceReply?: VoiceReply;
   manualReply?: ManualReply;
+  memory?: string;
 };
 
 export type Chat = {
@@ -34,6 +35,7 @@ export type Chat = {
   tone: Tone;
   voiceReply: VoiceReply;
   manualReply: ManualReply;
+  memory: string;
   customPrompt?: string;
 };
 
@@ -71,6 +73,9 @@ export type Settings = {
   replyDelayMs: number;
   replyToGroups: boolean;
   manualReply: boolean;
+  hideSensitive: boolean;
+  typingIndicator: boolean;
+  contactMemoryEnabled: boolean;
   language: Exclude<Language, "default">; // "auto" | "english" | "hindi" | "hinglish" | "english-slang"
   tone: Exclude<Tone, "default">; // "professional" | "friendly" | "flirty"
   ownerProfile: string;
@@ -133,6 +138,7 @@ export function useWaSocket() {
   const [connected, setConnected] = useState(false);
   const [snap, setSnap] = useState<Snapshot | null>(null);
   const [messages, setMessages] = useState<Record<string, Message[]>>({});
+  const [typing, setTyping] = useState<Record<string, boolean>>({});
   const [authState, setAuthState] = useState<AuthState>("connecting");
   const [authError, setAuthError] = useState<string | null>(null);
   const [keyTick, setKeyTick] = useState(0);
@@ -187,6 +193,9 @@ export function useWaSocket() {
     socket.on("sync", (sync: SyncState) =>
       setSnap((prev) => (prev ? { ...prev, sync } : prev))
     );
+    socket.on("typing", ({ chatId, on }: { chatId: string; on: boolean }) =>
+      setTyping((prev) => ({ ...prev, [chatId]: on }))
+    );
     socket.on("suggestion", ({ chatId, suggestion }: { chatId: string; suggestion: Suggestion | null }) =>
       setSnap((prev) => {
         if (!prev) return prev;
@@ -209,6 +218,20 @@ export function useWaSocket() {
         const next = i >= 0 ? arr.map((m) => (m.id === message.id ? { ...m, ...message } : m)) : [...arr, message];
         return { ...prev, [chatId]: next.slice(-80) };
       });
+      // Browser notification for a genuinely new incoming message while the tab
+      // is in the background.
+      if (
+        typeof window !== "undefined" &&
+        "Notification" in window &&
+        Notification.permission === "granted" &&
+        !message.fromMe &&
+        !message.private &&
+        document.hidden
+      ) {
+        try {
+          new Notification("New WhatsApp message", { body: message.text || "", tag: chatId });
+        } catch {}
+      }
     });
 
     return () => {
@@ -242,6 +265,16 @@ export function useWaSocket() {
     [emit]
   );
 
+  const sendMedia = useCallback(
+    async (
+      chatId: string,
+      media: { base64: string; mimetype: string; filename?: string; caption?: string; asVoice?: boolean }
+    ) => {
+      return emit("message:sendMedia", { chatId, media });
+    },
+    [emit]
+  );
+
   const assistantCommand = useCallback(
     async (text: string, chatId?: string | null) => {
       return emit("assistant:command", { text, chatId: chatId || undefined });
@@ -260,6 +293,15 @@ export function useWaSocket() {
     async (chatId: string) => emit("suggestion:clear", { chatId }),
     [emit]
   );
+
+  const enableNotifications = useCallback(async (): Promise<NotificationPermission | "unsupported"> => {
+    if (typeof window === "undefined" || !("Notification" in window)) return "unsupported";
+    try {
+      return await Notification.requestPermission();
+    } catch {
+      return "denied";
+    }
+  }, []);
 
   const loadMedia = useCallback(
     async (chatId: string, messageId: string) => {
@@ -307,12 +349,15 @@ export function useWaSocket() {
     connected,
     snap,
     messages,
+    typing,
     emit,
     openChat,
     sendMessage,
+    sendMedia,
     assistantCommand,
     chatAssistant,
     clearSuggestion,
+    enableNotifications,
     loadMedia,
     fetchModels,
     previewVoice,
