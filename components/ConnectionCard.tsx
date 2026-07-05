@@ -29,12 +29,12 @@ export function ConnectionCard({
   const connected = snap.status === "connected";
 
   return (
-    <div className="card p-5">
+    <div className="card card-hover p-5">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
           Connection
         </h2>
-        <span className={`chip bg-white/5 ${meta.color}`}>
+        <span className={`chip border border-white/10 bg-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ${meta.color}`}>
           <span className="relative flex h-2 w-2">
             {connected && (
               <span className={`absolute inline-flex h-full w-full rounded-full ${meta.dot} opacity-60 animate-pulse-ring`} />
@@ -48,21 +48,23 @@ export function ConnectionCard({
       {/* QR / connected state */}
       {connected ? (
         <div className="flex flex-col items-center gap-3 py-4 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-wa-green/15 text-wa-green">
-            <Icon.Power className="h-9 w-9" />
+          <div className="rounded-full bg-gradient-to-br from-wa-green/60 via-wa-green/20 to-wa-teal/40 p-[2px] shadow-glow">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-ink-900 text-wa-green">
+              <Icon.Power className="h-9 w-9" />
+            </div>
           </div>
-          <div>
-            <p className="text-lg font-semibold text-slate-100">{snap.me?.name || "Linked"}</p>
-            <p className="text-sm text-slate-400">+{snap.me?.number}</p>
+          <div className="animate-fade-up">
+            <p className="text-lg font-semibold tracking-tight text-slate-100">{snap.me?.name || "Linked"}</p>
+            <p className="text-sm text-slate-400 tabular-nums">+{snap.me?.number}</p>
           </div>
         </div>
       ) : snap.qr ? (
-        <div className="flex flex-col items-center gap-3 py-2">
-          <div className="rounded-2xl bg-white p-3 shadow-glow">
+        <div className="flex flex-col items-center gap-4 py-2">
+          <div className="animate-fade-up rounded-3xl bg-white p-3.5 shadow-[0_0_0_1px_rgba(37,211,102,0.25),0_12px_40px_-12px_rgba(37,211,102,0.35)] ring-4 ring-white/10">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={snap.qr} alt="WhatsApp QR" className="h-56 w-56" />
+            <img src={snap.qr} alt="WhatsApp QR" className="h-52 w-52 rounded-xl sm:h-56 sm:w-56" />
           </div>
-          <p className="text-center text-xs text-slate-400">
+          <p className="max-w-xs text-center text-xs leading-relaxed text-slate-400">
             Open WhatsApp → <b className="text-slate-200">Linked devices</b> → <b className="text-slate-200">Link a device</b> → scan this code.
           </p>
         </div>
@@ -75,7 +77,7 @@ export function ConnectionCard({
         </div>
       )}
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-5 flex flex-wrap gap-2 border-t border-white/5 pt-4">
         <button className="btn-ghost flex-1" onClick={onRefresh} disabled={!connected}>
           <Icon.Refresh className="h-4 w-4" /> Sync contacts
         </button>

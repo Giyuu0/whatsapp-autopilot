@@ -14,9 +14,18 @@ body {
 body {
   @apply bg-ink-950 text-slate-200 antialiased;
   background-image:
-    radial-gradient(60rem 60rem at 90% -10%, rgba(37, 211, 102, 0.07), transparent 60%),
-    radial-gradient(50rem 50rem at -10% 110%, rgba(18, 140, 126, 0.08), transparent 55%);
+    linear-gradient(to bottom, rgba(37, 211, 102, 0.05), transparent 18rem),
+    radial-gradient(42rem 24rem at 50% -8rem, rgba(37, 211, 102, 0.08), transparent 70%),
+    radial-gradient(60rem 60rem at 90% -10%, rgba(37, 211, 102, 0.06), transparent 60%),
+    radial-gradient(50rem 50rem at -10% 110%, rgba(18, 140, 126, 0.08), transparent 55%),
+    radial-gradient(36rem 36rem at 110% 60%, rgba(18, 140, 126, 0.05), transparent 60%);
   background-attachment: fixed;
+}
+
+/* Subtle WhatsApp-green tinted text selection */
+::selection {
+  background: rgba(37, 211, 102, 0.28);
+  color: #eafff2;
 }
 
 /* Slim scrollbars */
@@ -33,7 +42,25 @@ body {
 }
 
 .card {
-  @apply rounded-2xl border border-white/5 bg-ink-850/70 backdrop-blur-sm;
+  @apply rounded-2xl border border-white/[0.07] bg-ink-850/70 backdrop-blur-md;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 12px 32px -16px rgba(0, 0, 0, 0.55);
+}
+
+/* Lift + glow on hover — opt-in per card */
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-1px);
+  border-color: rgba(37, 211, 102, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 16px 40px -16px rgba(0, 0, 0, 0.6),
+    0 0 24px -6px rgba(37, 211, 102, 0.16);
 }
 
 .chip {
@@ -41,8 +68,13 @@ body {
 }
 
 .btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold
     disabled:cursor-not-allowed disabled:opacity-40;
+  transition: background-color 0.2s ease, color 0.2s ease, filter 0.2s ease,
+    box-shadow 0.2s ease, transform 0.15s ease;
+}
+.btn:not(:disabled):active {
+  transform: scale(0.97);
 }
 .btn-primary {
   @apply btn bg-wa-green text-ink-950 hover:brightness-110 shadow-glow;
@@ -57,8 +89,57 @@ body {
 .input {
   @apply w-full rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 text-sm text-slate-100
     placeholder:text-slate-500 outline-none focus:border-wa-green/60 focus:ring-2 focus:ring-wa-green/20;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.input:focus {
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.12), 0 0 20px -6px rgba(37, 211, 102, 0.25);
 }
 
 .label {
   @apply mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400;
+}
+
+/* Consistent, subtle wa-green focus rings for keyboard users */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="switch"]:focus-visible {
+  outline: 2px solid rgba(37, 211, 102, 0.55);
+  outline-offset: 2px;
+  border-radius: 0.75rem;
+}
+
+/* Soft breathing glow for logo marks */
+@keyframes logo-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px rgba(37, 211, 102, 0.2), 0 8px 30px -8px rgba(37, 211, 102, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(37, 211, 102, 0.35), 0 8px 38px -6px rgba(37, 211, 102, 0.55);
+  }
+}
+.logo-glow {
+  animation: logo-glow 3.2s ease-in-out infinite;
+}
+
+/* Slow drifting background accent (login screen) */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(-4%, -2%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(4%, 3%, 0) scale(1.08);
+  }
+}
+.animate-drift {
+  animation: drift 12s ease-in-out infinite;
+}
+
+/* Gradient text helper for the brand word */
+.text-gradient-wa {
+  @apply bg-gradient-to-r from-wa-green via-emerald-300 to-wa-teal bg-clip-text text-transparent;
 }

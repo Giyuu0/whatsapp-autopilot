@@ -5,8 +5,17 @@
  * and the background client).
  */
 const { createServer } = require("http");
+const crypto = require("crypto");
 const next = require("next");
 const { Server } = require("socket.io");
+
+/** Constant-time string compare (avoids timing attacks on the access key). */
+function safeEqual(a, b) {
+  const ba = Buffer.from(String(a || ""));
+  const bb = Buffer.from(String(b || ""));
+  if (ba.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ba, bb);
+}
 
 const dev = process.env.NODE_ENV !== "production";
 const port = parseInt(process.env.PORT || "4499", 10);
@@ -26,7 +35,7 @@ app.prepare().then(() => {
   // ---- Access gate: every socket must present the correct access key ----
   io.use((socket, next) => {
     const provided = socket.handshake.auth && socket.handshake.auth.key;
-    if (provided && provided === store.accessKey()) return next();
+    if (provided && safeEqual(provided, store.accessKey())) return next();
     next(new Error("unauthorized"));
   });
 
