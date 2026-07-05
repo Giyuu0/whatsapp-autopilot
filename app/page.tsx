@@ -25,6 +25,7 @@ export default function Dashboard() {
     editMessage,
     assistantCommand,
     chatAssistant,
+    rewriteDraft,
     clearSuggestion,
     enableNotifications,
     loadMedia,
@@ -263,6 +264,7 @@ export default function Dashboard() {
             onSetCustomPrompt={(id, prompt) => patchContact(id, { customPrompt: prompt })}
             onToggleFavorite={(id, favorite) => patchContact(id, { favorite })}
             onChatAssistant={chatAssistant}
+            onRewrite={rewriteDraft}
             onLoadMedia={loadMedia}
             onSendMedia={sendMedia}
             onDeleteMessage={deleteMessage}

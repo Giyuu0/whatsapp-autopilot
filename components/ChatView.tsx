@@ -536,6 +536,7 @@ export function ChatView(props: {
   onSetMemory: (chatId: string, memory: string) => void;
   onToggleFavorite: (chatId: string, favorite: boolean) => void;
   onChatAssistant: (chatId: string, command: string) => Promise<any>;
+  onRewrite: (text: string, lang: string) => Promise<{ ok?: boolean; text?: string; error?: string }>;
   onLoadMedia: (chatId: string, messageId: string) => Promise<any>;
   onDeleteMessage: (chatId: string, messageId: string) => Promise<any>;
   onEditMessage: (chatId: string, messageId: string, text: string) => Promise<any>;
@@ -564,6 +565,7 @@ export function ChatView(props: {
     onSetMemory,
     onToggleFavorite,
     onChatAssistant,
+    onRewrite,
     onLoadMedia,
     onDeleteMessage,
     onEditMessage,
@@ -579,6 +581,11 @@ export function ChatView(props: {
   const [filter, setFilter] = useState<"all" | "unread" | "fav">("all");
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  // Compose helper: rewrite/translate the draft before sending.
+  const [translateOn, setTranslateOn] = useState(false);
+  const [translateLang, setTranslateLang] = useState<"english" | "english-slang">("english");
+  const [rewriting, setRewriting] = useState(false);
+  const [rewrittenText, setRewrittenText] = useState(""); // draft is "ready to send" when it equals this
   const [showPrompt, setShowPrompt] = useState(false);
   const [promptDraft, setPromptDraft] = useState("");
   const [memoryDraft, setMemoryDraft] = useState("");
@@ -677,11 +684,29 @@ export function ChatView(props: {
 
   async function handleSend() {
     const text = draft.trim();
-    if (!text || !activeChatId || sending) return;
+    if (!text || !activeChatId || sending || rewriting) return;
     // "@bot ..." is a PRIVATE aside to your assistant about this chat — it is
     // NOT sent to the person. The bot replies "@yati ..." (also private).
     const isBot = /^@bot\b/i.test(text);
     if (!isBot && !connected) return;
+
+    // Translate/rewrite mode: the FIRST Enter/Send rewrites the draft in place
+    // (into the chosen language); the SECOND one actually sends it. We treat
+    // the draft as "ready" once it matches the last rewrite output.
+    if (translateOn && !isBot && text !== rewrittenText.trim()) {
+      setRewriting(true);
+      try {
+        const res = await onRewrite(text, translateLang);
+        if (res?.ok && res.text) {
+          setDraft(res.text);
+          setRewrittenText(res.text);
+        }
+      } finally {
+        setRewriting(false);
+      }
+      return; // don't send yet — let the user review, then Enter/Send again
+    }
+
     setSending(true);
     try {
       if (isBot) {
@@ -1064,6 +1089,59 @@ export function ChatView(props: {
 
               {/* composer */}
               <div className="border-t border-fg/10 bg-fg/5 p-3">
+                {/* translate / rewrite controls */}
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTranslateOn((v) => !v);
+                      setRewrittenText("");
+                    }}
+                    title="Rewrite your message into English before sending"
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
+                      translateOn ? "bg-wa-green text-ink-950" : "bg-fg/5 text-fg/60 hover:bg-fg/10 hover:text-fg/80"
+                    }`}
+                  >
+                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M4 5h7M9 3v2c0 4.5-2 7-5 9M5 9c0 2.5 2.5 5 6 6" />
+                      <path d="M14 19l3-7 3 7M14.5 17h5" />
+                    </svg>
+                    Translate
+                  </button>
+                  {translateOn && (
+                    <>
+                      {(
+                        [
+                          { key: "english", label: "English" },
+                          { key: "english-slang", label: "English + slang" },
+                        ] as const
+                      ).map((o) => (
+                        <button
+                          key={o.key}
+                          type="button"
+                          onClick={() => {
+                            setTranslateLang(o.key);
+                            setRewrittenText("");
+                          }}
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
+                            translateLang === o.key
+                              ? "bg-fg/15 text-fg/90 ring-1 ring-inset ring-wa-green/40"
+                              : "bg-fg/5 text-fg/55 hover:bg-fg/10"
+                          }`}
+                        >
+                          {o.label}
+                        </button>
+                      ))}
+                      <span className="text-[11px] text-fg/40">
+                        {rewriting
+                          ? "Rewriting…"
+                          : draft.trim() && draft.trim() === rewrittenText.trim()
+                            ? "Ready — press Enter to send"
+                            : "Press Enter to rewrite, again to send"}
+                      </span>
+                    </>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <input
                     ref={fileRef}
@@ -1123,15 +1201,31 @@ export function ChatView(props: {
                       }
                     }}
                   />
-                  <button
-                    type="button"
-                    className="btn-primary h-11 w-11 shrink-0 rounded-full !p-0 transition active:scale-95"
-                    onClick={() => void handleSend()}
-                    disabled={!connected || !draft.trim() || sending}
-                    aria-label="Send message"
-                  >
-                    <Icon.Send className="mx-auto h-4 w-4" />
-                  </button>
+                  {(() => {
+                    const needsRewrite =
+                      translateOn && !!draft.trim() && draft.trim() !== rewrittenText.trim() && !/^@bot\b/i.test(draft);
+                    return (
+                      <button
+                        type="button"
+                        className="btn-primary h-11 w-11 shrink-0 rounded-full !p-0 transition active:scale-95"
+                        onClick={() => void handleSend()}
+                        disabled={!connected || !draft.trim() || sending || rewriting}
+                        aria-label={needsRewrite ? "Rewrite message" : "Send message"}
+                        title={needsRewrite ? "Rewrite into " + (translateLang === "english-slang" ? "English + slang" : "English") : "Send"}
+                      >
+                        {rewriting ? (
+                          <span className="mx-auto h-4 w-4 animate-spin rounded-full border-2 border-ink-950/30 border-t-ink-950" />
+                        ) : needsRewrite ? (
+                          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.1L5.5 9l4.6-1.4L12 3z" />
+                            <path d="M19 14l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z" />
+                          </svg>
+                        ) : (
+                          <Icon.Send className="mx-auto h-4 w-4" />
+                        )}
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </>

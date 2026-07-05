@@ -307,6 +307,13 @@ export function useWaSocket() {
     [emit]
   );
 
+  const rewriteDraft = useCallback(
+    async (text: string, lang: string): Promise<{ ok?: boolean; text?: string; error?: string }> => {
+      return emit("composer:rewrite", { text, lang });
+    },
+    [emit]
+  );
+
   const clearSuggestion = useCallback(
     async (chatId: string) => emit("suggestion:clear", { chatId }),
     [emit]
@@ -376,6 +383,7 @@ export function useWaSocket() {
     editMessage,
     assistantCommand,
     chatAssistant,
+    rewriteDraft,
     clearSuggestion,
     enableNotifications,
     loadMedia,

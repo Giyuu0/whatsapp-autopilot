@@ -171,6 +171,16 @@ app.prepare().then(() => {
       }
     });
 
+    // Composer helper: translate + rewrite the owner's own draft before sending.
+    socket.on("composer:rewrite", async ({ text, lang }, ack) => {
+      try {
+        const rewritten = await wa.rewriteDraft(text, lang);
+        ack && ack({ ok: true, text: rewritten });
+      } catch (e) {
+        ack && ack({ ok: false, error: e.message });
+      }
+    });
+
     // Private @bot side-channel for an open chat (never sent to the person).
     socket.on("chat:assistant", async ({ chatId, text }, ack) => {
       try {
