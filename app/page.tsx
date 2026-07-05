@@ -144,8 +144,12 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <button className="btn-ghost !py-1.5 text-xs" onClick={() => emit("contacts:refresh")}>
-                Sync chats
+              <button
+                className="btn-ghost !py-1.5 text-xs"
+                onClick={() => emit("contacts:refresh")}
+                disabled={snap.sync?.syncing}
+              >
+                {snap.sync?.syncing ? "Syncing…" : "Sync chats"}
               </button>
               <button className="btn-ghost !py-1.5 text-xs" onClick={() => emit("wa:restart")}>
                 Restart
@@ -155,6 +159,27 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
+
+          {/* sync progress bar */}
+          {snap.sync?.syncing && (
+            <div className="animate-fade-up rounded-2xl border border-white/5 bg-ink-850/70 px-4 py-3">
+              <div className="mb-2 flex items-center justify-between text-xs">
+                <span className="flex items-center gap-2 text-slate-300">
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/15 border-t-wa-green" />
+                  Syncing your chats &amp; contacts…
+                </span>
+                <span className="tabular-nums text-slate-400">
+                  {snap.sync.done}/{snap.sync.total || "…"}
+                </span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-wa-green to-wa-teal transition-all duration-300"
+                  style={{ width: `${snap.sync.total ? Math.round((snap.sync.done / snap.sync.total) * 100) : 8}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           <ChatView
             chats={snap.chats}

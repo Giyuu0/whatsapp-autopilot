@@ -100,6 +100,8 @@ export type Stats = {
   totalContacts: number;
 };
 
+export type SyncState = { syncing: boolean; done: number; total: number };
+
 export type Status =
   | "idle" | "initializing" | "qr" | "authenticating"
   | "connected" | "disconnected" | "error";
@@ -115,6 +117,7 @@ export type Snapshot = {
   chats: Chat[];
   logs: LogEntry[];
   stats: Stats;
+  sync: SyncState;
 };
 
 const KEY_STORAGE = "wa_access_key";
@@ -174,6 +177,9 @@ export function useWaSocket() {
     );
     socket.on("stats", (stats: Stats) =>
       setSnap((prev) => (prev ? { ...prev, stats } : prev))
+    );
+    socket.on("sync", (sync: SyncState) =>
+      setSnap((prev) => (prev ? { ...prev, sync } : prev))
     );
     socket.on("log", (entry: LogEntry) =>
       setSnap((prev) => (prev ? { ...prev, logs: [...prev.logs, entry].slice(-250) } : prev))
