@@ -21,6 +21,7 @@ export default function Dashboard() {
     sendMessage,
     assistantCommand,
     chatAssistant,
+    loadMedia,
     authState,
     authError,
     login,
@@ -195,6 +196,7 @@ export default function Dashboard() {
             onSetVoiceReply={(id, pref: VoiceReply) => patchContact(id, { voiceReply: pref })}
             onSetCustomPrompt={(id, prompt) => patchContact(id, { customPrompt: prompt })}
             onChatAssistant={chatAssistant}
+            onLoadMedia={loadMedia}
           />
         </div>
       )}

@@ -44,6 +44,8 @@ export type Message = {
   isAutoReply?: boolean;
   private?: boolean; // @bot/@yati aside — shown only to you, never sent to the person
   ack?: number; // WhatsApp delivery status: -1 err, 0 pending, 1 sent, 2 delivered, 3 read, 4 played
+  media?: string | null; // image preview as a data URL
+  viewOnce?: boolean; // WhatsApp "view once" photo
 };
 
 export type LogEntry = {
@@ -239,6 +241,21 @@ export function useWaSocket() {
     [emit]
   );
 
+  const loadMedia = useCallback(
+    async (chatId: string, messageId: string) => {
+      const res = await emit("message:media", { messageId });
+      if (res?.ok && res.media) {
+        setMessages((prev) => {
+          const arr = prev[chatId];
+          if (!arr) return prev;
+          return { ...prev, [chatId]: arr.map((m) => (m.id === messageId ? { ...m, media: res.media } : m)) };
+        });
+      }
+      return res;
+    },
+    [emit]
+  );
+
   const fetchModels = useCallback(async (): Promise<ModelsResult> => {
     return emit("models:fetch", {});
   }, [emit]);
@@ -275,6 +292,7 @@ export function useWaSocket() {
     sendMessage,
     assistantCommand,
     chatAssistant,
+    loadMedia,
     fetchModels,
     previewVoice,
     authState,

@@ -66,6 +66,16 @@ app.prepare().then(() => {
       }
     });
 
+    // Load an image's preview on demand (for history photos).
+    socket.on("message:media", async ({ messageId }, ack) => {
+      try {
+        const media = await wa.fetchMedia(messageId);
+        ack && ack({ ok: true, media });
+      } catch (e) {
+        ack && ack({ ok: false, error: e.message });
+      }
+    });
+
     // Send a message manually from the chat composer.
     socket.on("message:send", async ({ chatId, text }, ack) => {
       try {

@@ -193,9 +193,11 @@ function ChatRow({
 
 /* --------------------------------- bubble --------------------------------- */
 
-function MessageBubble({ msg }: { msg: Message }) {
+function MessageBubble({ msg, onLoadMedia }: { msg: Message; onLoadMedia: (id: string) => Promise<any> }) {
   const mine = msg.fromMe;
   const showModel = msg.isAutoReply && msg.model;
+  const [loadingImg, setLoadingImg] = useState(false);
+  const caption = msg.text && msg.text !== "📷 Photo" ? msg.text : "";
 
   // Private @bot / @yati aside — only you see this; it never went to the person.
   if (msg.private) {
@@ -227,12 +229,49 @@ function MessageBubble({ msg }: { msg: Message }) {
             : "rounded-bl-sm bg-ink-700/60 text-white/90 ring-white/5"
         }`}
       >
-        <div className="whitespace-pre-wrap break-words pr-1 text-sm leading-relaxed">
-          {msg.type === "voice" && <span className="mr-1">🎤</span>}
-          {msg.type === "audio" && <span className="mr-1">🎧</span>}
-          {msg.type === "image" && <span className="mr-1">📷</span>}
-          {msg.text || (msg.type === "voice" ? "Voice message" : msg.type === "image" ? "Photo" : "")}
-        </div>
+        {msg.type === "image" ? (
+          <div className="max-w-[260px]">
+            {msg.viewOnce && (
+              <div className="mb-1 flex items-center gap-1 text-[10px] font-medium text-amber-300/90">
+                👁️ View once
+              </div>
+            )}
+            {msg.media ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={msg.media} alt="photo" className="max-h-72 w-full rounded-xl object-cover" />
+            ) : (
+              <button
+                type="button"
+                onClick={async () => {
+                  setLoadingImg(true);
+                  try {
+                    await onLoadMedia(msg.id);
+                  } finally {
+                    setLoadingImg(false);
+                  }
+                }}
+                disabled={loadingImg}
+                className="flex h-32 w-full min-w-[180px] flex-col items-center justify-center gap-1 rounded-xl bg-black/25 text-xs text-white/70 transition hover:bg-black/35"
+              >
+                {loadingImg ? (
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-wa-green" />
+                ) : (
+                  <>
+                    <span className="text-2xl">📷</span>
+                    <span>Tap to view photo</span>
+                  </>
+                )}
+              </button>
+            )}
+            {caption && <div className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed">{caption}</div>}
+          </div>
+        ) : (
+          <div className="whitespace-pre-wrap break-words pr-1 text-sm leading-relaxed">
+            {msg.type === "voice" && <span className="mr-1">🎤</span>}
+            {msg.type === "audio" && <span className="mr-1">🎧</span>}
+            {msg.text || (msg.type === "voice" ? "Voice message" : "")}
+          </div>
+        )}
         <div
           className={`mt-0.5 flex items-center gap-1.5 text-[10px] ${
             mine ? "justify-end text-wa-light/55" : "text-white/40"
@@ -266,6 +305,7 @@ export function ChatView(props: {
   onSetVoiceReply: (chatId: string, pref: VoiceReply) => void;
   onSetCustomPrompt: (chatId: string, prompt: string) => void;
   onChatAssistant: (chatId: string, command: string) => Promise<any>;
+  onLoadMedia: (chatId: string, messageId: string) => Promise<any>;
   connected: boolean;
 }) {
   const {
@@ -280,6 +320,7 @@ export function ChatView(props: {
     onSetVoiceReply,
     onSetCustomPrompt,
     onChatAssistant,
+    onLoadMedia,
     connected,
   } = props;
 
@@ -564,7 +605,7 @@ export function ChatView(props: {
                     return (
                       <React.Fragment key={m.id}>
                         {showDate && <DateDivider ts={m.ts} />}
-                        <MessageBubble msg={m} />
+                        <MessageBubble msg={m} onLoadMedia={(id) => onLoadMedia(activeChat.id, id)} />
                       </React.Fragment>
                     );
                   })

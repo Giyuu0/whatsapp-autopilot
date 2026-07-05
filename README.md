@@ -94,6 +94,12 @@ Inside any open conversation, start a message with **`@bot`** to talk to your as
 
 The bot reads the conversation and answers you inline, addressed **`@yati`** (also private, dashed/highlighted so you can't confuse it with a real message). Use it to brainstorm replies, get context, or ask questions mid-chat. Works in the main chat view and inside the orb.
 
+**It's smart about intent:** if your `@bot` note is actually a *correction or instruction to send* (e.g. after a wrong image guess you type `@bot it is ghevar`), it phrases a natural reply and **sends it to the person** ("ohh my bad 😅 that's actually ghevar!"). If it's a question to you, it stays private.
+
+## 🖼️ Photo previews
+
+Incoming (and outgoing) photos show as real **image previews** in the chat, not just a placeholder. Older photos load on demand (**Tap to view**), and **"view once"** photos are captured and shown too, clearly labelled 👁️.
+
 ---
 
 ## 🧠 How replies are routed
