@@ -881,9 +881,11 @@ export function ChatView(props: {
         <section
           className={`flex min-h-0 flex-col ${
             activeChatId
-              ? // Mobile: the open conversation becomes a full-screen app view
-                // (h-dvh, never 100vh). Desktop stays inside the card grid.
-                "fixed inset-x-0 top-0 z-40 h-dvh bg-surface md:static md:z-auto md:h-auto md:bg-transparent"
+              ? // Mobile: the open conversation is a full-screen app view. inset-0
+                // pins all four edges (immune to dvh/keyboard quirks) with a solid
+                // opaque bg and a high z so nothing bleeds through. Desktop stays
+                // inside the card grid (md:static).
+                "fixed inset-0 z-[60] bg-surface md:static md:inset-auto md:z-auto md:bg-transparent"
               : "hidden md:flex"
           }`}
         >

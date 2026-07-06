@@ -111,6 +111,7 @@ export function ChatbotOrb(props: {
   onRewrite?: (text: string, lang: string) => Promise<{ ok?: boolean; text?: string; error?: string }>;
   activeChatId: string | null;
   activeChatName: string | null;
+  chatOpen?: boolean; // a full-screen chat is open on the dashboard (mobile)
 }) {
   const {
     onCommand,
@@ -123,6 +124,7 @@ export function ChatbotOrb(props: {
     onChatAssistant,
     onRewrite,
     activeChatName,
+    chatOpen,
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -464,7 +466,13 @@ export function ChatbotOrb(props: {
   );
 
   return (
-    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-50 flex flex-col items-end gap-3 sm:right-5 md:bottom-5">
+    <div
+      className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[70] flex-col items-end gap-3 sm:right-5 md:bottom-5 ${
+        // On phones, hide the whole orb while a full-screen chat is open — its
+        // button would otherwise sit on top of that chat's send button.
+        chatOpen ? "hidden md:flex" : "flex"
+      }`}
+    >
       {/* -------------------- Panel -------------------- */}
       {open && (
         <div
@@ -967,7 +975,11 @@ export function ChatbotOrb(props: {
         onClick={toggleOpen}
         aria-label={open ? "Close assistant" : "Open assistant"}
         aria-expanded={open}
-        className={`relative grid h-[60px] w-[60px] place-items-center rounded-full bg-gradient-to-br from-wa-green to-wa-teal text-ink-950 transition duration-200 hover:scale-105 active:scale-95 ${orbGlow}`}
+        className={`relative h-[60px] w-[60px] place-items-center rounded-full bg-gradient-to-br from-wa-green to-wa-teal text-ink-950 transition duration-200 hover:scale-105 active:scale-95 ${orbGlow} ${
+          // While the panel is open on mobile, hide this floating button (it would
+          // sit over the panel's own send button); the panel header has a ✕.
+          open ? "hidden md:grid" : "grid"
+        }`}
       >
         {/* pulsing rings */}
         <span
