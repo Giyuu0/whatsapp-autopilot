@@ -1,9 +1,23 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Icon, Toggle, Select } from "./ui";
 import { VoiceRecorder } from "./VoiceRecorder";
 import type { Chat, Message, Language, Tone, VoiceReply, ManualReply, Suggestion } from "./useWaSocket";
+
+/** True on phone-width viewports (client-only; updates on resize). */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const on = () => setIsMobile(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return isMobile;
+}
 
 /* ---------------------------------- utils --------------------------------- */
 
@@ -586,6 +600,9 @@ export function ChatView(props: {
     typing,
   } = props;
 
+  const isMobile = useIsMobile();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "unread" | "fav">("all");
   const [draft, setDraft] = useState("");
@@ -878,16 +895,10 @@ export function ChatView(props: {
         </aside>
 
         {/* --------------------------- RIGHT: conversation --------------------------- */}
+        {(() => {
+          const panel = (
         <section
-          className={`flex min-h-0 flex-col ${
-            activeChatId
-              ? // Mobile: the open conversation is a full-screen app view. inset-0
-                // pins all four edges (immune to dvh/keyboard quirks) with a solid
-                // opaque bg and a high z so nothing bleeds through. Desktop stays
-                // inside the card grid (md:static).
-                "fixed inset-0 z-[60] bg-surface md:static md:inset-auto md:z-auto md:bg-transparent"
-              : "hidden md:flex"
-          }`}
+          className={`flex min-h-0 flex-col ${activeChatId ? "h-full" : "hidden md:flex"}`}
         >
           {!activeChat ? (
             <div className="chat-wallpaper relative flex flex-1 flex-col items-center justify-center gap-4 p-10 text-center">
@@ -1314,6 +1325,22 @@ export function ChatView(props: {
             </>
           )}
         </section>
+          );
+          // On phones, the open conversation is portaled to <body> as a
+          // full-screen overlay. This escapes every ancestor's stacking /
+          // overflow / containing-block context (deep-nested position:fixed is
+          // unreliable on iOS Safari) so it always covers the whole screen with
+          // nothing bleeding through. Desktop renders inline in the card grid.
+          if (mounted && isMobile && activeChatId) {
+            return createPortal(
+              <div className="fixed inset-0 z-[60] flex flex-col bg-surface" style={{ height: "100dvh" }}>
+                {panel}
+              </div>,
+              document.body
+            );
+          }
+          return panel;
+        })()}
       </div>
     </div>
   );
