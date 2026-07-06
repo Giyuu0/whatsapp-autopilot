@@ -1,9 +1,26 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
   title: "WhatsApp AutoPilot",
   description: "Auto-reply on WhatsApp with Groq (text) + Gemini (vision) — you choose which contacts.",
+  manifest: "/manifest.json",
+  icons: { icon: "/icon.svg" },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "AutoPilot",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0a0f14" },
+    { media: "(prefers-color-scheme: light)", color: "#edf1f6" },
+  ],
 };
 
 // Set the theme before first paint to avoid a flash of the wrong theme.

@@ -181,7 +181,7 @@ function ChatRow({
           onOpen(chat.id);
         }
       }}
-      className={`group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+      className={`group flex min-h-[56px] w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left transition active:scale-[0.98] active:bg-fg/10 md:min-h-0 ${
         active ? "bg-fg/10 ring-1 ring-wa-green/40" : "hover:bg-fg/5"
       }`}
     >
@@ -223,10 +223,12 @@ function ChatRow({
                 e.stopPropagation();
                 onToggleFavorite(chat.id, !chat.favorite);
               }}
-              className={`text-base leading-none transition ${
+              className={`-m-1.5 p-1.5 text-base leading-none transition active:scale-90 ${
                 chat.favorite
                   ? "text-amber-400"
-                  : "text-fg/30 opacity-0 hover:text-amber-300 group-hover:opacity-100"
+                  : // No hover on touch — keep the star reachable on mobile,
+                    // hover-revealed on desktop as before.
+                    "text-fg/30 opacity-60 hover:text-amber-300 md:opacity-0 md:group-hover:opacity-100"
               }`}
             >
               {chat.favorite ? "★" : "☆"}
@@ -640,6 +642,22 @@ export function ChatView(props: {
     );
   }, [chats, query, filter]);
 
+  // Mobile only: while a conversation is open full-screen, lock the page
+  // behind it so the dashboard can't scroll underneath. Desktop untouched.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    const apply = () => {
+      document.body.style.overflow = activeChatId && mq.matches ? "hidden" : "";
+    };
+    apply();
+    mq.addEventListener?.("change", apply);
+    return () => {
+      mq.removeEventListener?.("change", apply);
+      document.body.style.overflow = "";
+    };
+  }, [activeChatId]);
+
   // Jump to the bottom when a chat opens.
   useEffect(() => {
     const el = listRef.current;
@@ -813,10 +831,10 @@ export function ChatView(props: {
                   key={t.key}
                   type="button"
                   onClick={() => setFilter(t.key)}
-                  className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition ${
+                  className={`flex min-h-[40px] items-center gap-1 rounded-full px-3.5 py-1 text-xs font-medium transition active:scale-[0.98] md:min-h-0 md:px-3 ${
                     filter === t.key
                       ? "bg-wa-green text-ink-950"
-                      : "bg-fg/5 text-fg/60 hover:bg-fg/10 hover:text-fg/80"
+                      : "bg-fg/5 text-fg/60 hover:bg-fg/10 hover:text-fg/80 active:bg-fg/10"
                   }`}
                 >
                   <span>{t.label}</span>
@@ -833,7 +851,7 @@ export function ChatView(props: {
               ))}
             </div>
           </div>
-          <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
+          <div className="scroll-touch min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
             {sortedChats.length === 0 ? (
               <div className="px-3 py-10 text-center text-sm text-fg/40">
                 {chats.length === 0
@@ -862,7 +880,11 @@ export function ChatView(props: {
         {/* --------------------------- RIGHT: conversation --------------------------- */}
         <section
           className={`flex min-h-0 flex-col ${
-            activeChatId ? "flex" : "hidden md:flex"
+            activeChatId
+              ? // Mobile: the open conversation becomes a full-screen app view
+                // (h-dvh, never 100vh). Desktop stays inside the card grid.
+                "fixed inset-x-0 top-0 z-40 h-dvh bg-surface md:static md:z-auto md:h-auto md:bg-transparent"
+              : "hidden md:flex"
           }`}
         >
           {!activeChat ? (
@@ -884,13 +906,13 @@ export function ChatView(props: {
           ) : (
             <>
               {/* header */}
-              <div className="sticky top-0 z-10 border-b border-fg/10 bg-gradient-to-b from-surface-1/80 to-surface-1/50 p-3 backdrop-blur-xl">
+              <div className="sticky top-0 z-10 border-b border-fg/10 bg-gradient-to-b from-surface-1/80 to-surface-1/50 p-3 pt-[calc(0.75rem+env(safe-area-inset-top))] backdrop-blur-xl md:pt-3">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                   {/* back button (mobile only) */}
                   <button
                     type="button"
                     onClick={() => onOpenChat("")}
-                    className="btn-ghost shrink-0 px-2 md:hidden"
+                    className="btn-ghost min-h-[44px] shrink-0 px-3 active:scale-[0.98] active:bg-fg/10 md:hidden"
                     aria-label="Back to chats"
                   >
                     ‹ Back
@@ -916,7 +938,7 @@ export function ChatView(props: {
                         type="button"
                         title={activeChat.favorite ? "Remove from favorites" : "Add to favorites"}
                         onClick={() => onToggleFavorite(activeChat.id, !activeChat.favorite)}
-                        className={`shrink-0 text-sm leading-none transition ${
+                        className={`-m-1.5 shrink-0 p-1.5 text-sm leading-none transition active:scale-90 ${
                           activeChat.favorite ? "text-amber-400" : "text-fg/25 hover:text-amber-300"
                         }`}
                       >
@@ -939,9 +961,9 @@ export function ChatView(props: {
                     </div>
                   </div>
 
-                  {/* controls */}
-                  <div className="flex w-full flex-wrap items-center justify-start gap-2 md:w-auto md:justify-end">
-                    <div className="flex items-center gap-1.5">
+                  {/* controls — one swipeable row on mobile, wrapping row on desktop */}
+                  <div className="no-scrollbar scroll-touch -mx-1 flex w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto px-1 py-0.5 md:mx-0 md:w-auto md:flex-wrap md:justify-end md:overflow-visible md:px-0 md:py-0">
+                    <div className="flex shrink-0 items-center gap-1.5">
                       <span className="text-[11px] text-fg/50">Auto-reply</span>
                       <Toggle
                         checked={activeChat.enabled}
@@ -950,7 +972,7 @@ export function ChatView(props: {
                       />
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex shrink-0 items-center gap-1">
                       <span className="hidden text-[11px] text-fg/50 lg:inline">Lang</span>
                       <Select
                         value={activeChat.language}
@@ -960,7 +982,7 @@ export function ChatView(props: {
                       />
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex shrink-0 items-center gap-1">
                       <span className="hidden text-[11px] text-fg/50 lg:inline">Tone</span>
                       <Select
                         value={activeChat.tone}
@@ -970,7 +992,7 @@ export function ChatView(props: {
                       />
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex shrink-0 items-center gap-1">
                       <span className="hidden text-[11px] text-fg/50 lg:inline">Voice</span>
                       <Select
                         value={activeChat.voiceReply}
@@ -980,7 +1002,7 @@ export function ChatView(props: {
                       />
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex shrink-0 items-center gap-1">
                       <span className="hidden text-[11px] text-fg/50 lg:inline">Mode</span>
                       <Select
                         value={activeChat.manualReply}
@@ -996,7 +1018,7 @@ export function ChatView(props: {
                         setPromptDraft(activeChat.customPrompt || "");
                         setShowPrompt((s) => !s);
                       }}
-                      className={`btn-ghost h-8 shrink-0 px-2 ${
+                      className={`btn-ghost h-9 shrink-0 px-2.5 active:scale-[0.98] active:bg-fg/10 md:h-8 md:px-2 ${
                         showPrompt ? "bg-fg/10 text-fg" : ""
                       }`}
                       aria-label="Edit persona"
@@ -1067,7 +1089,7 @@ export function ChatView(props: {
               <div
                 ref={listRef}
                 onScroll={onListScroll}
-                className="chat-wallpaper min-h-0 flex-1 space-y-2 overflow-y-auto p-4"
+                className="chat-wallpaper scroll-touch min-h-0 flex-1 space-y-2 overflow-y-auto p-3 sm:p-4"
               >
                 {messages.length === 0 ? (
                   <div className="flex h-full items-center justify-center text-center text-sm text-fg/40">
@@ -1106,7 +1128,7 @@ export function ChatView(props: {
                   below (no separate suggestion card). */}
 
               {/* composer */}
-              <div className="border-t border-fg/10 bg-fg/5 p-3">
+              <div className="border-t border-fg/10 bg-fg/5 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-3">
                 {/* translate / rewrite controls */}
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <button
@@ -1116,8 +1138,8 @@ export function ChatView(props: {
                       setRewrittenText("");
                     }}
                     title="Rewrite your message into English before sending"
-                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
-                      translateOn ? "bg-wa-green text-ink-950" : "bg-fg/5 text-fg/60 hover:bg-fg/10 hover:text-fg/80"
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition active:scale-[0.98] md:py-1 ${
+                      translateOn ? "bg-wa-green text-ink-950" : "bg-fg/5 text-fg/60 hover:bg-fg/10 hover:text-fg/80 active:bg-fg/10"
                     }`}
                   >
                     <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1141,10 +1163,10 @@ export function ChatView(props: {
                             setTranslateLang(o.key);
                             setRewrittenText("");
                           }}
-                          className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
+                          className={`rounded-full px-2.5 py-1.5 text-[11px] font-medium transition active:scale-[0.98] md:py-1 ${
                             translateLang === o.key
                               ? "bg-fg/15 text-fg/90 ring-1 ring-inset ring-wa-green/40"
-                              : "bg-fg/5 text-fg/55 hover:bg-fg/10"
+                              : "bg-fg/5 text-fg/55 hover:bg-fg/10 active:bg-fg/10"
                           }`}
                         >
                           {o.label}

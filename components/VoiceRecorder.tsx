@@ -124,7 +124,7 @@ export function VoiceRecorder({
           onClick={cancel}
           title="Cancel"
           aria-label="Cancel recording"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-fg/60 transition hover:bg-fg/10 hover:text-fg/90"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-fg/60 transition hover:bg-fg/10 hover:text-fg/90 active:scale-95 md:h-8 md:w-8"
         >
           ✕
         </button>
@@ -133,7 +133,7 @@ export function VoiceRecorder({
           onClick={stop}
           title="Send voice note"
           aria-label="Send voice note"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-wa-green text-ink-950 transition active:scale-95"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-wa-green text-ink-950 transition active:scale-95 md:h-8 md:w-8"
         >
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
             <path d="M2 21l21-9L2 3v7l15 2-15 2z" />

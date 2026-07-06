@@ -82,9 +82,9 @@ export default function Dashboard() {
   const patchContact = (id: string, patch: any) => emit("contact:update", { id, patch });
 
   return (
-    <main className="mx-auto max-w-7xl px-3 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto max-w-7xl px-3 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-6 sm:pb-6 lg:px-8">
       {/* Header */}
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <header className="mb-4 flex flex-wrap items-center justify-between gap-3 sm:mb-6 sm:gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="logo-glow flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-wa-green to-wa-teal text-ink-950">
             <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6">
@@ -95,7 +95,7 @@ export default function Dashboard() {
             <h1 className="text-lg font-bold tracking-tighter text-fg sm:text-xl">
               WhatsApp <span className="text-gradient-wa">AutoPilot</span>
             </h1>
-            <p className="text-xs text-fg/60">
+            <p className="hidden text-xs text-fg/60 sm:block">
               Groq replies to text &amp; voice · Gemini sees images · you pick who gets replies
             </p>
           </div>
@@ -125,7 +125,7 @@ export default function Dashboard() {
                 setNotifOn(p === "granted");
               }}
               title={notifOn ? "Notifications on" : "Enable browser notifications"}
-              className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors hover:bg-fg/5 ${
+              className={`flex h-11 w-11 items-center justify-center rounded-xl transition hover:bg-fg/5 active:scale-[0.95] active:bg-fg/10 md:h-9 md:w-9 ${
                 notifOn ? "text-wa-green" : "text-fg/60 hover:text-fg/90"
               }`}
             >
@@ -140,7 +140,7 @@ export default function Dashboard() {
               onClick={toggleTheme}
               title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
               aria-label="Toggle theme"
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-fg/60 transition-colors hover:bg-fg/5 hover:text-wa-green"
+              className="flex h-11 w-11 items-center justify-center rounded-xl text-fg/60 transition hover:bg-fg/5 hover:text-wa-green active:scale-[0.95] active:bg-fg/10 md:h-9 md:w-9"
             >
               {theme === "dark" ? (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
@@ -158,7 +158,7 @@ export default function Dashboard() {
             <Link
               href="/settings"
               title="Settings"
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-fg/60 transition-colors hover:bg-fg/5 hover:text-wa-green"
+              className="flex h-11 w-11 items-center justify-center rounded-xl text-fg/60 transition hover:bg-fg/5 hover:text-wa-green active:scale-[0.95] active:bg-fg/10 md:h-9 md:w-9"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
                 <circle cx="12" cy="12" r="3" />
@@ -170,7 +170,7 @@ export default function Dashboard() {
             <button
               onClick={lock}
               title="Lock dashboard"
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-fg/60 transition-colors hover:bg-fg/5 hover:text-red-300"
+              className="flex h-11 w-11 items-center justify-center rounded-xl text-fg/60 transition hover:bg-fg/5 hover:text-red-300 active:scale-[0.95] active:bg-fg/10 md:h-9 md:w-9"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
                 <rect x="3" y="11" width="18" height="11" rx="2" />
@@ -182,7 +182,7 @@ export default function Dashboard() {
       </header>
 
       {/* Stats */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <StatCards stats={snap.stats} />
       </div>
 
@@ -212,16 +212,16 @@ export default function Dashboard() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button
-                className="btn-ghost !py-1.5 text-xs"
+                className="btn-ghost !py-2.5 text-xs md:!py-1.5"
                 onClick={() => emit("contacts:refresh")}
                 disabled={snap.sync?.syncing}
               >
                 {snap.sync?.syncing ? "Syncing…" : "Sync chats"}
               </button>
-              <button className="btn-ghost !py-1.5 text-xs" onClick={() => emit("wa:restart")}>
+              <button className="btn-ghost !py-2.5 text-xs md:!py-1.5" onClick={() => emit("wa:restart")}>
                 Restart
               </button>
-              <button className="btn-danger !py-1.5 text-xs" onClick={() => emit("wa:logout")}>
+              <button className="btn-danger !py-2.5 text-xs md:!py-1.5" onClick={() => emit("wa:logout")}>
                 Log out
               </button>
             </div>

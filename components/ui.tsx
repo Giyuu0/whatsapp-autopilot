@@ -19,28 +19,66 @@ export function Select<T extends string>({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
+  const btnRef = useRef<HTMLButtonElement | null>(null);
+  // On phones the menu is rendered position:fixed (anchored to the button) so
+  // horizontally-scrollable rows (chat header controls) can never clip it.
+  // Desktop keeps the original absolute popover — visually unchanged.
+  const [mobileRect, setMobileRect] = useState<{ top: number; left?: number; right?: number } | null>(
+    null
+  );
   const current = options.find((o) => o.value === value);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setMobileRect(null);
+      return;
+    }
     const onDoc = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    // A fixed-position menu doesn't follow its button — close on any scroll.
+    const onScroll = () => setOpen(false);
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
+    if (mobileRect) {
+      window.addEventListener("scroll", onScroll, true);
+      window.addEventListener("resize", onScroll);
+    }
     return () => {
       document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onScroll);
     };
-  }, [open]);
+  }, [open, mobileRect]);
+
+  const toggleOpen = () => {
+    if (
+      !open &&
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 767px)").matches &&
+      btnRef.current
+    ) {
+      const r = btnRef.current.getBoundingClientRect();
+      setMobileRect(
+        align === "right"
+          ? { top: r.bottom + 4, right: Math.max(8, window.innerWidth - r.right) }
+          : { top: r.bottom + 4, left: Math.max(8, r.left) }
+      );
+    } else {
+      setMobileRect(null);
+    }
+    setOpen((o) => !o);
+  };
 
   return (
     <div ref={ref} className="relative">
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => setOpen((o) => !o)}
-        className={`flex h-8 items-center justify-between gap-1.5 rounded-lg border border-fg/10 bg-surface-2/80 px-2.5 text-xs text-fg outline-none transition hover:border-fg/20 ${
+        onClick={toggleOpen}
+        className={`flex h-9 items-center justify-between gap-1.5 rounded-lg border border-fg/10 bg-surface-2/80 px-2.5 text-xs text-fg outline-none transition hover:border-fg/20 active:scale-[0.98] md:h-8 ${
           open ? "border-wa-green/60 ring-2 ring-wa-green/20" : ""
         } ${buttonClassName}`}
       >
@@ -52,9 +90,16 @@ export function Select<T extends string>({
 
       {open && (
         <div
-          className={`animate-fade-up absolute z-40 mt-1 min-w-[9rem] overflow-hidden rounded-xl border border-fg/10 bg-surface-1 p-1 shadow-xl shadow-black/40 ${
-            align === "right" ? "right-0" : "left-0"
+          className={`animate-fade-up min-w-[9rem] overflow-hidden rounded-xl border border-fg/10 bg-surface-1 p-1 shadow-xl shadow-black/40 ${
+            mobileRect
+              ? "fixed z-50"
+              : `absolute z-40 mt-1 ${align === "right" ? "right-0" : "left-0"}`
           }`}
+          style={
+            mobileRect
+              ? { top: mobileRect.top, left: mobileRect.left, right: mobileRect.right }
+              : undefined
+          }
         >
           {options.map((o) => {
             const active = o.value === value;
@@ -66,7 +111,7 @@ export function Select<T extends string>({
                   onChange(o.value);
                   setOpen(false);
                 }}
-                className={`flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-left text-xs transition ${
+                className={`flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2.5 text-left text-xs transition active:bg-fg/10 md:py-1.5 ${
                   active ? "bg-wa-green/15 text-wa-green" : "text-fg/90 hover:bg-fg/10"
                 }`}
               >
