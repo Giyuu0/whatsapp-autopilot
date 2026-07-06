@@ -273,7 +273,19 @@ export function useWaSocket() {
     return new Promise<any>((resolve) => {
       const s = socketRef.current;
       if (!s) return resolve({ ok: false });
-      s.emit(event, payload, (res: any) => resolve(res || { ok: true }));
+      // Resolve even if the server never acks (e.g. a WhatsApp op hangs), so a
+      // caller's "sending" state can't get stuck forever and lock the button.
+      let done = false;
+      const finish = (res: any) => {
+        if (done) return;
+        done = true;
+        resolve(res);
+      };
+      const timer = setTimeout(() => finish({ ok: false, error: "timed out" }), 30000);
+      s.emit(event, payload, (res: any) => {
+        clearTimeout(timer);
+        finish(res || { ok: true });
+      });
     });
   }, []);
 
