@@ -29,6 +29,8 @@ A beautiful, self-hosted dashboard that connects to WhatsApp (by scanning a QR c
 - 📄 **Reads links & PDFs** — if someone shares a URL or a PDF, it reads the content and replies about it.
 - ⌨️ **Typing indicator**, 📎 **send images/files/voice** from the dashboard, and 🔔 **browser notifications**.
 - 🧠 **Smart routing + fallback chains** — text → **Groq**, images → **Gemini Vision**, voice notes → **Groq Whisper**. Each has an ordered fallback chain that's tried in turn if a model errors or is rate-limited.
+- 🔁 **Multi-key rotation** — give Groq **several API keys** (comma-separated) and it rotates to the next one the moment one hits its rate limit. Combined with the model fallback chain, replies keep flowing well past a single key's daily cap.
+- 🚻 **Gender-aware** — infers each contact's gender from the conversation and tailors phrasing/pronouns accordingly.
 - 🎭 **Per-chat tone** — reply **Professional**, **Friendly** (witty, roast-back), or **Flirty** — different for every chat.
 - 🗣️ **Per-chat language** — **Auto-detect** (mirror the sender), English, Hindi, Hinglish, or English + slang.
 - 🎙️ **Voice notes** — incoming voice messages are transcribed, **playable in the dashboard**, and answered; optionally reply *with a real voice note* too (Groq TTS → Ogg/Opus via bundled ffmpeg). **Preview any voice** (▶ Play) in Settings. Turn it on in Settings ("Reply to voice notes with a voice note") or per chat (Voice = Voice).
@@ -36,7 +38,7 @@ A beautiful, self-hosted dashboard that connects to WhatsApp (by scanning a QR c
 - 🧩 **Context-aware** — reads the recent conversation before replying, and says so honestly when it doesn't know something.
 - 🪄 **Assistant orb** — a floating voice/text control center. Talk or type to send messages, change a chat's tone/language, toggle auto-reply, or **open any conversation right inside the orb** so you and the AI can both reply.
 - 🔒 **Access-key gate** + **secure settings** — the dashboard is locked behind a key, and your API keys are write-only (never sent back to the browser).
-- 📱 **Fully responsive** — works beautifully on desktop and phone.
+- 📱 **Mobile-first** — a genuine full-screen phone experience: the conversation, per-chat settings sheet, and orb all work cleanly on a real phone, not just a shrunk desktop layout.
 
 ---
 
@@ -112,9 +114,11 @@ Incoming (and outgoing) photos show as real **image previews** in the chat, not 
 
 | Incoming | Pipeline |
 |---|---|
-| Text | **Groq** (primary) → fallback chain → Gemini text |
+| Text | **Groq** (`llama-3.3-70b` → smaller/OSS Groq models) → **Gemini** text |
 | Image | **Gemini Vision** (primary) → fallback chain → Groq vision |
 | Voice note | **Groq Whisper** (transcribe) → text pipeline → optional voice reply |
+
+Every model is a **separate rate-limit bucket**, so the chain walks down them on a `429`. Within each Groq model, your **comma-separated keys are rotated** too — so a reply only fails once *every model × every key* is exhausted. Keys set in the environment always **win over** whatever's stored in Settings.
 
 A contact only gets a reply when **the master switch is ON** *and* **that chat's toggle is ON**.
 
@@ -139,7 +143,7 @@ The browser talks to the bot **only over Socket.IO**, so there's a single source
 > **Use Railway / Render / Fly.io / a VPS — not Vercel.**
 > This is a persistent server running a headless browser and an open WebSocket for hours; serverless platforms can't host it.
 
-The repo ships a **`Dockerfile`** (with system Chromium) and **`railway.json`**. On Railway: deploy from GitHub, add a **Volume** at `/data`, and set `ACCESS_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY`, `DATA_DIR=/data`, `WWEBJS_DIR=/data/.wwebjs_auth`. The WhatsApp session lives on the volume, so redeploys don't force a re-scan.
+The repo ships a **`Dockerfile`** (bundling Puppeteer's Chrome-for-Testing) and **`railway.json`**. On Railway: deploy from GitHub, add a **Volume** at `/data`, and set `ACCESS_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY`, `DATA_DIR=/data`, `WWEBJS_DIR=/data/.wwebjs_auth`. The WhatsApp session lives on the volume, so redeploys don't force a re-scan. Set `GROQ_API_KEY` to a **comma-separated list** to run several keys in rotation.
 
 ---
 
