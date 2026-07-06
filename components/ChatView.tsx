@@ -616,6 +616,7 @@ export function ChatView(props: {
   const [promptDraft, setPromptDraft] = useState("");
   const [memoryDraft, setMemoryDraft] = useState("");
   const [sendingMedia, setSendingMedia] = useState(false);
+  const [dragOver, setDragOver] = useState(false); // highlight composer while dragging a file over it
 
   const fileRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -783,13 +784,9 @@ export function ChatView(props: {
     }
   }
 
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const input = e.target;
-    const file = input.files?.[0];
-    if (!file || !activeChatId || !connected || sendingMedia) {
-      input.value = "";
-      return;
-    }
+  // Core send-a-file routine, shared by the attach button, paste and drag-drop.
+  async function sendFile(file: File) {
+    if (!file || !activeChatId || !connected || sendingMedia) return;
     setSendingMedia(true);
     try {
       const base64: string = await new Promise((resolve, reject) => {
@@ -806,7 +803,8 @@ export function ChatView(props: {
       await onSendMedia(activeChatId, {
         base64,
         mimetype: file.type,
-        filename: file.name,
+        // Pasted screenshots come through as a blank/"image.png" name — give them a unique one.
+        filename: file.name || `pasted-${Date.now()}.${(file.type.split("/")[1] || "png").split("+")[0]}`,
         caption: draft.trim() || undefined,
       });
       setDraft("");
@@ -814,7 +812,35 @@ export function ChatView(props: {
       /* leave draft intact so the user can retry */
     } finally {
       setSendingMedia(false);
-      input.value = "";
+    }
+  }
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
+    const file = input.files?.[0];
+    if (file) await sendFile(file);
+    input.value = "";
+  }
+
+  // Paste an image/file straight into the composer (Ctrl/⌘+V).
+  function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const items = Array.from(e.clipboardData?.items || []);
+    const fileItem = items.find((it) => it.kind === "file");
+    if (!fileItem) return; // plain text paste — let it fall through to the input
+    const file = fileItem.getAsFile();
+    if (file) {
+      e.preventDefault();
+      void sendFile(file);
+    }
+  }
+
+  // Drag-and-drop a file onto the composer.
+  function handleDrop(e: React.DragEvent<HTMLElement>) {
+    const file = e.dataTransfer?.files?.[0];
+    if (file) {
+      e.preventDefault();
+      setDragOver(false);
+      void sendFile(file);
     }
   }
 
@@ -1271,12 +1297,27 @@ export function ChatView(props: {
                   </button>
                   <input
                     className={`input flex-1 !rounded-full !bg-surface-2/80 px-4 ${
-                      /^@bot\b/i.test(draft) ? "ring-2 ring-amber-400/50" : ""
+                      dragOver ? "ring-2 ring-wa-green" : /^@bot\b/i.test(draft) ? "ring-2 ring-amber-400/50" : ""
                     }`}
-                    placeholder={connected ? "Type a message — or “@bot …” to ask privately" : "Disconnected…"}
+                    placeholder={
+                      dragOver
+                        ? "Drop to send…"
+                        : connected
+                          ? "Type a message — or “@bot …” to ask privately"
+                          : "Disconnected…"
+                    }
                     value={draft}
                     disabled={!connected}
                     onChange={(e) => setDraft(e.target.value)}
+                    onPaste={handlePaste}
+                    onDrop={handleDrop}
+                    onDragOver={(e) => {
+                      if (Array.from(e.dataTransfer?.types || []).includes("Files")) {
+                        e.preventDefault();
+                        setDragOver(true);
+                      }
+                    }}
+                    onDragLeave={() => setDragOver(false)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
