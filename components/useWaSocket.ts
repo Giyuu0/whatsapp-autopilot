@@ -94,6 +94,7 @@ export type Settings = {
   ttsModel: string;
   ttsVoice: string;
   hasGroqKey: boolean;
+  groqKeyCount?: number;
   hasGeminiKey: boolean;
   accessKeyLocked: boolean;
 };

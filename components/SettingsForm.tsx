@@ -328,15 +328,24 @@ export function SettingsForm({
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="label">
-              Groq API key {settings.hasGroqKey && <span className="text-wa-green">• set</span>}
+              Groq API key(s){" "}
+              {settings.hasGroqKey && (
+                <span className="text-wa-green">
+                  • {settings.groqKeyCount && settings.groqKeyCount > 1 ? `${settings.groqKeyCount} keys set` : "set"}
+                </span>
+              )}
             </label>
             <input
               type="password"
               className="input"
-              placeholder={settings.hasGroqKey ? "•••••••• (leave blank to keep)" : "gsk_…"}
+              placeholder={settings.hasGroqKey ? "•••••••• (leave blank to keep)" : "gsk_… , gsk_… (comma-separated)"}
               value={groqKey}
               onChange={(e) => setGroqKey(e.target.value)}
             />
+            <p className="mt-1 text-[11px] leading-relaxed text-fg/45">
+              💡 Paste <b>multiple free keys separated by commas</b> (<code className="text-fg/60">key1,key2</code>) to multiply
+              your daily limit — the app auto-rotates to the next key when one is rate-limited. Re-enter all keys together to change them.
+            </p>
           </div>
           <div>
             <label className="label">
