@@ -630,6 +630,28 @@ export function ChatView(props: {
   // We do NOT clear the server-side draft on pickup — it survives a page
   // refresh; the server clears it itself when the message is actually sent.
   const consumedDraftRef = useRef<Record<string, number>>({});
+  // Always points at the latest sendFile so the document-level paste listener
+  // (added once) can send with the current draft/chat without re-subscribing.
+  const sendFileRef = useRef<(f: File) => void>(() => {});
+
+  // Paste an image/file anywhere on the page (like WhatsApp Web) — you don't
+  // have to click into the input first. Ctrl/Cmd+V a screenshot → it sends.
+  useEffect(() => {
+    function onDocPaste(e: ClipboardEvent) {
+      if (!activeChatId || !connected) return;
+      const items = Array.from(e.clipboardData?.items || []);
+      const fileItem = items.find((it) => it.kind === "file");
+      if (!fileItem) return; // plain-text paste — leave it to the focused field
+      const file = fileItem.getAsFile();
+      if (file) {
+        e.preventDefault();
+        void sendFileRef.current(file);
+      }
+    }
+    document.addEventListener("paste", onDocPaste);
+    return () => document.removeEventListener("paste", onDocPaste);
+  }, [activeChatId, connected]);
+
   useEffect(() => {
     draftRef.current = draft;
   }, [draft]);
@@ -815,23 +837,14 @@ export function ChatView(props: {
     }
   }
 
+  // Expose the latest sendFile to the document-level paste listener.
+  sendFileRef.current = sendFile;
+
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target;
     const file = input.files?.[0];
     if (file) await sendFile(file);
     input.value = "";
-  }
-
-  // Paste an image/file straight into the composer (Ctrl/⌘+V).
-  function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
-    const items = Array.from(e.clipboardData?.items || []);
-    const fileItem = items.find((it) => it.kind === "file");
-    if (!fileItem) return; // plain text paste — let it fall through to the input
-    const file = fileItem.getAsFile();
-    if (file) {
-      e.preventDefault();
-      void sendFile(file);
-    }
   }
 
   // Drag-and-drop a file onto the composer.
@@ -1309,7 +1322,6 @@ export function ChatView(props: {
                     value={draft}
                     disabled={!connected}
                     onChange={(e) => setDraft(e.target.value)}
-                    onPaste={handlePaste}
                     onDrop={handleDrop}
                     onDragOver={(e) => {
                       if (Array.from(e.dataTransfer?.types || []).includes("Files")) {
