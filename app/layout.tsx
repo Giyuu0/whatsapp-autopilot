@@ -17,6 +17,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  // Keyboard shrinks the layout viewport (and 100dvh) instead of overlaying it,
+  // so the message composer stays above the on-screen keyboard on mobile.
+  interactiveWidget: "resizes-content",
   themeColor: [
     { media: "(prefers-color-scheme: dark)", color: "#0a0f14" },
     { media: "(prefers-color-scheme: light)", color: "#edf1f6" },

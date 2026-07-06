@@ -802,7 +802,7 @@ export function ChatView(props: {
   }
 
   return (
-    <div className="card overflow-hidden p-0">
+    <div className="card chat-shell overflow-hidden p-0">
       <div className="grid h-[calc(100dvh-13rem)] min-h-[440px] grid-cols-1 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
         {/* ------------------------------ LEFT: list ------------------------------ */}
         <aside

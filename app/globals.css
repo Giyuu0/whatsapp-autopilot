@@ -137,6 +137,25 @@ body {
   overscroll-behavior: contain;
 }
 
+/* The chat shell hosts the full-screen mobile conversation view, which is
+   position:fixed. A backdrop-filter on this wrapper (from .card) would make it
+   the containing block for that fixed child — trapping it inside the card and
+   pushing the composer off-screen. On phones, drop the filter + card chrome so
+   "fixed" anchors to the real viewport. Desktop keeps the full card look. */
+@media (max-width: 767px) {
+  .chat-shell {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+  .chat-shell::before {
+    display: none !important;
+  }
+}
+
 /* Hide scrollbars (horizontally scrollable control rows on mobile). */
 .no-scrollbar {
   -ms-overflow-style: none;
