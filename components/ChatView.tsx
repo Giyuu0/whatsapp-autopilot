@@ -961,8 +961,26 @@ export function ChatView(props: {
                     </div>
                   </div>
 
-                  {/* controls — one swipeable row on mobile, wrapping row on desktop */}
-                  <div className="no-scrollbar scroll-touch -mx-1 flex w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto px-1 py-0.5 md:mx-0 md:w-auto md:flex-wrap md:justify-end md:overflow-visible md:px-0 md:py-0">
+                  {/* mobile: single gear opens a full-width settings sheet
+                      (the cramped inline row is hidden on phones) */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPromptDraft(activeChat.customPrompt || "");
+                      setMemoryDraft(activeChat.memory || "");
+                      setShowPrompt((s) => !s);
+                    }}
+                    className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl transition active:scale-95 md:hidden ${
+                      showPrompt ? "bg-wa-green/20 text-wa-green" : "bg-fg/5 text-fg/70"
+                    }`}
+                    aria-label="Chat settings"
+                    title="Chat settings"
+                  >
+                    <Icon.Cog className="h-5 w-5" />
+                  </button>
+
+                  {/* controls — desktop inline row (hidden on mobile; see sheet below) */}
+                  <div className="no-scrollbar scroll-touch -mx-1 hidden w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto px-1 py-0.5 md:mx-0 md:flex md:w-auto md:flex-wrap md:justify-end md:overflow-visible md:px-0 md:py-0">
                     <div className="flex shrink-0 items-center gap-1.5">
                       <span className="text-[11px] text-fg/50">Auto-reply</span>
                       <Toggle
@@ -1029,9 +1047,32 @@ export function ChatView(props: {
                   </div>
                 </div>
 
-                {/* inline persona editor */}
+                {/* inline persona editor (+ full-width per-chat controls on mobile) */}
                 {showPrompt && (
                   <div className="animate-fade-up mt-3 rounded-xl border border-fg/10 bg-fg/5 p-3">
+                    {/* MOBILE-ONLY: the per-chat controls as big, easy full-width rows */}
+                    <div className="mb-4 space-y-1 md:hidden">
+                      <div className="flex min-h-[44px] items-center justify-between gap-3 border-b border-fg/10 pb-2">
+                        <span className="text-sm text-fg/80">Auto-reply</span>
+                        <Toggle checked={activeChat.enabled} onChange={(v) => onToggleEnabled(activeChat.id, v)} />
+                      </div>
+                      <div className="flex min-h-[44px] items-center justify-between gap-3 border-b border-fg/10 pb-1 pt-1">
+                        <span className="text-sm text-fg/80">Language</span>
+                        <Select value={activeChat.language} onChange={(v) => onSetLanguage(activeChat.id, v as Language)} options={LANGUAGE_OPTIONS} align="right" />
+                      </div>
+                      <div className="flex min-h-[44px] items-center justify-between gap-3 border-b border-fg/10 pb-1 pt-1">
+                        <span className="text-sm text-fg/80">Tone</span>
+                        <Select value={activeChat.tone} onChange={(v) => onSetTone(activeChat.id, v as Tone)} options={TONE_OPTIONS} align="right" />
+                      </div>
+                      <div className="flex min-h-[44px] items-center justify-between gap-3 border-b border-fg/10 pb-1 pt-1">
+                        <span className="text-sm text-fg/80">Voice reply</span>
+                        <Select value={activeChat.voiceReply} onChange={(v) => onSetVoiceReply(activeChat.id, v as VoiceReply)} options={VOICE_OPTIONS} align="right" />
+                      </div>
+                      <div className="flex min-h-[44px] items-center justify-between gap-3 pt-1">
+                        <span className="text-sm text-fg/80">Reply mode</span>
+                        <Select value={activeChat.manualReply} onChange={(v) => onSetManual(activeChat.id, v as ManualReply)} options={MANUAL_OPTIONS} align="right" />
+                      </div>
+                    </div>
                     <label className="label">Custom persona for this chat</label>
                     <textarea
                       className="input mt-1 min-h-[80px] resize-y text-sm"

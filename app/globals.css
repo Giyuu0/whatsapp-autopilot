@@ -226,10 +226,15 @@ textarea:focus-visible,
   @apply bg-gradient-to-r from-wa-green via-emerald-300 to-wa-teal bg-clip-text text-transparent;
 }
 
-/* Cards get a faint top-edge sheen so they read as glass, not flat panels */
-.card {
-  position: relative;
-  isolation: isolate;
+/* Cards get a faint top-edge sheen so they read as glass, not flat panels.
+   NOTE: kept in @layer components so a positioning utility (fixed/absolute/
+   sticky) on a .card still wins — otherwise this position:relative would
+   override e.g. the orb's `.card fixed` panel and break its layout. */
+@layer components {
+  .card {
+    position: relative;
+    isolation: isolate;
+  }
 }
 .card::before {
   content: "";
