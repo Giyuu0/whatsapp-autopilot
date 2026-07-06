@@ -237,7 +237,7 @@ function ChatRow({
                 e.stopPropagation();
                 onToggleFavorite(chat.id, !chat.favorite);
               }}
-              className={`-m-1.5 p-1.5 text-base leading-none transition active:scale-90 ${
+              className={`grid h-11 w-11 shrink-0 place-items-center text-base leading-none transition active:scale-90 md:h-auto md:w-auto md:p-1.5 ${
                 chat.favorite
                   ? "text-amber-400"
                   : // No hover on touch — keep the star reachable on mobile,
@@ -819,7 +819,7 @@ export function ChatView(props: {
   }
 
   return (
-    <div className="card chat-shell overflow-hidden p-0">
+    <div className="card overflow-hidden p-0">
       <div className="grid h-[calc(100dvh-13rem)] min-h-[440px] grid-cols-1 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
         {/* ------------------------------ LEFT: list ------------------------------ */}
         <aside

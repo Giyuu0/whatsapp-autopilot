@@ -56,17 +56,12 @@ module.exports = {
           "0%,100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-6px)" },
         },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
       },
       animation: {
         "fade-up": "fade-up 0.35s ease-out",
         "pulse-ring": "pulse-ring 1.8s cubic-bezier(0.4,0,0.6,1) infinite",
         "bubble-in": "bubble-in 0.28s cubic-bezier(0.22,1,0.36,1)",
         float: "float 5s ease-in-out infinite",
-        shimmer: "shimmer 2.5s linear infinite",
       },
     },
   },

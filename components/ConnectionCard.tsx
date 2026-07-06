@@ -5,7 +5,7 @@ import { Icon } from "./ui";
 import type { Snapshot } from "./useWaSocket";
 
 const STATUS_META: Record<string, { label: string; color: string; dot: string }> = {
-  idle: { label: "Idle", color: "text-fg/60", dot: "bg-slate-400" },
+  idle: { label: "Idle", color: "text-fg/60", dot: "bg-fg/40" },
   initializing: { label: "Starting…", color: "text-amber-300", dot: "bg-amber-300" },
   qr: { label: "Scan QR to link", color: "text-sky-300", dot: "bg-sky-300" },
   authenticating: { label: "Authenticating…", color: "text-amber-300", dot: "bg-amber-300" },

@@ -635,9 +635,9 @@ export function ChatbotOrb(props: {
                 {thinking && (
                   <div className="flex justify-start">
                     <div className="flex items-center gap-1 rounded-2xl rounded-bl-sm bg-fg/5 px-3 py-2.5">
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-fg/40 [animation-delay:-0.3s]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-fg/40 [animation-delay:-0.15s]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-fg/40" />
                     </div>
                   </div>
                 )}
@@ -728,7 +728,7 @@ export function ChatbotOrb(props: {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search chats…"
-                    className="w-full bg-transparent py-2 text-sm text-fg/90 placeholder:text-fg/45 focus:outline-none"
+                    className="w-full bg-transparent py-2 text-base text-fg/90 placeholder:text-fg/45 focus:outline-none md:text-sm"
                     aria-label="Search chats"
                   />
                 </div>

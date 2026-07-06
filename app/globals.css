@@ -137,25 +137,6 @@ body {
   overscroll-behavior: contain;
 }
 
-/* The chat shell hosts the full-screen mobile conversation view, which is
-   position:fixed. A backdrop-filter on this wrapper (from .card) would make it
-   the containing block for that fixed child — trapping it inside the card and
-   pushing the composer off-screen. On phones, drop the filter + card chrome so
-   "fixed" anchors to the real viewport. Desktop keeps the full card look. */
-@media (max-width: 767px) {
-  .chat-shell {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    border-radius: 0 !important;
-  }
-  .chat-shell::before {
-    display: none !important;
-  }
-}
-
 /* Hide scrollbars (horizontally scrollable control rows on mobile). */
 .no-scrollbar {
   -ms-overflow-style: none;
@@ -261,24 +242,10 @@ textarea:focus-visible,
   z-index: -1;
 }
 
-/* Animated gradient sweep for skeletons / accents */
-.shimmer-bg {
-  background: linear-gradient(
-    100deg,
-    transparent 20%,
-    rgba(255, 255, 255, 0.06) 40%,
-    rgba(255, 255, 255, 0.12) 50%,
-    rgba(255, 255, 255, 0.06) 60%,
-    transparent 80%
-  );
-  background-size: 200% 100%;
-}
-
 /* Respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .animate-bubble-in,
   .animate-float,
-  .animate-shimmer,
   .logo-glow,
   .animate-drift {
     animation: none !important;

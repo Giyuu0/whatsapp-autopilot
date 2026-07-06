@@ -140,7 +140,9 @@ export function Toggle({
   size?: "sm" | "md";
 }) {
   const w = size === "sm" ? "w-9 h-5" : "w-11 h-6";
-  const dot = size === "sm" ? "w-3.5 h-3.5" : "w-4.5 h-4.5";
+  // NOTE: w-4.5/h-4.5 aren't real Tailwind classes (no 4.5 spacing step) — they
+  // emitted no CSS, so the md knob had zero size. Use explicit pixel sizes.
+  const dot = size === "sm" ? "h-3.5 w-3.5" : "h-[18px] w-[18px]";
   const shift = size === "sm" ? "translate-x-4" : "translate-x-5";
   return (
     <button
