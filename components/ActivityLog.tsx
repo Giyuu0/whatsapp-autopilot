@@ -32,7 +32,7 @@ export function ActivityLog({ logs, onClear }: { logs: LogEntry[]; onClear: () =
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left transition hover:bg-fg/[0.03]"
+        className="flex min-h-[48px] w-full items-center justify-between px-4 py-3 text-left transition hover:bg-fg/[0.03] active:bg-fg/5"
       >
         <span className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-fg/60">
           Activity
@@ -51,7 +51,7 @@ export function ActivityLog({ logs, onClear }: { logs: LogEntry[]; onClear: () =
           {recent.length === 0 ? (
             <p className="px-4 py-6 text-center text-xs text-fg/40">No activity yet.</p>
           ) : (
-            <ul className="max-h-64 overflow-y-auto">
+            <ul className="scroll-touch max-h-64 overflow-y-auto">
               {recent.map((l) => {
                 const meta = DIR_META[l.direction] || DIR_META.in;
                 return (

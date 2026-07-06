@@ -28,11 +28,11 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
-      <header className="mb-6">
+    <main className="mx-auto max-w-3xl px-3 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-4 sm:py-6 sm:pb-6">
+      <header className="mb-4 sm:mb-6">
         <Link
           href="/"
-          className="text-sm text-fg/60 transition hover:text-wa-green"
+          className="inline-flex min-h-[44px] items-center text-sm text-fg/60 transition hover:text-wa-green active:text-wa-green sm:min-h-0"
         >
           ← Back to dashboard
         </Link>

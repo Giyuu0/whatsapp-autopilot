@@ -464,11 +464,11 @@ export function ChatbotOrb(props: {
   );
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-5 sm:right-5">
+    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-50 flex flex-col items-end gap-3 sm:right-5 md:bottom-5">
       {/* -------------------- Panel -------------------- */}
       {open && (
         <div
-          className="card animate-fade-up flex max-h-[70vh] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden shadow-2xl sm:w-96"
+          className="card animate-fade-up fixed inset-x-2 top-[calc(0.75rem+env(safe-area-inset-top))] bottom-[calc(0.5rem+env(safe-area-inset-bottom))] flex flex-col overflow-hidden shadow-2xl md:static md:inset-x-auto md:top-auto md:bottom-auto md:max-h-[70vh] md:w-96 md:max-w-sm"
           role="dialog"
           aria-label="Assistant"
         >
@@ -482,7 +482,7 @@ export function ChatbotOrb(props: {
                 onClick={() => {
                   setMode("picker");
                 }}
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-fg/5 text-fg/75 transition hover:bg-fg/10 hover:text-fg"
+                className="grid h-9 w-9 md:h-8 md:w-8 shrink-0 place-items-center rounded-lg bg-fg/5 text-fg/75 transition hover:bg-fg/10 hover:text-fg"
                 title="Back to chats"
                 aria-label="Back to chats"
               >
@@ -502,7 +502,7 @@ export function ChatbotOrb(props: {
               <button
                 type="button"
                 onClick={toggleOpen}
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-fg/5 text-fg/60 transition hover:bg-fg/10 hover:text-fg/90"
+                className="grid h-9 w-9 md:h-8 md:w-8 shrink-0 place-items-center rounded-lg bg-fg/5 text-fg/60 transition hover:bg-fg/10 hover:text-fg/90"
                 title="Close"
                 aria-label="Close assistant"
               >
@@ -532,7 +532,7 @@ export function ChatbotOrb(props: {
               <button
                 type="button"
                 onClick={() => setMode((m) => (m === "picker" ? "assistant" : "picker"))}
-                className={`grid h-8 w-8 place-items-center rounded-lg transition ${
+                className={`grid h-9 w-9 md:h-8 md:w-8 place-items-center rounded-lg transition ${
                   mode === "picker"
                     ? "bg-wa-green/20 text-wa-green hover:bg-wa-green/30"
                     : "bg-fg/5 text-fg/60 hover:bg-fg/10 hover:text-fg/90"
@@ -548,7 +548,7 @@ export function ChatbotOrb(props: {
               <button
                 type="button"
                 onClick={() => setSpeakOn((s) => !s)}
-                className={`grid h-8 w-8 place-items-center rounded-lg transition ${
+                className={`grid h-9 w-9 md:h-8 md:w-8 place-items-center rounded-lg transition ${
                   speakOn
                     ? "bg-wa-green/15 text-wa-green hover:bg-wa-green/25"
                     : "bg-fg/5 text-fg/60 hover:bg-fg/10"
@@ -567,7 +567,7 @@ export function ChatbotOrb(props: {
               <button
                 type="button"
                 onClick={toggleOpen}
-                className="grid h-8 w-8 place-items-center rounded-lg bg-fg/5 text-fg/60 transition hover:bg-fg/10 hover:text-fg/90"
+                className="grid h-9 w-9 md:h-8 md:w-8 place-items-center rounded-lg bg-fg/5 text-fg/60 transition hover:bg-fg/10 hover:text-fg/90"
                 title="Close"
                 aria-label="Close assistant"
               >
@@ -589,7 +589,7 @@ export function ChatbotOrb(props: {
               )}
 
               {/* Messages */}
-              <div ref={listRef} className="flex-1 space-y-2.5 overflow-y-auto px-3 py-3">
+              <div ref={listRef} className="scroll-touch flex-1 space-y-2.5 overflow-y-auto px-3 py-3">
                 {messages.map((m) => (
                   <div
                     key={m.id}
@@ -670,7 +670,7 @@ export function ChatbotOrb(props: {
                     <button
                       type="button"
                       onClick={startListening}
-                      className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl transition ${
+                      className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl transition active:scale-95 md:h-9 md:w-9 ${
                         listening
                           ? "bg-red-500/20 text-red-300 ring-2 ring-red-400/40"
                           : "bg-fg/5 text-fg/75 hover:bg-fg/10 hover:text-wa-green"
@@ -683,7 +683,7 @@ export function ChatbotOrb(props: {
                     </button>
                   ) : (
                     <div
-                      className="grid h-9 w-9 shrink-0 cursor-not-allowed place-items-center rounded-xl bg-fg/5 text-fg/40"
+                      className="grid h-11 w-11 shrink-0 cursor-not-allowed place-items-center rounded-xl bg-fg/5 text-fg/40 md:h-9 md:w-9"
                       title="Voice input not supported in this browser"
                       aria-label="Voice input not supported in this browser"
                     >
@@ -696,7 +696,7 @@ export function ChatbotOrb(props: {
                     type="button"
                     onClick={() => submit(input)}
                     disabled={!input.trim() || thinking}
-                    className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-wa-green text-ink-950 shadow-glow transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-wa-green text-ink-950 shadow-glow transition hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 md:h-9 md:w-9"
                     title="Send"
                     aria-label="Send command"
                   >
@@ -727,7 +727,7 @@ export function ChatbotOrb(props: {
               </div>
 
               {/* Chat list */}
-              <div className="flex-1 overflow-y-auto px-1.5 py-1.5">
+              <div className="scroll-touch flex-1 overflow-y-auto px-1.5 py-1.5">
                 {!connected ? (
                   <div className="px-3 py-8 text-center text-[13px] text-fg/45">
                     WhatsApp not connected yet — chats will appear here once linked.
@@ -742,7 +742,7 @@ export function ChatbotOrb(props: {
                       key={c.id}
                       type="button"
                       onClick={() => enterChat(c.id)}
-                      className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition hover:bg-fg/5"
+                      className="flex min-h-[56px] w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition hover:bg-fg/5 active:scale-[0.98] active:bg-fg/10 md:min-h-0"
                     >
                       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-wa-teal/60 to-wa-green/50 text-[13px] font-bold text-ink-950">
                         {initials(c.name || c.number)}
@@ -775,7 +775,7 @@ export function ChatbotOrb(props: {
           {mode === "chat" && (
             <>
               {/* Bubbles */}
-              <div ref={chatListRef} className="flex-1 space-y-2 overflow-y-auto px-3 py-3">
+              <div ref={chatListRef} className="scroll-touch flex-1 space-y-2 overflow-y-auto px-3 py-3">
                 {activeMessages.length === 0 ? (
                   <div className="px-3 py-8 text-center text-[13px] text-fg/45">
                     No messages loaded yet…
@@ -940,7 +940,7 @@ export function ChatbotOrb(props: {
                         type="button"
                         onClick={sendChat}
                         disabled={!chatInput.trim() || !connected || sending || rewriting}
-                        className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-wa-green text-ink-950 shadow-glow transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-wa-green text-ink-950 shadow-glow transition hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 md:h-9 md:w-9"
                         title={needsRewrite ? "Rewrite" : "Send message"}
                         aria-label={needsRewrite ? "Rewrite message" : "Send message"}
                       >

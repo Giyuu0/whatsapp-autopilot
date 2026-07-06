@@ -30,6 +30,13 @@ body {
   height: 100%;
 }
 
+html {
+  /* No grey/blue flash on tap; keep pinch-zoom but stop iOS text inflation */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   @apply bg-surface text-fg/80 antialiased;
   background-image:
@@ -112,6 +119,33 @@ body {
 }
 .input:focus {
   box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.12), 0 0 20px -6px rgba(37, 211, 102, 0.25);
+}
+
+/* iOS Safari auto-zooms into inputs with a font-size under 16px — keep
+   inputs at 16px on phones so focusing never zooms the page. */
+@media (max-width: 767px) {
+  .input,
+  select.input,
+  textarea.input {
+    font-size: 1rem;
+  }
+}
+
+/* App-like touch scrolling: momentum + no scroll-chaining to the page. */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Hide scrollbars (horizontally scrollable control rows on mobile). */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .label {

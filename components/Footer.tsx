@@ -5,7 +5,7 @@ import React from "react";
 /** App footer with the maker credit + optional live status. */
 export function Footer({ live }: { live?: boolean }) {
   return (
-    <footer className="mx-auto mt-12 max-w-lg px-4 pb-8">
+    <footer className="mx-auto mt-8 max-w-lg px-4 pb-6 sm:mt-12 sm:pb-8">
       {/* gradient divider */}
       <div className="mb-5 h-px w-full bg-gradient-to-r from-transparent via-wa-green/25 to-transparent" />
 
