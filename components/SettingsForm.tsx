@@ -569,8 +569,9 @@ export function SettingsForm({
             <option value="friendly">Friendly — calm, witty, approachable</option>
           </select>
           <p className="mt-1 text-xs text-fg/45">
-            When a persona is on, replies take on that personality and run on the cheap high-limit 8B model (low token use).
-            Everything else still applies: manual-draft vs auto-send, language, memory, guards and per-chat toggles.
+            When a persona is on, replies take on that personality and run on the <b>free persona chat service</b> — no Groq/Gemini
+            tokens (falls back to your cheap 8B model if it&apos;s down). Images are described by vision once, then the persona replies.
+            Everything else still applies: manual-draft vs auto-send, language, memory, guards, per-chat toggles and @bot/@yati.
             A per-chat custom persona still overrides this.
           </p>
         </div>
