@@ -181,6 +181,7 @@ export function SettingsForm({
   const [hideSensitive, setHideSensitive] = useState(settings.hideSensitive);
   const [typingIndicator, setTypingIndicator] = useState(settings.typingIndicator);
   const [contactMemoryEnabled, setContactMemoryEnabled] = useState(settings.contactMemoryEnabled);
+  const [chatbotPersona, setChatbotPersona] = useState(settings.chatbotPersona);
   const [attentionAlerts, setAttentionAlerts] = useState(settings.attentionAlerts);
   const [attentionHold, setAttentionHold] = useState(settings.attentionHold);
   const [groqOnly, setGroqOnly] = useState(settings.groqOnly);
@@ -232,6 +233,7 @@ export function SettingsForm({
     setHideSensitive(settings.hideSensitive);
     setTypingIndicator(settings.typingIndicator);
     setContactMemoryEnabled(settings.contactMemoryEnabled);
+    setChatbotPersona(settings.chatbotPersona);
     setAttentionAlerts(settings.attentionAlerts);
     setAttentionHold(settings.attentionHold);
     setGroqOnly(settings.groqOnly);
@@ -291,6 +293,7 @@ export function SettingsForm({
       hideSensitive,
       typingIndicator,
       contactMemoryEnabled,
+      chatbotPersona,
       attentionAlerts,
       attentionHold,
       groqOnly,
@@ -553,6 +556,13 @@ export function SettingsForm({
           <div>
             <span className="text-sm text-fg/90">Remember facts about contacts</span>
             <p className="text-xs text-fg/45">The bot learns durable facts about each person over time and uses them in replies. Edit or clear a chat&apos;s memory from its header.</p>
+          </div>
+        </div>
+        <div className="mt-4 flex items-center gap-3">
+          <Toggle checked={chatbotPersona} onChange={setChatbotPersona} />
+          <div>
+            <span className="text-sm text-fg/90">✨ Chatbot persona</span>
+            <p className="text-xs text-fg/45">Replies take on a charming, playful, emotionally-aware personality — confident, witty and lightly flirty, while staying respectful. Your language, memory, guards and per-chat toggles all still apply. A per-chat custom persona still overrides this.</p>
           </div>
         </div>
         <div className="mt-4 flex items-center gap-3">

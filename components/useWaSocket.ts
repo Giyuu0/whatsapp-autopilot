@@ -83,6 +83,7 @@ export type Settings = {
   hideSensitive: boolean;
   typingIndicator: boolean;
   contactMemoryEnabled: boolean;
+  chatbotPersona: boolean;
   attentionAlerts: boolean;
   attentionHold: boolean;
   groqOnly: boolean;
