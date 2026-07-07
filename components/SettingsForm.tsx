@@ -182,6 +182,7 @@ export function SettingsForm({
   const [typingIndicator, setTypingIndicator] = useState(settings.typingIndicator);
   const [contactMemoryEnabled, setContactMemoryEnabled] = useState(settings.contactMemoryEnabled);
   const [personaMode, setPersonaMode] = useState(settings.personaMode);
+  const [testNumbers, setTestNumbers] = useState(settings.testNumbers || "");
   const [attentionAlerts, setAttentionAlerts] = useState(settings.attentionAlerts);
   const [attentionHold, setAttentionHold] = useState(settings.attentionHold);
   const [groqOnly, setGroqOnly] = useState(settings.groqOnly);
@@ -234,6 +235,7 @@ export function SettingsForm({
     setTypingIndicator(settings.typingIndicator);
     setContactMemoryEnabled(settings.contactMemoryEnabled);
     setPersonaMode(settings.personaMode);
+    setTestNumbers(settings.testNumbers || "");
     setAttentionAlerts(settings.attentionAlerts);
     setAttentionHold(settings.attentionHold);
     setGroqOnly(settings.groqOnly);
@@ -294,6 +296,7 @@ export function SettingsForm({
       typingIndicator,
       contactMemoryEnabled,
       personaMode,
+      testNumbers,
       attentionAlerts,
       attentionHold,
       groqOnly,
@@ -563,11 +566,26 @@ export function SettingsForm({
           <select className="input" value={personaMode} onChange={(e) => setPersonaMode(e.target.value as any)}>
             <option value="off">Off — use my normal reply style</option>
             <option value="flirty">Flirty — charming, playful, lightly flirty</option>
-            <option value="professional">Professional — calm, witty, friendly</option>
+            <option value="friendly">Friendly — calm, witty, approachable</option>
           </select>
           <p className="mt-1 text-xs text-fg/45">
-            When a persona is on, replies take on that personality. Everything else still applies: manual-draft vs auto-send,
-            language, memory, guards and per-chat toggles. A per-chat custom persona still overrides this.
+            When a persona is on, replies take on that personality and run on the cheap high-limit 8B model (low token use).
+            Everything else still applies: manual-draft vs auto-send, language, memory, guards and per-chat toggles.
+            A per-chat custom persona still overrides this.
+          </p>
+        </div>
+        <div className="mt-4">
+          <label className="label">🧪 Testing number(s)</label>
+          <input
+            className="input"
+            value={testNumbers}
+            onChange={(e) => setTestNumbers(e.target.value)}
+            placeholder="e.g. 919812345678, 447700900123"
+            inputMode="tel"
+          />
+          <p className="mt-1 text-xs text-fg/45">
+            Any chat matching one of these numbers auto-replies regardless of its per-chat toggle — so you can flip the persona
+            above and test it instantly. Comma-separate multiple numbers; the country code is optional. Leave blank to disable.
           </p>
         </div>
         <div className="mt-4 flex items-center gap-3">

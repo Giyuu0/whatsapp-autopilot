@@ -83,7 +83,8 @@ export type Settings = {
   hideSensitive: boolean;
   typingIndicator: boolean;
   contactMemoryEnabled: boolean;
-  personaMode: "off" | "flirty" | "professional";
+  personaMode: "off" | "flirty" | "friendly";
+  testNumbers: string;
   attentionAlerts: boolean;
   attentionHold: boolean;
   groqOnly: boolean;
