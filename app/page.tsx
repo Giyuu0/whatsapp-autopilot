@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useWaSocket, type Language, type Tone, type VoiceReply, type ManualReply } from "@/components/useWaSocket";
+import { useWaSocket, type Language, type Tone, type VoiceReply, type ManualReply, type PersonaMode } from "@/components/useWaSocket";
 import { ConnectionCard } from "@/components/ConnectionCard";
 import { ChatView } from "@/components/ChatView";
 import { ChatbotOrb } from "@/components/ChatbotOrb";
@@ -261,6 +261,7 @@ export default function Dashboard() {
             onSetTone={(id, tone: Tone) => patchContact(id, { tone })}
             onSetVoiceReply={(id, pref: VoiceReply) => patchContact(id, { voiceReply: pref })}
             onSetManual={(id, mode: ManualReply) => patchContact(id, { manualReply: mode })}
+            onSetPersona={(id, mode: PersonaMode) => patchContact(id, { personaMode: mode })}
             onSetMemory={(id, memory) => patchContact(id, { memory })}
             onSetCustomPrompt={(id, prompt) => patchContact(id, { customPrompt: prompt })}
             onToggleFavorite={(id, favorite) => patchContact(id, { favorite })}

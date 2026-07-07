@@ -8,6 +8,7 @@ export type VoiceReply = "default" | "voice" | "text";
 export type Tone = "default" | "professional" | "friendly" | "flirty";
 export type ManualReply = "default" | "on" | "off";
 export type Suggestion = { text: string; model: string | null; ts: number };
+export type PersonaMode = "off" | "flirty" | "friendly";
 
 export type Contact = {
   id: string;
@@ -21,6 +22,7 @@ export type Contact = {
   manualReply?: ManualReply;
   memory?: string;
   favorite?: boolean;
+  personaMode?: PersonaMode;
 };
 
 export type Chat = {
@@ -39,6 +41,8 @@ export type Chat = {
   memory: string;
   customPrompt?: string;
   favorite?: boolean;
+  personaMode: PersonaMode;
+  isTest?: boolean;
 };
 
 export type Message = {
@@ -83,8 +87,6 @@ export type Settings = {
   hideSensitive: boolean;
   typingIndicator: boolean;
   contactMemoryEnabled: boolean;
-  personaMode: "off" | "flirty" | "friendly";
-  testNumbers: string;
   attentionAlerts: boolean;
   attentionHold: boolean;
   groqOnly: boolean;

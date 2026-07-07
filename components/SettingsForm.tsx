@@ -181,8 +181,6 @@ export function SettingsForm({
   const [hideSensitive, setHideSensitive] = useState(settings.hideSensitive);
   const [typingIndicator, setTypingIndicator] = useState(settings.typingIndicator);
   const [contactMemoryEnabled, setContactMemoryEnabled] = useState(settings.contactMemoryEnabled);
-  const [personaMode, setPersonaMode] = useState(settings.personaMode);
-  const [testNumbers, setTestNumbers] = useState(settings.testNumbers || "");
   const [attentionAlerts, setAttentionAlerts] = useState(settings.attentionAlerts);
   const [attentionHold, setAttentionHold] = useState(settings.attentionHold);
   const [groqOnly, setGroqOnly] = useState(settings.groqOnly);
@@ -234,8 +232,6 @@ export function SettingsForm({
     setHideSensitive(settings.hideSensitive);
     setTypingIndicator(settings.typingIndicator);
     setContactMemoryEnabled(settings.contactMemoryEnabled);
-    setPersonaMode(settings.personaMode);
-    setTestNumbers(settings.testNumbers || "");
     setAttentionAlerts(settings.attentionAlerts);
     setAttentionHold(settings.attentionHold);
     setGroqOnly(settings.groqOnly);
@@ -295,8 +291,6 @@ export function SettingsForm({
       hideSensitive,
       typingIndicator,
       contactMemoryEnabled,
-      personaMode,
-      testNumbers,
       attentionAlerts,
       attentionHold,
       groqOnly,
@@ -561,33 +555,10 @@ export function SettingsForm({
             <p className="text-xs text-fg/45">The bot learns durable facts about each person over time and uses them in replies. Edit or clear a chat&apos;s memory from its header.</p>
           </div>
         </div>
-        <div className="mt-4">
-          <label className="label">✨ Chatbot persona</label>
-          <select className="input" value={personaMode} onChange={(e) => setPersonaMode(e.target.value as any)}>
-            <option value="off">Off — use my normal reply style</option>
-            <option value="flirty">Flirty — charming, playful, lightly flirty</option>
-            <option value="friendly">Friendly — calm, witty, approachable</option>
-          </select>
-          <p className="mt-1 text-xs text-fg/45">
-            When a persona is on, replies take on that personality and run on the <b>free persona chat service</b> — no Groq/Gemini
-            tokens (falls back to your cheap 8B model if it&apos;s down). Images are described by vision once, then the persona replies.
-            Everything else still applies: manual-draft vs auto-send, language, memory, guards, per-chat toggles and @bot/@yati.
-            A per-chat custom persona still overrides this.
-          </p>
-        </div>
-        <div className="mt-4">
-          <label className="label">🧪 Testing number(s)</label>
-          <input
-            className="input"
-            value={testNumbers}
-            onChange={(e) => setTestNumbers(e.target.value)}
-            placeholder="e.g. 919812345678, 447700900123"
-            inputMode="tel"
-          />
-          <p className="mt-1 text-xs text-fg/45">
-            Any chat matching one of these numbers auto-replies regardless of its per-chat toggle — so you can flip the persona
-            above and test it instantly. Comma-separate multiple numbers; the country code is optional. Leave blank to disable.
-          </p>
+        <div className="mt-4 rounded-xl border border-fg/10 bg-fg/5 p-3 text-xs text-fg/55">
+          ✨ <b className="text-fg/80">Chatbot persona</b> (Flirty / Friendly) is now a <b className="text-fg/80">per-chat</b> setting —
+          open a chat, tap the ⚙️ gear in its header, and pick a persona there. To try it safely, open the
+          <b className="text-fg/80"> 🧪 Test Chat</b> at the top of your chat list — messages there are never sent to WhatsApp.
         </div>
         <div className="mt-4 flex items-center gap-3">
           <Toggle checked={attentionAlerts} onChange={setAttentionAlerts} />
