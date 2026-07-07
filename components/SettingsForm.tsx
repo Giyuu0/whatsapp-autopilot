@@ -181,7 +181,7 @@ export function SettingsForm({
   const [hideSensitive, setHideSensitive] = useState(settings.hideSensitive);
   const [typingIndicator, setTypingIndicator] = useState(settings.typingIndicator);
   const [contactMemoryEnabled, setContactMemoryEnabled] = useState(settings.contactMemoryEnabled);
-  const [chatbotPersona, setChatbotPersona] = useState(settings.chatbotPersona);
+  const [personaMode, setPersonaMode] = useState(settings.personaMode);
   const [attentionAlerts, setAttentionAlerts] = useState(settings.attentionAlerts);
   const [attentionHold, setAttentionHold] = useState(settings.attentionHold);
   const [groqOnly, setGroqOnly] = useState(settings.groqOnly);
@@ -233,7 +233,7 @@ export function SettingsForm({
     setHideSensitive(settings.hideSensitive);
     setTypingIndicator(settings.typingIndicator);
     setContactMemoryEnabled(settings.contactMemoryEnabled);
-    setChatbotPersona(settings.chatbotPersona);
+    setPersonaMode(settings.personaMode);
     setAttentionAlerts(settings.attentionAlerts);
     setAttentionHold(settings.attentionHold);
     setGroqOnly(settings.groqOnly);
@@ -293,7 +293,7 @@ export function SettingsForm({
       hideSensitive,
       typingIndicator,
       contactMemoryEnabled,
-      chatbotPersona,
+      personaMode,
       attentionAlerts,
       attentionHold,
       groqOnly,
@@ -558,12 +558,17 @@ export function SettingsForm({
             <p className="text-xs text-fg/45">The bot learns durable facts about each person over time and uses them in replies. Edit or clear a chat&apos;s memory from its header.</p>
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-3">
-          <Toggle checked={chatbotPersona} onChange={setChatbotPersona} />
-          <div>
-            <span className="text-sm text-fg/90">✨ Chatbot persona</span>
-            <p className="text-xs text-fg/45">Replies take on a charming, playful, emotionally-aware personality — confident, witty and lightly flirty, while staying respectful. Your language, memory, guards and per-chat toggles all still apply. A per-chat custom persona still overrides this.</p>
-          </div>
+        <div className="mt-4">
+          <label className="label">✨ Chatbot persona</label>
+          <select className="input" value={personaMode} onChange={(e) => setPersonaMode(e.target.value as any)}>
+            <option value="off">Off — use my normal reply style</option>
+            <option value="flirty">Flirty — charming, playful, lightly flirty</option>
+            <option value="professional">Professional — calm, witty, friendly</option>
+          </select>
+          <p className="mt-1 text-xs text-fg/45">
+            When a persona is on, replies take on that personality. Everything else still applies: manual-draft vs auto-send,
+            language, memory, guards and per-chat toggles. A per-chat custom persona still overrides this.
+          </p>
         </div>
         <div className="mt-4 flex items-center gap-3">
           <Toggle checked={attentionAlerts} onChange={setAttentionAlerts} />

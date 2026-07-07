@@ -83,7 +83,7 @@ export type Settings = {
   hideSensitive: boolean;
   typingIndicator: boolean;
   contactMemoryEnabled: boolean;
-  chatbotPersona: boolean;
+  personaMode: "off" | "flirty" | "professional";
   attentionAlerts: boolean;
   attentionHold: boolean;
   groqOnly: boolean;
