@@ -9,6 +9,7 @@ export type Tone = "default" | "professional" | "friendly" | "flirty";
 export type ManualReply = "default" | "on" | "off";
 export type Suggestion = { text: string; model: string | null; ts: number };
 export type PersonaMode = "off" | "flirty" | "friendly";
+export type Gender = "" | "male" | "female";
 
 export type Contact = {
   id: string;
@@ -23,6 +24,7 @@ export type Contact = {
   memory?: string;
   favorite?: boolean;
   personaMode?: PersonaMode;
+  gender?: Gender;
 };
 
 export type Chat = {
@@ -42,6 +44,7 @@ export type Chat = {
   customPrompt?: string;
   favorite?: boolean;
   personaMode: PersonaMode;
+  gender: Gender;
   isTest?: boolean;
 };
 

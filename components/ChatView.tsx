@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Icon, Toggle, Select } from "./ui";
 import { VoiceRecorder } from "./VoiceRecorder";
-import type { Chat, Message, Language, Tone, VoiceReply, ManualReply, PersonaMode, Suggestion } from "./useWaSocket";
+import type { Chat, Message, Language, Tone, VoiceReply, ManualReply, PersonaMode, Gender, Suggestion } from "./useWaSocket";
 
 /** True on phone-width viewports (client-only; updates on resize). */
 function useIsMobile() {
@@ -146,6 +146,12 @@ const PERSONA_OPTIONS: { value: PersonaMode; label: string }[] = [
   { value: "off", label: "Off (normal)" },
   { value: "flirty", label: "Flirty" },
   { value: "friendly", label: "Friendly" },
+];
+
+const GENDER_OPTIONS: { value: Gender; label: string }[] = [
+  { value: "", label: "Auto-detect" },
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
 ];
 
 function prettyModel(model: string | null) {
@@ -562,6 +568,7 @@ export function ChatView(props: {
   onSetVoiceReply: (chatId: string, pref: VoiceReply) => void;
   onSetManual: (chatId: string, mode: ManualReply) => void;
   onSetPersona: (chatId: string, mode: PersonaMode) => void;
+  onSetGender: (chatId: string, gender: Gender) => void;
   onSetCustomPrompt: (chatId: string, prompt: string) => void;
   onSetMemory: (chatId: string, memory: string) => void;
   onToggleFavorite: (chatId: string, favorite: boolean) => void;
@@ -592,6 +599,7 @@ export function ChatView(props: {
     onSetVoiceReply,
     onSetManual,
     onSetPersona,
+    onSetGender,
     onSetCustomPrompt,
     onSetMemory,
     onToggleFavorite,
@@ -1100,6 +1108,16 @@ export function ChatView(props: {
                       />
                     </div>
 
+                    <div className="flex shrink-0 items-center gap-1">
+                      <span className="hidden text-[11px] text-fg/50 lg:inline">Gender</span>
+                      <Select
+                        value={activeChat.gender}
+                        onChange={(v) => onSetGender(activeChat.id, v as Gender)}
+                        options={GENDER_OPTIONS}
+                        align="right"
+                      />
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -1142,9 +1160,13 @@ export function ChatView(props: {
                         <span className="text-sm text-fg/80">Reply mode</span>
                         <Select value={activeChat.manualReply} onChange={(v) => onSetManual(activeChat.id, v as ManualReply)} options={MANUAL_OPTIONS} align="right" />
                       </div>
-                      <div className="flex min-h-[44px] items-center justify-between gap-3 pt-1">
+                      <div className="flex min-h-[44px] items-center justify-between gap-3 border-b border-fg/10 pb-1 pt-1">
                         <span className="text-sm text-fg/80">✨ Persona</span>
                         <Select value={activeChat.personaMode} onChange={(v) => onSetPersona(activeChat.id, v as PersonaMode)} options={PERSONA_OPTIONS} align="right" />
+                      </div>
+                      <div className="flex min-h-[44px] items-center justify-between gap-3 pt-1">
+                        <span className="text-sm text-fg/80">Gender</span>
+                        <Select value={activeChat.gender} onChange={(v) => onSetGender(activeChat.id, v as Gender)} options={GENDER_OPTIONS} align="right" />
                       </div>
                     </div>
                     <label className="label">Custom persona for this chat</label>
