@@ -28,6 +28,7 @@ export default function Dashboard() {
     chatAssistant,
     rewriteDraft,
     clearSuggestion,
+    pairWithPhone,
     enableNotifications,
     loadMedia,
     authState,
@@ -194,6 +195,7 @@ export default function Dashboard() {
             onLogout={() => emit("wa:logout")}
             onRestart={() => emit("wa:restart")}
             onRefresh={() => emit("contacts:refresh")}
+            onPairPhone={pairWithPhone}
           />
         </div>
       ) : (

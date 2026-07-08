@@ -151,6 +151,16 @@ app.prepare().then(() => {
       }
     });
 
+    // "Link with phone number" — request a pairing code instead of scanning QR.
+    socket.on("pair:phone", async ({ number }, ack) => {
+      try {
+        const code = await wa.requestPairingCode(number);
+        ack && ack({ ok: true, code });
+      } catch (e) {
+        ack && ack({ ok: false, error: e.message });
+      }
+    });
+
     // Send a message manually from the chat composer.
     socket.on("message:send", async ({ chatId, text }, ack) => {
       try {

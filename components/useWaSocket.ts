@@ -137,6 +137,7 @@ export type Status =
 export type Snapshot = {
   status: Status;
   qr: string | null;
+  pairingCode: string | null;
   me: { number: string; name: string } | null;
   error: string | null;
   loadingPercent?: number;
@@ -196,7 +197,7 @@ export function useWaSocket() {
     socket.on("state", (s: Snapshot) => setSnap(s));
     socket.on("status", (p: any) =>
       setSnap((prev) =>
-        prev ? { ...prev, status: p.status, qr: p.qr, me: p.me, error: p.error, loadingPercent: p.loadingPercent } : prev
+        prev ? { ...prev, status: p.status, qr: p.qr, pairingCode: p.pairingCode ?? null, me: p.me, error: p.error, loadingPercent: p.loadingPercent } : prev
       )
     );
     socket.on("settings", (settings: Settings) =>
@@ -360,6 +361,12 @@ export function useWaSocket() {
     [emit]
   );
 
+  const pairWithPhone = useCallback(
+    async (number: string): Promise<{ ok?: boolean; code?: string; error?: string }> =>
+      emit("pair:phone", { number }),
+    [emit]
+  );
+
   const enableNotifications = useCallback(async (): Promise<NotificationPermission | "unsupported"> => {
     if (typeof window === "undefined" || !("Notification" in window)) return "unsupported";
     try {
@@ -426,6 +433,7 @@ export function useWaSocket() {
     chatAssistant,
     rewriteDraft,
     clearSuggestion,
+    pairWithPhone,
     enableNotifications,
     loadMedia,
     fetchModels,

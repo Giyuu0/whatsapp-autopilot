@@ -19,16 +19,36 @@ export function ConnectionCard({
   onLogout,
   onRestart,
   onRefresh,
+  onPairPhone,
 }: {
   snap: Snapshot;
   onLogout: () => void;
   onRestart: () => void;
   onRefresh: () => void;
+  onPairPhone?: (number: string) => Promise<{ ok?: boolean; code?: string; error?: string }>;
 }) {
   const meta = STATUS_META[snap.status] || STATUS_META.idle;
   const connected = snap.status === "connected";
   const preparing = snap.status === "authenticating" || snap.status === "initializing";
   const pct = Math.max(0, Math.min(100, snap.loadingPercent ?? 0));
+
+  // "Link with phone number" alternative to the QR.
+  const [mode, setMode] = useState<"qr" | "phone">("qr");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [pairing, setPairing] = useState(false);
+  const [pairErr, setPairErr] = useState<string | null>(null);
+  async function requestCode() {
+    setPairErr(null);
+    setPairing(true);
+    try {
+      const res = await onPairPhone?.(phoneNumber);
+      if (!res?.ok) setPairErr(res?.error || "Couldn't get a code — try again.");
+    } catch (e: any) {
+      setPairErr(e?.message || "Couldn't get a code — try again.");
+    } finally {
+      setPairing(false);
+    }
+  }
 
   // Track how long we've been preparing, so we can nudge the user if it stalls.
   const [waited, setWaited] = useState(0);
@@ -75,15 +95,72 @@ export function ConnectionCard({
             <p className="text-sm text-fg/60 tabular-nums">+{snap.me?.number}</p>
           </div>
         </div>
-      ) : snap.qr ? (
+      ) : snap.qr || snap.pairingCode ? (
         <div className="flex flex-col items-center gap-4 py-2">
-          <div className="animate-fade-up rounded-3xl bg-fg p-3.5 shadow-[0_0_0_1px_rgba(37,211,102,0.25),0_12px_40px_-12px_rgba(37,211,102,0.35)] ring-4 ring-fg/10">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={snap.qr} alt="WhatsApp QR" className="h-52 w-52 rounded-xl sm:h-56 sm:w-56" />
-          </div>
-          <p className="max-w-xs text-center text-xs leading-relaxed text-fg/60">
-            Open WhatsApp → <b className="text-fg/90">Linked devices</b> → <b className="text-fg/90">Link a device</b> → scan this code.
-          </p>
+          {mode === "qr" ? (
+            <>
+              <div className="animate-fade-up rounded-3xl bg-fg p-3.5 shadow-[0_0_0_1px_rgba(37,211,102,0.25),0_12px_40px_-12px_rgba(37,211,102,0.35)] ring-4 ring-fg/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {snap.qr && <img src={snap.qr} alt="WhatsApp QR" className="h-52 w-52 rounded-xl sm:h-56 sm:w-56" />}
+              </div>
+              <p className="max-w-xs text-center text-xs leading-relaxed text-fg/60">
+                Open WhatsApp → <b className="text-fg/90">Linked devices</b> → <b className="text-fg/90">Link a device</b> → scan this code.
+              </p>
+              <button
+                type="button"
+                onClick={() => { setMode("phone"); setPairErr(null); }}
+                className="text-xs font-semibold text-wa-green underline-offset-2 hover:underline"
+              >
+                Link with phone number instead →
+              </button>
+            </>
+          ) : (
+            <div className="w-full max-w-xs animate-fade-up">
+              {snap.pairingCode ? (
+                <div className="flex flex-col items-center gap-3">
+                  <p className="text-center text-xs text-fg/60">Enter this code in WhatsApp:</p>
+                  <div className="rounded-2xl border border-wa-green/30 bg-wa-green/5 px-5 py-3">
+                    <span className="select-all font-mono text-3xl font-bold tracking-[0.2em] text-fg">{snap.pairingCode}</span>
+                  </div>
+                  <p className="text-center text-xs leading-relaxed text-fg/60">
+                    On your phone: <b className="text-fg/90">WhatsApp → Linked devices → Link a device →</b>{" "}
+                    <b className="text-fg/90">Link with phone number instead</b>, then type this code.
+                  </p>
+                  <button type="button" onClick={requestCode} disabled={pairing} className="btn-ghost text-xs">
+                    {pairing ? "Refreshing…" : "Get a new code"}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  <label className="text-xs font-medium text-fg/70">Your WhatsApp number (with country code)</label>
+                  <input
+                    className="input"
+                    inputMode="tel"
+                    placeholder="e.g. 919812345678"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") requestCode(); }}
+                  />
+                  {pairErr && <p className="text-xs text-red-300">{pairErr}</p>}
+                  <button
+                    type="button"
+                    onClick={requestCode}
+                    disabled={pairing || phoneNumber.replace(/\D/g, "").length < 8}
+                    className="btn-primary"
+                  >
+                    {pairing ? "Getting code…" : "Get pairing code"}
+                  </button>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => { setMode("qr"); setPairErr(null); }}
+                className="mt-3 w-full text-center text-xs font-semibold text-fg/50 underline-offset-2 hover:underline"
+              >
+                ← Scan QR code instead
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
