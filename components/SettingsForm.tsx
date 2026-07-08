@@ -180,7 +180,6 @@ export function SettingsForm({
   const [manualReply, setManualReply] = useState(settings.manualReply);
   const [hideSensitive, setHideSensitive] = useState(settings.hideSensitive);
   const [typingIndicator, setTypingIndicator] = useState(settings.typingIndicator);
-  const [contactMemoryEnabled, setContactMemoryEnabled] = useState(settings.contactMemoryEnabled);
   const [picoFlirtyAppId, setPicoFlirtyAppId] = useState(settings.picoFlirtyAppId || "");
   const [picoFriendlyAppId, setPicoFriendlyAppId] = useState(settings.picoFriendlyAppId || "");
   const [attentionAlerts, setAttentionAlerts] = useState(settings.attentionAlerts);
@@ -233,7 +232,6 @@ export function SettingsForm({
     setManualReply(settings.manualReply);
     setHideSensitive(settings.hideSensitive);
     setTypingIndicator(settings.typingIndicator);
-    setContactMemoryEnabled(settings.contactMemoryEnabled);
     setPicoFlirtyAppId(settings.picoFlirtyAppId || "");
     setPicoFriendlyAppId(settings.picoFriendlyAppId || "");
     setAttentionAlerts(settings.attentionAlerts);
@@ -294,7 +292,6 @@ export function SettingsForm({
       manualReply,
       hideSensitive,
       typingIndicator,
-      contactMemoryEnabled,
       picoFlirtyAppId,
       picoFriendlyAppId,
       attentionAlerts,
@@ -552,13 +549,6 @@ export function SettingsForm({
           <div>
             <span className="text-sm text-fg/90">Show &ldquo;typing…&rdquo; before replying</span>
             <p className="text-xs text-fg/45">The recipient sees a typing indicator, so replies feel human.</p>
-          </div>
-        </div>
-        <div className="mt-4 flex items-center gap-3">
-          <Toggle checked={contactMemoryEnabled} onChange={setContactMemoryEnabled} />
-          <div>
-            <span className="text-sm text-fg/90">Remember facts about contacts</span>
-            <p className="text-xs text-fg/45">The bot learns durable facts about each person over time and uses them in replies. Edit or clear a chat&apos;s memory from its header.</p>
           </div>
         </div>
         <div className="mt-4 rounded-xl border border-fg/10 bg-fg/5 p-3 text-xs text-fg/55">

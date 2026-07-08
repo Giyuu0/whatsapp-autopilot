@@ -570,7 +570,6 @@ export function ChatView(props: {
   onSetPersona: (chatId: string, mode: PersonaMode) => void;
   onSetGender: (chatId: string, gender: Gender) => void;
   onSetCustomPrompt: (chatId: string, prompt: string) => void;
-  onSetMemory: (chatId: string, memory: string) => void;
   onToggleFavorite: (chatId: string, favorite: boolean) => void;
   onChatAssistant: (chatId: string, command: string) => Promise<any>;
   onRewrite: (text: string, lang: string) => Promise<{ ok?: boolean; text?: string; error?: string }>;
@@ -601,7 +600,6 @@ export function ChatView(props: {
     onSetPersona,
     onSetGender,
     onSetCustomPrompt,
-    onSetMemory,
     onToggleFavorite,
     onChatAssistant,
     onRewrite,
@@ -630,7 +628,6 @@ export function ChatView(props: {
   const [rewrittenText, setRewrittenText] = useState(""); // draft is "ready to send" when it equals this
   const [showPrompt, setShowPrompt] = useState(false);
   const [promptDraft, setPromptDraft] = useState("");
-  const [memoryDraft, setMemoryDraft] = useState("");
   const [sendingMedia, setSendingMedia] = useState(false);
   const [dragOver, setDragOver] = useState(false); // highlight composer while dragging a file over it
 
@@ -744,7 +741,6 @@ export function ChatView(props: {
   useEffect(() => {
     setShowPrompt(false);
     setPromptDraft(activeChat?.customPrompt || "");
-    setMemoryDraft(activeChat?.memory || "");
     const prev = prevChatRef.current;
     if (prev && prev !== activeChatId) draftStore.current[prev] = draftRef.current;
     prevChatRef.current = activeChatId;
@@ -1035,7 +1031,6 @@ export function ChatView(props: {
                     type="button"
                     onClick={() => {
                       setPromptDraft(activeChat.customPrompt || "");
-                      setMemoryDraft(activeChat.memory || "");
                       setShowPrompt((s) => !s);
                     }}
                     className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl transition active:scale-95 md:hidden ${
@@ -1194,29 +1189,6 @@ export function ChatView(props: {
                       >
                         Save
                       </button>
-                    </div>
-
-                    {/* contact memory editor */}
-                    <div className="mt-4 border-t border-fg/10 pt-3">
-                      <label className="label">Memory (what the bot knows about this person)</label>
-                      <textarea
-                        className="input mt-1 min-h-[80px] resize-y text-sm"
-                        placeholder="e.g. Prefers short replies. Works night shifts. Has a dog named Rex…"
-                        value={memoryDraft}
-                        onChange={(e) => setMemoryDraft(e.target.value)}
-                      />
-                      <p className="mt-1 text-[11px] text-fg/40">
-                        The bot updates this automatically over time — you can edit or clear it.
-                      </p>
-                      <div className="mt-2 flex items-center justify-end">
-                        <button
-                          type="button"
-                          className="btn-primary"
-                          onClick={() => onSetMemory(activeChat.id, memoryDraft.trim())}
-                        >
-                          Save memory
-                        </button>
-                      </div>
                     </div>
                   </div>
                 )}

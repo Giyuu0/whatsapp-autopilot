@@ -265,7 +265,6 @@ export default function Dashboard() {
             onSetManual={(id, mode: ManualReply) => patchContact(id, { manualReply: mode })}
             onSetPersona={(id, mode: PersonaMode) => patchContact(id, { personaMode: mode })}
             onSetGender={(id, gender: Gender) => patchContact(id, { gender })}
-            onSetMemory={(id, memory) => patchContact(id, { memory })}
             onSetCustomPrompt={(id, prompt) => patchContact(id, { customPrompt: prompt })}
             onToggleFavorite={(id, favorite) => patchContact(id, { favorite })}
             onChatAssistant={chatAssistant}

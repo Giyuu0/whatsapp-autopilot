@@ -21,7 +21,6 @@ export type Contact = {
   tone?: Tone;
   voiceReply?: VoiceReply;
   manualReply?: ManualReply;
-  memory?: string;
   favorite?: boolean;
   personaMode?: PersonaMode;
   gender?: Gender;
@@ -40,7 +39,6 @@ export type Chat = {
   tone: Tone;
   voiceReply: VoiceReply;
   manualReply: ManualReply;
-  memory: string;
   customPrompt?: string;
   favorite?: boolean;
   personaMode: PersonaMode;
@@ -89,7 +87,6 @@ export type Settings = {
   manualReply: boolean;
   hideSensitive: boolean;
   typingIndicator: boolean;
-  contactMemoryEnabled: boolean;
   picoFlirtyAppId?: string;
   picoFriendlyAppId?: string;
   attentionAlerts: boolean;
