@@ -90,6 +90,8 @@ export type Settings = {
   hideSensitive: boolean;
   typingIndicator: boolean;
   contactMemoryEnabled: boolean;
+  picoFlirtyAppId?: string;
+  picoFriendlyAppId?: string;
   attentionAlerts: boolean;
   attentionHold: boolean;
   groqOnly: boolean;

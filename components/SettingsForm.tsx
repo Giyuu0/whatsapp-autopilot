@@ -181,6 +181,8 @@ export function SettingsForm({
   const [hideSensitive, setHideSensitive] = useState(settings.hideSensitive);
   const [typingIndicator, setTypingIndicator] = useState(settings.typingIndicator);
   const [contactMemoryEnabled, setContactMemoryEnabled] = useState(settings.contactMemoryEnabled);
+  const [picoFlirtyAppId, setPicoFlirtyAppId] = useState(settings.picoFlirtyAppId || "");
+  const [picoFriendlyAppId, setPicoFriendlyAppId] = useState(settings.picoFriendlyAppId || "");
   const [attentionAlerts, setAttentionAlerts] = useState(settings.attentionAlerts);
   const [attentionHold, setAttentionHold] = useState(settings.attentionHold);
   const [groqOnly, setGroqOnly] = useState(settings.groqOnly);
@@ -232,6 +234,8 @@ export function SettingsForm({
     setHideSensitive(settings.hideSensitive);
     setTypingIndicator(settings.typingIndicator);
     setContactMemoryEnabled(settings.contactMemoryEnabled);
+    setPicoFlirtyAppId(settings.picoFlirtyAppId || "");
+    setPicoFriendlyAppId(settings.picoFriendlyAppId || "");
     setAttentionAlerts(settings.attentionAlerts);
     setAttentionHold(settings.attentionHold);
     setGroqOnly(settings.groqOnly);
@@ -291,6 +295,8 @@ export function SettingsForm({
       hideSensitive,
       typingIndicator,
       contactMemoryEnabled,
+      picoFlirtyAppId,
+      picoFriendlyAppId,
       attentionAlerts,
       attentionHold,
       groqOnly,
@@ -559,6 +565,21 @@ export function SettingsForm({
           ✨ <b className="text-fg/80">Chatbot persona</b> (Flirty / Friendly) is now a <b className="text-fg/80">per-chat</b> setting —
           open a chat, tap the ⚙️ gear in its header, and pick a persona there. To try it safely, open the
           <b className="text-fg/80"> 🧪 Test Chat</b> at the top of your chat list — messages there are never sent to WhatsApp.
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <div>
+              <label className="label">Pico app ID — Flirty</label>
+              <input className="input" value={picoFlirtyAppId} onChange={(e) => setPicoFlirtyAppId(e.target.value)} placeholder="hot-power (default)" />
+            </div>
+            <div>
+              <label className="label">Pico app ID — Friendly</label>
+              <input className="input" value={picoFriendlyAppId} onChange={(e) => setPicoFriendlyAppId(e.target.value)} placeholder="that-teach (default)" />
+            </div>
+          </div>
+          <p className="mt-2 text-[11px] leading-relaxed text-fg/45">
+            Personas reply through buildpicoapps (free — no Groq/Gemini tokens). Each app ID is a separate <b>monthly</b> quota
+            bucket; if one runs out, create a new chatbot at buildpicoapps.com and paste its app ID here. The app ID only
+            carries the quota — the personality always comes from this dashboard.
+          </p>
         </div>
         <div className="mt-4 flex items-center gap-3">
           <Toggle checked={attentionAlerts} onChange={setAttentionAlerts} />
