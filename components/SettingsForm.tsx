@@ -568,11 +568,11 @@ export function SettingsForm({
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             <div>
               <label className="label">Pico app ID — Flirty</label>
-              <input className="input" value={picoFlirtyAppId} onChange={(e) => setPicoFlirtyAppId(e.target.value)} placeholder="hot-power (default)" />
+              <input className="input" value={picoFlirtyAppId} onChange={(e) => setPicoFlirtyAppId(e.target.value)} placeholder="that-and (default)" />
             </div>
             <div>
               <label className="label">Pico app ID — Friendly</label>
-              <input className="input" value={picoFriendlyAppId} onChange={(e) => setPicoFriendlyAppId(e.target.value)} placeholder="that-teach (default)" />
+              <input className="input" value={picoFriendlyAppId} onChange={(e) => setPicoFriendlyAppId(e.target.value)} placeholder="nation-TV (default)" />
             </div>
           </div>
           <p className="mt-2 text-[11px] leading-relaxed text-fg/45">
