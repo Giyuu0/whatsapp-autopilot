@@ -8,7 +8,7 @@ export type VoiceReply = "default" | "voice" | "text";
 export type Tone = "default" | "professional" | "friendly" | "flirty";
 export type ManualReply = "default" | "on" | "off";
 export type Suggestion = { text: string; model: string | null; ts: number };
-export type PersonaMode = "off" | "flirty" | "friendly";
+export type PersonaMode = "off" | "flirty" | "friendly" | "scripted";
 export type Gender = "" | "male" | "female";
 
 export type Contact = {

@@ -146,6 +146,7 @@ const PERSONA_OPTIONS: { value: PersonaMode; label: string }[] = [
   { value: "off", label: "Off (normal)" },
   { value: "flirty", label: "Flirty" },
   { value: "friendly", label: "Friendly" },
+  { value: "scripted", label: "Offline (no AI)" },
 ];
 
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
