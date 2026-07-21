@@ -17,6 +17,8 @@ function safeEqual(a, b) {
   return crypto.timingSafeEqual(ba, bb);
 }
 
+const { sanitizeSettings } = require("./lib/settings-schema");
+
 const dev = process.env.NODE_ENV !== "production";
 const port = parseInt(process.env.PORT || "4499", 10);
 // Bind address. Default keeps LAN access (0.0.0.0); set HOST=127.0.0.1 in .env
@@ -43,8 +45,50 @@ app.prepare().then(() => {
   const authFails = new Map(); // ip -> { count, blockedUntil }
   const MAX_FAILS = 10;
   const BLOCK_MS = 15 * 60 * 1000;
+
+  /**
+   * The REAL client IP, so a lockout is SPECIFIC to whoever is failing.
+   *
+   * Behind Railway's proxy every socket's remote address is the proxy itself,
+   * so keying on handshake.address made the counter GLOBAL: ten bad keys from
+   * any one visitor locked out everybody, including you — while giving no real
+   * brute-force protection, since every attacker shared that one bucket too.
+   *
+   * X-Forwarded-For is client-controlled, so it is honored ONLY behind a
+   * trusted reverse proxy (auto-detected on Railway; override with
+   * TRUST_PROXY=1/0). There we take the RIGHTMOST entry: a spoofed header
+   * arrives as "<fake>, <real>" once the proxy appends the true address, so
+   * the rightmost value is the one the proxy vouches for. On a DIRECT
+   * deployment (LAN / port-forward) there is no proxy appending anything —
+   * an attacker owns the whole header and could rotate fake IPs to dodge the
+   * per-IP block — so there we use the socket address, which they can't fake.
+   */
+  const TRUST_PROXY =
+    process.env.TRUST_PROXY != null
+      ? process.env.TRUST_PROXY === "1"
+      : !!process.env.RAILWAY_ENVIRONMENT;
+  const clientIp = (socket) => {
+    if (TRUST_PROXY) {
+      const xff = socket.handshake.headers["x-forwarded-for"];
+      if (xff) {
+        const parts = String(xff).split(",").map((s) => s.trim()).filter(Boolean);
+        if (parts.length) return parts[parts.length - 1];
+      }
+    }
+    return socket.handshake.address || "?";
+  };
+
+  // Keyed by real IP now, so the map grows with unique visitors. Evict expired
+  // entries periodically so it can't creep on a long-lived container.
+  setInterval(() => {
+    const now = Date.now();
+    for (const [ip, r] of authFails) {
+      if (r.blockedUntil < now && r.count < MAX_FAILS) authFails.delete(ip);
+    }
+  }, 10 * 60 * 1000).unref();
+
   io.use((socket, next) => {
-    const ip = socket.handshake.address || "?";
+    const ip = clientIp(socket);
     const rec = authFails.get(ip);
     if (rec && rec.blockedUntil > Date.now()) return next(new Error("unauthorized"));
     const provided = socket.handshake.auth && socket.handshake.auth.key;
@@ -226,9 +270,11 @@ app.prepare().then(() => {
     });
 
     socket.on("settings:update", (partial, ack) => {
-      // Only overwrite keys when a non-empty value is sent (so blanking a
-      // field in the UI doesn't wipe a stored key).
-      const clean = { ...partial };
+      // Whitelist + clamp first (unknown keys dropped, delays capped, chains
+      // shape-checked) — see lib/settings-schema.js for why.
+      // Then: only overwrite keys when a non-empty value is sent (so blanking
+      // a field in the UI doesn't wipe a stored key).
+      const clean = sanitizeSettings(partial);
       if (clean.groqApiKey === "" || clean.groqApiKey === undefined) delete clean.groqApiKey;
       if (clean.geminiApiKey === "" || clean.geminiApiKey === undefined) delete clean.geminiApiKey;
       // Persona prompts are write-only (their contents never go to the
