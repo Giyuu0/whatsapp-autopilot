@@ -17,7 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Puppeteer downloads Chrome for Testing during npm ci into this fixed path.
 ENV PUPPETEER_CACHE_DIR=/app/.puppeteer-cache
-ENV NODE_ENV=production
+# NOTE: NODE_ENV is deliberately NOT set to production here — it is set AFTER
+# the build (below). With NODE_ENV=production in scope, npm treats the install
+# as production-only and `npm ci --include=dev` did not reliably keep the dev
+# dependencies, so `next build` died with "Cannot find module 'tailwindcss'".
+# That stayed hidden for weeks behind a warm Docker layer cache and only
+# surfaced when the cache was evicted, taking the service down.
 # Keep the Node heap modest so usage-based billing stays low (the app idles
 # around ~150MB; Chromium is managed separately by puppeteer).
 ENV NODE_OPTIONS=--max-old-space-size=256
@@ -27,14 +32,20 @@ ENV XDG_CACHE_HOME=/tmp/.chromium-cache
 
 WORKDIR /app
 
-# Install deps — dev deps INCLUDED (tailwind/postcss/typescript are needed for
-# the Next.js build; NODE_ENV=production above would otherwise skip them).
+# Install deps — dev deps INCLUDED (tailwind/postcss/typescript are needed by
+# `next build`). Belt and braces: --include=dev AND npm_config_production=false,
+# with a verification step so a missing build dep fails HERE with a clear
+# message instead of 200 lines of webpack noise later.
 COPY package*.json ./
-RUN npm ci --include=dev --no-audit --no-fund
+RUN npm_config_production=false npm ci --include=dev --no-audit --no-fund \
+    && node -e "require.resolve('tailwindcss'); require.resolve('postcss'); require.resolve('autoprefixer'); console.log('build deps present')"
 
 # Build the Next.js app.
 COPY . .
 RUN npm run build
+
+# Runtime env — set only AFTER the build so it can't strip build dependencies.
+ENV NODE_ENV=production
 
 # The server reads $PORT (Railway/Render inject it); defaults to 4499.
 EXPOSE 4499
