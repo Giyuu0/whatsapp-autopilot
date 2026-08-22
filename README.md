@@ -162,3 +162,20 @@ The repo ships a **`Dockerfile`** (bundling Puppeteer's Chrome-for-Testing) and 
 Built by [Yati Bhardwaj](https://masstree.in) · New Delhi
 
 </div>
+
+## 📄 Licence
+
+Released under the **[MIT Licence with Attribution Requirement](LICENSE)** — use it,
+fork it, rebrand it, sell what you build with it.
+
+### ⭐ One condition: attribution
+
+Credit to the original author stays visible:
+
+- the dashboard footer reads *"Designed & developed by Yati Bhardwaj"* and links to
+  **[@ys941](https://github.com/ys941)**, and
+- the server will not start until you set `ATTRIBUTION_ACK="https://github.com/ys941"`
+  in your environment — nothing is transmitted, both checks are local.
+
+See [`lib/attribution.js`](lib/attribution.js) and [COPYRIGHT.md](COPYRIGHT.md).
+A purely private deployment nobody else uses is exempt.

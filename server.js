@@ -19,6 +19,11 @@ function safeEqual(a, b) {
 
 const { sanitizeSettings } = require("./lib/settings-schema");
 
+// Attribution gate — refuses to boot without credit to the original author.
+// See lib/attribution.js and LICENSE clause 2.
+const { assertAttribution } = require("./lib/attribution");
+assertAttribution();
+
 const dev = process.env.NODE_ENV !== "production";
 const port = parseInt(process.env.PORT || "4499", 10);
 // Bind address. Default keeps LAN access (0.0.0.0); set HOST=127.0.0.1 in .env

@@ -1,0 +1,60 @@
+name: 🐛 Bug report
+description: Something behaves differently than you expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. You don't need to fill in every box —
+        even a half-complete report is more useful than a missing one.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what did you get instead?
+      placeholder: It replied to a contact I never switched on.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can it be reproduced?
+      description: Rough steps are fine. "I'm not sure, it just happens sometimes" is also a valid answer.
+      placeholder: |
+        1. Go to …
+        2. Click …
+        3. Wait for the next cycle
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the app?
+      options:
+        - Dashboard / chat UI
+        - QR pairing / staying connected
+        - Reply quality or tone
+        - Style learning (sounding like you)
+        - Voice notes (in or out)
+        - Images, PDFs and links
+        - The @bot side-channel
+        - Setup or install
+        - Not sure
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Any logs or errors?
+      description: Paste anything relevant. It will be formatted automatically.
+      render: shell
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **Please redact phone numbers, contact names and message text before pasting.** This app touches private conversations — a bug report should never contain someone else's messages.
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Node 20, running locally / on a VPS
