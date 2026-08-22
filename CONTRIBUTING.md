@@ -153,7 +153,7 @@ one condition, and it is deliberately small:
 
 This is **clause 2 of the [licence](LICENSE)**, so it applies whether or not the check
 is present — deleting [`lib/attribution.js`](lib/attribution.js) does not remove the
-obligation. A purely private deployment nobody else uses is exempt.
+obligation.
 
 Full detail on what you may and may not do: [COPYRIGHT.md](COPYRIGHT.md).
 

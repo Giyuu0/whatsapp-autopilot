@@ -178,4 +178,3 @@ Credit to the original author stays visible:
   in your environment — nothing is transmitted, both checks are local.
 
 See [`lib/attribution.js`](lib/attribution.js) and [COPYRIGHT.md](COPYRIGHT.md).
-A purely private deployment nobody else uses is exempt.
