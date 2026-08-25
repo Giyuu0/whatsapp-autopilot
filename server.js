@@ -20,7 +20,7 @@ function safeEqual(a, b) {
 const { sanitizeSettings } = require("./lib/settings-schema");
 
 // Attribution gate — refuses to boot without credit to the original author.
-// See lib/attribution.js and LICENSE clause 2.
+// See lib/attribution.js and COPYRIGHT.md.
 const { assertAttribution } = require("./lib/attribution");
 assertAttribution();
 

@@ -151,9 +151,9 @@ one condition, and it is deliberately small:
   Strip the credit and the app refuses to boot. Nothing is transmitted — both checks
   are local.
 
-This is **clause 2 of the [licence](LICENSE)**, so it applies whether or not the check
-is present — deleting [`lib/attribution.js`](lib/attribution.js) does not remove the
-obligation.
+This is the project's **attribution requirement** (see [COPYRIGHT.md](COPYRIGHT.md)),
+so it applies whether or not the check is present — deleting
+[`lib/attribution.js`](lib/attribution.js) does not remove the ask.
 
 Full detail on what you may and may not do: [COPYRIGHT.md](COPYRIGHT.md).
 
@@ -185,8 +185,9 @@ scope and taken seriously.
 
 ## 📜 Licence
 
-Contributions are made under the [MIT Licence with Attribution Requirement](LICENSE),
-the same as the project.
+Contributions are made under the [MIT Licence](LICENSE), the same as the project
+(which also carries the attribution requirement described in
+[COPYRIGHT.md](COPYRIGHT.md)).
 
 See [COPYRIGHT.md](COPYRIGHT.md) for exactly what you may and may not do — the short
 version is "almost anything, just keep the credit".

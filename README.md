@@ -12,6 +12,18 @@ Per-chat **tone**, **language**, and a talking **assistant orb** that runs the w
 ![Groq](https://img.shields.io/badge/Groq-F55036?logo=groq&logoColor=white)
 ![Gemini](https://img.shields.io/badge/Gemini-8E75FF?logo=googlegemini&logoColor=white)
 ![whatsapp-web.js](https://img.shields.io/badge/whatsapp--web.js-25D366?logo=whatsapp&logoColor=white)
+[![CI](https://github.com/ys941/whatsapp-autopilot/actions/workflows/ci.yml/badge.svg)](https://github.com/ys941/whatsapp-autopilot/actions/workflows/ci.yml)
+[![Licence: MIT](https://img.shields.io/badge/licence-MIT-3fb950)](LICENSE)
+
+</div>
+
+---
+
+<div align="center">
+
+![WhatsApp AutoPilot dashboard — link WhatsApp by scanning a QR, then switch auto-reply on per contact](docs/screenshots/wa-dashboard.png)
+
+*Scan a QR (like WhatsApp Web), flip a toggle per contact, and the AI answers in your voice.*
 
 </div>
 
@@ -147,6 +159,16 @@ The repo ships a **`Dockerfile`** (bundling Puppeteer's Chrome-for-Testing) and 
 
 ---
 
+## ⚙️ Under the hood
+
+<div align="center">
+
+![Settings — bring your own keys, pick a model fallback chain that keeps replies flowing past rate limits](docs/screenshots/wa-settings.png)
+
+*Your own Groq/Gemini keys, with ordered model fallback chains and multi-key rotation.*
+
+</div>
+
 ## 🔐 Security
 
 - Dashboard locked behind an **access key** (change it in Settings or via `ACCESS_KEY` in `.env`), enforced server-side on every connection.
@@ -165,7 +187,7 @@ Built by [Yati Bhardwaj](https://masstree.in) · New Delhi
 
 ## 📄 Licence
 
-Released under the **[MIT Licence with Attribution Requirement](LICENSE)** — use it,
+Released under the **[MIT Licence](LICENSE)** — use it,
 fork it, rebrand it, sell what you build with it.
 
 ### ⭐ One condition: attribution
