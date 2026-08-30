@@ -17,3 +17,6 @@ data/db.json
 .claude/
 .preview-wwebjs/
 .preview-data/
+# Windows folder-icon cosmetics - local only, not part of the project
+desktop.ini
+folder-icon.ico

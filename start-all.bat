@@ -59,7 +59,18 @@ echo.
 echo Starting server on http://localhost:4499
 echo The dashboard will open in your browser automatically.
 echo.
-start "WA-Open" /d "%~dp0" cmd /c open-when-ready.bat
+REM One background poller opens the browser as soon as the server answers.
+REM This used to live in a separate open-when-ready.bat spawned with
+REM   start "WA-Open" /d "%~dp0" cmd /c open-when-ready.bat
+REM which never ran at all: %~dp0 ends in a backslash, so /d "%~dp0" passed
+REM "C:\...\whatsapp-autopilot\" where the \" reads as an escaped quote, and
+REM start failed with "The filename, directory name, or volume label syntax is
+REM incorrect." That is why the dashboard never opened by itself.
+REM Inlined here so this launcher is the only .bat you ever need to run.
+REM /b keeps it in this console (no extra window) and it costs ONE process,
+REM unlike the old helper which spawned PowerShell up to 90 times and starved
+REM the very server it was waiting for on this 2-core machine.
+start "" /b powershell -NoProfile -WindowStyle Hidden -Command "$u='http://localhost:4499'; for($i=0; $i -lt 120; $i++){ try { Invoke-WebRequest -UseBasicParsing $u -TimeoutSec 3 | Out-Null; Start-Process $u; break } catch { Start-Sleep -Seconds 3 } }"
 
 REM --- 4. Run the app (keep this window open) ------------------------
 if "%NEED_BUILD%"=="2" (
