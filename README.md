@@ -185,6 +185,11 @@ Built by [Yati Bhardwaj](https://masstree.in) · New Delhi
 
 </div>
 
+## ⭐ Star the repo
+
+If WhatsApp AutoPilot is useful to you, star it. There is no marketing behind
+this project — a star is genuinely how the next person ends up finding it.
+
 ## 📄 Licence
 
 Released under the **[MIT Licence](LICENSE)** — use it,
