@@ -380,9 +380,38 @@ export class DemoSocket {
     this.pushStats();
   }
 
-  private assistantReply(text: string) {
+  private assistantReply(text: string, chatId?: string) {
     const t = text.toLowerCase();
     const who = this.snap.chats.find((c) => t.includes(c.name.toLowerCase().split(/[ (]/)[0]));
+    const s = this.snap.settings;
+
+    // "Message Rahul I'll be late" — send it for you.
+    const send = text.match(/^(?:message|text|tell)\s+(\S+)\s+(?:that\s+)?(.+)$/i);
+    if (who && send) {
+      const body = send[2].trim();
+      this.handle("message:send", { chatId: who.id, text: body });
+      return { ok: true, reply: `Sent to ${who.name}: “${body}”`, action: { action: "open_chat", chatId: who.id } };
+    }
+    if (/\b(pause|stop|turn off|disable)\b.*\bauto-?reply\b/.test(t) && !who) {
+      this.handle("settings:update", { autoReplyEnabled: false });
+      return { ok: true, reply: "Auto-reply is paused for everyone. Say “resume auto-reply” to switch it back on." };
+    }
+    if (/\b(resume|start|turn on|enable)\b.*\bauto-?reply\b/.test(t) && !who) {
+      this.handle("settings:update", { autoReplyEnabled: true });
+      return { ok: true, reply: "Auto-reply is back on for the chats you've enabled." };
+    }
+    const here = chatId ? this.chatById(chatId) : undefined;
+    if (/\b(this chat|about this)\b/.test(t)) {
+      return {
+        ok: true,
+        reply: here
+          ? `${here.name}: ${this.msgs[here.id]?.length || 0} messages, auto-reply ${here.enabled ? "on" : "off"}, tone ${here.tone}. The real assistant would summarise the conversation too.`
+          : "Open a chat first, then ask me about it.",
+      };
+    }
+    if (/\bin hindi\b/.test(t)) {
+      return { ok: true, reply: "In the real app I'd write that reply in Hindi for you. The demo doesn't call the AI, so try toggling someone instead." };
+    }
     if (who && /\b(turn on|enable|start|switch on)\b/.test(t)) {
       this.patchChat(who.id, { enabled: true });
       return { ok: true, reply: `Done — I'll reply to ${who.name} from now on.` };
@@ -448,7 +477,7 @@ export class DemoSocket {
         return { ok: true };
       }
       case "assistant:command":
-        return this.assistantReply(String(p?.text || ""));
+        return this.assistantReply(String(p?.text || ""), p?.chatId);
       case "contact:update":
         this.patchChat(p.id, p.patch || {});
         return { ok: true };
