@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { DemoSocket, IS_DEMO } from "./demoSocket";
 
 export type Language = "default" | "auto" | "english" | "hindi" | "hinglish" | "english-slang";
 export type VoiceReply = "default" | "voice" | "text";
@@ -166,17 +167,20 @@ export function useWaSocket() {
     const key =
       typeof window !== "undefined" ? localStorage.getItem(KEY_STORAGE) || "" : "";
 
-    if (!key) {
+    // The public demo has no server: a local stand-in plays fictional chats.
+    if (!key && !IS_DEMO) {
       setAuthState("unauthorized");
       return;
     }
 
     setAuthState("connecting");
-    const socket = io({
-      transports: ["websocket", "polling"],
-      auth: { key },
-      reconnectionAttempts: 5,
-    });
+    const socket = IS_DEMO
+      ? (new DemoSocket() as unknown as Socket)
+      : io({
+          transports: ["websocket", "polling"],
+          auth: { key },
+          reconnectionAttempts: 5,
+        });
     socketRef.current = socket;
 
     socket.on("connect", () => {

@@ -1,11 +1,17 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 
+import { DemoBanner } from "@/components/DemoBanner";
+
+// Metadata URLs aren't prefixed with the basePath automatically (the demo is
+// served from a sub-path), so do it here. Empty for a normal install.
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 export const metadata: Metadata = {
   title: "WhatsApp AutoPilot",
   description: "Auto-reply on WhatsApp with Groq (text) + Gemini (vision) — you choose which contacts.",
-  manifest: "/manifest.json",
-  icons: { icon: "/icon.svg" },
+  manifest: `${BASE}/manifest.json`,
+  icons: { icon: `${BASE}/icon.svg` },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -35,7 +41,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <DemoBanner />
+      </body>
     </html>
   );
 }

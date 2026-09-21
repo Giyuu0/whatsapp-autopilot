@@ -20,3 +20,6 @@ data/db.json
 # Windows folder-icon cosmetics - local only, not part of the project
 desktop.ini
 folder-icon.ico
+
+# static demo build (npm run build:demo)
+/out/
