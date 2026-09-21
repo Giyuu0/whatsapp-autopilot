@@ -15,6 +15,10 @@ Per-chat **tone**, **language**, and a talking **assistant orb** that runs the w
 [![CI](https://github.com/ys941/whatsapp-autopilot/actions/workflows/ci.yml/badge.svg)](https://github.com/ys941/whatsapp-autopilot/actions/workflows/ci.yml)
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-3fb950)](LICENSE)
 
+[![Live demo](https://img.shields.io/badge/%E2%96%B6%20Try%20it-Live%20demo-25D366?style=for-the-badge)](https://ys941.github.io/whatsapp-autopilot/)
+
+**[▶ Try the live demo](https://ys941.github.io/whatsapp-autopilot/)** — the real dashboard with fictional chats that reply on their own. No WhatsApp needed, nothing is sent anywhere.
+
 </div>
 
 ---
