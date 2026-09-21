@@ -415,7 +415,7 @@ export function SettingsForm({
           Image (vision) reply models
         </h2>
         <p className="mb-4 text-xs text-fg/45">
-          For images. Groq (llama-4-scout) is first because free-tier Gemini vision is often rate-limited (429). Add/reorder as you like.
+          For images. Groq (Qwen 3.8, which reads images) is first because free-tier Gemini vision is often rate-limited (429). Add/reorder as you like.
         </p>
         <ChainEditor
           steps={visionChain}

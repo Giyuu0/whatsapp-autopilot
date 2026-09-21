@@ -126,8 +126,8 @@ Incoming (and outgoing) photos show as real **image previews** in the chat, not 
 
 | Incoming | Pipeline |
 |---|---|
-| Text | **Groq** (`llama-3.3-70b` → smaller/OSS Groq models) → **Gemini** text |
-| Image | **Gemini Vision** (primary) → fallback chain → Groq vision |
+| Text | **Groq** (`gpt-oss-120b` → `gpt-oss-20b` → `qwen3.8-27b`) → **Gemini** Flash text |
+| Image | **Groq** vision (`qwen3.8-27b`) → **Gemini** Flash vision |
 | Voice note | **Groq Whisper** (transcribe) → text pipeline → optional voice reply |
 
 Every model is a **separate rate-limit bucket**, so the chain walks down them on a `429`. Within each Groq model, your **comma-separated keys are rotated** too — so a reply only fails once *every model × every key* is exhausted. Keys set in the environment always **win over** whatever's stored in Settings.
